@@ -22,6 +22,23 @@ function App() {
     }
   }, []);
 
+  // Google OAuthコールバック処理
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const user = urlParams.get('user');
+    
+    if (token && user) {
+      // トークンとユーザー情報を保存
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', user);
+      setUser(JSON.parse(user));
+      
+      // URLからパラメータを削除
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   // LaravelのAPIを呼び出す関数
   const fetchApiData = async () => {
     setLoading(true)

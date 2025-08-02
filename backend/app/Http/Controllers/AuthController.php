@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -107,5 +109,51 @@ class AuthController extends Controller
             'success' => true,
             'user' => $request->user()
         ]);
+    }
+
+    /**
+     * Google OAuth認証へのリダイレクト
+     */
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    /**
+     * Google OAuth認証のコールバック処理
+     */
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+            
+            // ユーザーが存在するかチェック
+            $user = User::where('email', $googleUser->email)->first();
+            
+            if (!$user) {
+                // 新規ユーザー作成
+                $user = User::create([
+                    'name' => $googleUser->name,
+                    'email' => $googleUser->email,
+                    'password' => Hash::make(Str::random(16)),
+                    'google_id' => $googleUser->id,
+                ]);
+            }
+            
+            // トークン生成
+            $token = $user->createToken('auth_token')->plainTextToken;
+            
+            // フロントエンドにリダイレクト
+            return redirect()->away(
+                'http://localhost:5173/auth/callback?' . 
+                http_build_query([
+                    'token' => $token,
+                    'user' => json_encode($user)
+                ])
+            );
+            
+        } catch (\Exception $e) {
+            return redirect()->away('http://localhost:5173/auth/error');
+        }
     }
 }
