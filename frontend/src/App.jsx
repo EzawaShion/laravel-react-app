@@ -2,12 +2,25 @@ import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import SignUp from './components/SignUp'
 
 function App() {
   const [count, setCount] = useState(0)
   const [apiData, setApiData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [showSignUp, setShowSignUp] = useState(false)
+  const [user, setUser] = useState(null)
+
+  // ユーザー認証状態の確認
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    
+    if (token && userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
 
   // LaravelのAPIを呼び出す関数
   const fetchApiData = async () => {
@@ -32,6 +45,35 @@ function App() {
     fetchApiData()
   }, [])
 
+  // サインアップ成功時の処理
+  const handleSignUpSuccess = (userData) => {
+    setUser(userData);
+    setShowSignUp(false);
+  };
+
+  // ログイン画面に切り替え
+  const handleSwitchToLogin = () => {
+    // ログイン画面の実装は後で追加
+    console.log('ログイン画面に切り替え');
+  };
+
+  // ログアウト処理
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
+  // サインアップ画面を表示
+  if (showSignUp) {
+    return (
+      <SignUp 
+        onSignUpSuccess={handleSignUpSuccess}
+        onSwitchToLogin={handleSwitchToLogin}
+      />
+    );
+  }
+
   return (
     <>
       <div>
@@ -43,7 +85,26 @@ function App() {
         </a>
       </div>
       <h1>Vite + React + Laravel API</h1>
-      
+
+      {/* ユーザー認証状態の表示 */}
+      <div className="auth-section">
+        {user ? (
+          <div className="user-info">
+            <p>ようこそ、{user.name}さん！</p>
+            <button onClick={handleLogout} className="logout-button">
+              ログアウト
+            </button>
+          </div>
+        ) : (
+          <button 
+            onClick={() => setShowSignUp(true)}
+            className="signup-button"
+          >
+            アカウント作成
+          </button>
+        )}
+      </div>
+
       {/* APIデータの表示 */}
       <div className="card">
         <h2>Laravel API からのデータ</h2>

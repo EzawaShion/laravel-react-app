@@ -40,3 +40,56 @@
 .read-the-docs {
   color: #888;
 }
+
+/* 認証関連のスタイル */
+.auth-section {
+  margin: 20px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-info p {
+  margin: 0;
+  font-weight: 600;
+  color: #333;
+}
+
+.signup-button, .logout-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.signup-button:hover, .logout-button:hover {
+  transform: translateY(-2px);
+}
+
+.logout-button {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .user-info {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .signup-button, .logout-button {
+    width: 100%;
+  }
+}
