@@ -62,7 +62,13 @@
   color: #333;
 }
 
-.signup-button, .logout-button {
+.auth-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.signup-button, .login-button, .logout-button {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
@@ -74,8 +80,12 @@
   transition: transform 0.2s ease;
 }
 
-.signup-button:hover, .logout-button:hover {
+.signup-button:hover, .login-button:hover, .logout-button:hover {
   transform: translateY(-2px);
+}
+
+.login-button {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
 }
 
 .logout-button {

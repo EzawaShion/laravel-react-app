@@ -3,6 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import SignUp from './components/SignUp'
+import Login from './components/Login'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -10,6 +11,7 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [showSignUp, setShowSignUp] = useState(false)
+  const [showLogin, setShowLogin] = useState(false)
   const [user, setUser] = useState(null)
 
   // ユーザー認証状態の確認
@@ -68,10 +70,22 @@ function App() {
     setShowSignUp(false);
   };
 
+  // ログイン成功時の処理
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    setShowLogin(false);
+  };
+
   // ログイン画面に切り替え
   const handleSwitchToLogin = () => {
-    // ログイン画面の実装は後で追加
-    console.log('ログイン画面に切り替え');
+    setShowSignUp(false);
+    setShowLogin(true);
+  };
+
+  // サインアップ画面に切り替え
+  const handleSwitchToSignUp = () => {
+    setShowLogin(false);
+    setShowSignUp(true);
   };
 
   // ログアウト処理
@@ -87,6 +101,16 @@ function App() {
       <SignUp 
         onSignUpSuccess={handleSignUpSuccess}
         onSwitchToLogin={handleSwitchToLogin}
+      />
+    );
+  }
+
+  // ログイン画面を表示
+  if (showLogin) {
+    return (
+      <Login 
+        onLoginSuccess={handleLoginSuccess}
+        onSwitchToSignUp={handleSwitchToSignUp}
       />
     );
   }
@@ -113,12 +137,20 @@ function App() {
             </button>
           </div>
         ) : (
-          <button 
-            onClick={() => setShowSignUp(true)}
-            className="signup-button"
-          >
-            アカウント作成
-          </button>
+          <div className="auth-buttons">
+            <button 
+              onClick={() => setShowLogin(true)}
+              className="login-button"
+            >
+              ログイン
+            </button>
+            <button 
+              onClick={() => setShowSignUp(true)}
+              className="signup-button"
+            >
+              アカウント作成
+            </button>
+          </div>
         )}
       </div>
 
