@@ -4,6 +4,10 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import SignUp from './components/SignUp'
 import Login from './components/Login'
+import ForgotPassword from './components/ForgotPassword'
+import ResetPassword from './components/ResetPassword'
+import ResendVerification from './components/ResendVerification'
+import EmailVerificationRequest from './components/EmailVerificationRequest'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -12,6 +16,9 @@ function App() {
   const [error, setError] = useState(null)
   const [showSignUp, setShowSignUp] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [showResendVerification, setShowResendVerification] = useState(false)
+  const [showEmailVerificationRequest, setShowEmailVerificationRequest] = useState(false)
   const [user, setUser] = useState(null)
 
   // ユーザー認証状態の確認
@@ -37,6 +44,32 @@ function App() {
       setUser(JSON.parse(user));
       
       // URLからパラメータを削除
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
+  // メール認証結果の処理
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+
+    if (message) {
+      // メール認証結果を処理
+      if (message === 'email_verified') {
+        alert('メール認証が完了しました！ログインしてください。');
+        // ログイン画面を表示
+        setShowLogin(true);
+      } else if (message === 'already_verified') {
+        alert('このメールアドレスは既に認証済みです。');
+        // ログイン画面を表示
+        setShowLogin(true);
+      } else if (message === 'invalid_verification') {
+        alert('無効な認証リンクです。');
+        // ログイン画面を表示
+        setShowLogin(true);
+      }
+      
+      // URLパラメータをクリア
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
@@ -74,6 +107,9 @@ function App() {
   const handleLoginSuccess = (userData) => {
     setUser(userData);
     setShowLogin(false);
+    
+    // URLパラメータをクリア
+    window.history.replaceState({}, document.title, window.location.pathname);
   };
 
   // ログイン画面に切り替え
@@ -88,6 +124,50 @@ function App() {
     setShowSignUp(true);
   };
 
+  // パスワードリセット画面に切り替え
+  const handleSwitchToForgotPassword = () => {
+    setShowLogin(false);
+    setShowForgotPassword(true);
+  };
+
+  // ログイン画面に戻る
+  const handleBackToLogin = () => {
+    setShowForgotPassword(false);
+    setShowLogin(true);
+  };
+
+  // パスワードリセット成功時の処理
+  const handleResetSuccess = (message) => {
+    alert(message);
+    setShowForgotPassword(false);
+    setShowLogin(true);
+    
+    // URLパラメータをクリア
+    window.history.replaceState({}, document.title, window.location.pathname);
+  };
+
+  const handleSwitchToResendVerification = () => {
+    setShowLogin(false);
+    setShowForgotPassword(false);
+    setShowEmailVerificationRequest(false);
+    setShowResendVerification(true);
+  };
+
+  const handleBackToLoginFromResend = () => {
+    setShowResendVerification(false);
+    setShowLogin(true);
+  };
+
+  const handleSwitchToEmailVerificationRequest = () => {
+    setShowSignUp(false);
+    setShowEmailVerificationRequest(true);
+  };
+
+  const handleBackToLoginFromEmailVerification = () => {
+    setShowEmailVerificationRequest(false);
+    setShowLogin(true);
+  };
+
   // ログアウト処理
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -95,12 +175,32 @@ function App() {
     setUser(null);
   };
 
+  // メール認証依頼画面を表示
+  if (showEmailVerificationRequest) {
+    return (
+      <EmailVerificationRequest 
+        onSwitchToResendVerification={handleSwitchToResendVerification}
+        onSwitchToLogin={handleBackToLoginFromEmailVerification}
+      />
+    );
+  }
+
   // サインアップ画面を表示
   if (showSignUp) {
     return (
       <SignUp 
         onSignUpSuccess={handleSignUpSuccess}
         onSwitchToLogin={handleSwitchToLogin}
+        onSwitchToEmailVerificationRequest={handleSwitchToEmailVerificationRequest}
+      />
+    );
+  }
+
+  // メール再送画面を表示
+  if (showResendVerification) {
+    return (
+      <ResendVerification 
+        onBackToLogin={handleBackToLoginFromResend}
       />
     );
   }
@@ -111,6 +211,31 @@ function App() {
       <Login 
         onLoginSuccess={handleLoginSuccess}
         onSwitchToSignUp={handleSwitchToSignUp}
+        onSwitchToForgotPassword={handleSwitchToForgotPassword}
+      />
+    );
+  }
+
+  // パスワードリセット要求画面を表示
+  if (showForgotPassword) {
+    return (
+      <ForgotPassword 
+        onBackToLogin={handleBackToLogin}
+        onSwitchToResendVerification={handleSwitchToResendVerification}
+      />
+    );
+  }
+
+  // パスワードリセット画面を表示（URLパラメータで判定）
+  const urlParams = new URLSearchParams(window.location.search);
+  const resetToken = urlParams.get('token');
+  const resetEmail = urlParams.get('email');
+  
+  // パスワードリセット用のトークンとメールアドレスが両方存在する場合のみ表示
+  if (resetToken && resetEmail && !user) {
+    return (
+      <ResetPassword 
+        onResetSuccess={handleResetSuccess}
       />
     );
   }

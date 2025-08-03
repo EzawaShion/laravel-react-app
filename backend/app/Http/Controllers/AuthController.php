@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\EmailVerification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\URL;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
 
@@ -30,21 +33,30 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // ユーザー作成
+        // ユーザー作成（メール認証前は仮登録状態）
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'email_verified_at' => null, // 明示的に未認証状態
         ]);
 
-        // トークン生成
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // メール認証URLを生成
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addHours(24),
+            ['id' => $user->id, 'hash' => sha1($user->email)]
+        );
+
+        // メール認証メールを送信
+        Mail::to($user->email)->send(new EmailVerification($verificationUrl, $user->name));
 
         return response()->json([
             'success' => true,
-            'message' => 'ユーザー登録が完了しました',
+            'message' => 'ユーザー登録が完了しました。メール認証をお願いします。',
             'user' => $user,
-            'token' => $token
+            'email_verification_sent' => true,
+            'requires_verification' => true
         ], 201);
     }
 
@@ -74,6 +86,15 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'メールアドレスまたはパスワードが正しくありません'
             ], 401);
+        }
+
+        // メール認証チェック
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'メールアドレスの認証が必要です。登録時のメールをご確認ください。',
+                'requires_verification' => true
+            ], 403);
         }
 
         // トークン生成
@@ -155,5 +176,59 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return redirect()->away('http://localhost:5173/auth/error');
         }
+    }
+
+    /**
+     * メール認証処理
+     */
+    public function verifyEmail(Request $request, $id, $hash)
+    {
+        $user = User::findOrFail($id);
+
+        if (!hash_equals(sha1($user->email), $hash)) {
+            return redirect()->away('http://localhost:5173/auth/error?message=invalid_verification');
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->away('http://localhost:5173/auth/error?message=already_verified');
+        }
+
+        $user->markEmailAsVerified();
+
+        return redirect()->away('http://localhost:5173/auth/success?message=email_verified');
+    }
+
+    /**
+     * メール認証メールの再送
+     */
+    public function resendVerificationEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'このメールアドレスは既に認証済みです。'
+            ], 400);
+        }
+
+        // 新しい認証URLを生成
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => sha1($user->email)]
+        );
+
+        // メールを再送
+        Mail::to($user->email)->send(new EmailVerification($verificationUrl, $user->name));
+
+        return response()->json([
+            'success' => true,
+            'message' => '認証メールを再送しました。'
+        ]);
     }
 }

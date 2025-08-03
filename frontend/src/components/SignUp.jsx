@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './SignUp.css';
 
-function SignUp({ onSignUpSuccess, onSwitchToLogin }) {
+function SignUp({ onSignUpSuccess, onSwitchToLogin, onSwitchToEmailVerificationRequest }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -51,12 +51,15 @@ function SignUp({ onSignUpSuccess, onSwitchToLogin }) {
       // レスポンスが成功（200）の場合
       if (response.ok) {
         // 成功時の処理
-        // トークンとユーザー情報をローカルストレージに保存
-        localStorage.setItem('token', data.token);
-        // ユーザー情報をローカルストレージに保存
-        localStorage.setItem('user', JSON.stringify(data.user));
-        // ログイン成功時のコールバックを呼び出し
-        onSignUpSuccess(data.user);
+        if (data.requires_verification) {
+          // メール認証が必要な場合
+          onSwitchToEmailVerificationRequest();
+        } else {
+          // メール認証が不要な場合（Google OAuthなど）
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          onSignUpSuccess(data.user);
+        }
       } else {
         // エラー時の処理
         if (data.errors) {
@@ -188,6 +191,7 @@ function SignUp({ onSignUpSuccess, onSwitchToLogin }) {
             </button>
           </p>
         </div>
+
       </div>
     </div>
   );

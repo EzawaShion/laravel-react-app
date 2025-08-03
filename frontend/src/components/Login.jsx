@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './Login.css';
 
-function Login({ onLoginSuccess, onSwitchToSignUp }) {
+function Login({ onLoginSuccess, onSwitchToSignUp, onSwitchToForgotPassword }) {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -50,6 +50,9 @@ function Login({ onLoginSuccess, onSwitchToSignUp }) {
         // エラーハンドリング
         if (data.errors) {
           setErrors(data.errors);
+        } else if (response.status === 403 && data.requires_verification) {
+          // メール認証が必要な場合
+          setErrors({ general: data.message });
         } else {
           setErrors({ general: data.message || 'ログインに失敗しました' });
         }
@@ -115,6 +118,16 @@ function Login({ onLoginSuccess, onSwitchToSignUp }) {
               </button>
             </div>
             {errors.password && <span className="error-text">{errors.password[0]}</span>}
+                          <div className="forgot-password-link">
+                <button 
+                  type="button" 
+                  onClick={onSwitchToForgotPassword} 
+                  className="link-button"
+                >
+                  パスワードを忘れた場合
+                </button>
+              </div>
+
           </div>
 
           <button type="submit" className="login-button" disabled={loading}>
