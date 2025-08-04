@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\LocationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +27,11 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail']);
 
+// 地域関連のルート
+Route::get('/prefectures', [LocationController::class, 'getPrefectures']);
+Route::get('/cities/{prefectureId}', [LocationController::class, 'getCitiesByPrefecture']);
+Route::get('/locations', [LocationController::class, 'getAllLocations']);
+
 // パスワードリセット関連のルート
 Route::post('/password/email', [PasswordResetController::class, 'sendResetLink']);
 Route::post('/password/reset', [PasswordResetController::class, 'reset']);
@@ -33,6 +40,9 @@ Route::post('/password/reset', [PasswordResetController::class, 'reset']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    
+    // 投稿関連のルート
+    Route::apiResource('posts', PostController::class);
 });
 
 // テスト用のAPIエンドポイント

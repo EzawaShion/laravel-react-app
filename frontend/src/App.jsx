@@ -8,6 +8,7 @@ import ForgotPassword from './components/ForgotPassword'
 import ResetPassword from './components/ResetPassword'
 import ResendVerification from './components/ResendVerification'
 import EmailVerificationRequest from './components/EmailVerificationRequest'
+import CreatePost from './components/CreatePost'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -19,6 +20,7 @@ function App() {
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [showResendVerification, setShowResendVerification] = useState(false)
   const [showEmailVerificationRequest, setShowEmailVerificationRequest] = useState(false)
+  const [showCreatePost, setShowCreatePost] = useState(false)
   const [user, setUser] = useState(null)
 
   // ユーザー認証状態の確認
@@ -168,12 +170,36 @@ function App() {
     setShowLogin(true);
   };
 
+  const handleSwitchToCreatePost = () => {
+    setShowCreatePost(true);
+  };
+
+  const handleCancelCreatePost = () => {
+    setShowCreatePost(false);
+  };
+
+  const handlePostCreated = (post) => {
+    setShowCreatePost(false);
+    // 投稿作成後の処理（例：投稿一覧に追加など）
+    console.log('投稿が作成されました:', post);
+  };
+
   // ログアウト処理
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
   };
+
+  // 投稿作成画面を表示
+  if (showCreatePost) {
+    return (
+      <CreatePost 
+        onPostCreated={handlePostCreated}
+        onCancel={handleCancelCreatePost}
+      />
+    );
+  }
 
   // メール認証依頼画面を表示
   if (showEmailVerificationRequest) {
@@ -257,9 +283,17 @@ function App() {
         {user ? (
           <div className="user-info">
             <p>ようこそ、{user.name}さん！</p>
-            <button onClick={handleLogout} className="logout-button">
-              ログアウト
-            </button>
+            <div className="user-actions">
+              <button 
+                onClick={handleSwitchToCreatePost}
+                className="create-post-button"
+              >
+                新規投稿
+              </button>
+              <button onClick={handleLogout} className="logout-button">
+                ログアウト
+              </button>
+            </div>
           </div>
         ) : (
           <div className="auth-buttons">
