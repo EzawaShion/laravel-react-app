@@ -75,19 +75,26 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        $post = Post::with(['user', 'city', 'photoGroups', 'photos'])->find($id);
-        
-        if (!$post) {
+        try {
+            $post = Post::with(['user', 'city.prefecture'])->find($id);
+            
+            if (!$post) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '投稿が見つかりません'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'post' => $post
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => '投稿が見つかりません'
-            ], 404);
+                'message' => '投稿の取得中にエラーが発生しました: ' . $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'post' => $post
-        ]);
     }
 
     /**

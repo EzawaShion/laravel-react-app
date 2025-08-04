@@ -36,13 +36,19 @@ Route::get('/locations', [LocationController::class, 'getAllLocations']);
 Route::post('/password/email', [PasswordResetController::class, 'sendResetLink']);
 Route::post('/password/reset', [PasswordResetController::class, 'reset']);
 
+// 投稿関連のルート（読み取りは認証不要）
+Route::get('/posts', [PostController::class, 'index']);
+Route::get('/posts/{id}', [PostController::class, 'show']);
+
 // 認証が必要なルート
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
     
-    // 投稿関連のルート
-    Route::apiResource('posts', PostController::class);
+    // 投稿関連のルート（作成・更新・削除は認証必要）
+    Route::post('/posts', [PostController::class, 'store']);
+    Route::put('/posts/{id}', [PostController::class, 'update']);
+    Route::delete('/posts/{id}', [PostController::class, 'destroy']);
 });
 
 // テスト用のAPIエンドポイント

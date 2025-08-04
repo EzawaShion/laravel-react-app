@@ -9,6 +9,8 @@ import ResetPassword from './components/ResetPassword'
 import ResendVerification from './components/ResendVerification'
 import EmailVerificationRequest from './components/EmailVerificationRequest'
 import CreatePost from './components/CreatePost'
+import PostList from './components/PostList'
+import PostDetail from './components/PostDetail'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -21,6 +23,9 @@ function App() {
   const [showResendVerification, setShowResendVerification] = useState(false)
   const [showEmailVerificationRequest, setShowEmailVerificationRequest] = useState(false)
   const [showCreatePost, setShowCreatePost] = useState(false)
+  const [showPostList, setShowPostList] = useState(false)
+  const [showPostDetail, setShowPostDetail] = useState(false)
+  const [selectedPostId, setSelectedPostId] = useState(null)
   const [user, setUser] = useState(null)
 
   // ユーザー認証状態の確認
@@ -171,17 +176,45 @@ function App() {
   };
 
   const handleSwitchToCreatePost = () => {
+    setShowPostList(false);
     setShowCreatePost(true);
   };
 
   const handleCancelCreatePost = () => {
     setShowCreatePost(false);
+    setShowPostList(true);
   };
 
   const handlePostCreated = (post) => {
     setShowCreatePost(false);
+    setShowPostList(true);
     // 投稿作成後の処理（例：投稿一覧に追加など）
     console.log('投稿が作成されました:', post);
+  };
+
+  const handleSwitchToPostList = () => {
+    setShowPostList(true);
+  };
+
+  const handlePostClick = (post) => {
+    setSelectedPostId(post.id);
+    setShowPostDetail(true);
+  };
+
+  const handleBackToPostList = () => {
+    setShowPostDetail(false);
+    setSelectedPostId(null);
+  };
+
+  const handleEditPost = (post) => {
+    // 投稿編集機能（将来的に実装）
+    console.log('投稿編集:', post);
+  };
+
+  const handleDeletePost = () => {
+    setShowPostDetail(false);
+    setSelectedPostId(null);
+    setShowPostList(true);
   };
 
   // ログアウト処理
@@ -190,6 +223,28 @@ function App() {
     localStorage.removeItem('user');
     setUser(null);
   };
+
+  // 投稿詳細画面を表示
+  if (showPostDetail && selectedPostId) {
+    return (
+      <PostDetail 
+        postId={selectedPostId}
+        onBackToList={handleBackToPostList}
+        onEditPost={handleEditPost}
+        onDeletePost={handleDeletePost}
+      />
+    );
+  }
+
+  // 投稿一覧画面を表示
+  if (showPostList) {
+    return (
+      <PostList 
+        onPostClick={handlePostClick}
+        onCreatePost={handleSwitchToCreatePost}
+      />
+    );
+  }
 
   // 投稿作成画面を表示
   if (showCreatePost) {
@@ -284,6 +339,12 @@ function App() {
           <div className="user-info">
             <p>ようこそ、{user.name}さん！</p>
             <div className="user-actions">
+              <button 
+                onClick={handleSwitchToPostList}
+                className="post-list-button"
+              >
+                投稿一覧
+              </button>
               <button 
                 onClick={handleSwitchToCreatePost}
                 className="create-post-button"
