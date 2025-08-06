@@ -2,6 +2,8 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .post-detail-header {
@@ -11,6 +13,8 @@
   margin-bottom: 30px;
   padding-bottom: 20px;
   border-bottom: 2px solid #e1e5e9;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .back-button {
@@ -32,6 +36,23 @@
 .post-actions {
   display: flex;
   gap: 10px;
+}
+
+.photo-upload-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.photo-upload-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
 }
 
 .edit-button {
@@ -72,6 +93,8 @@
   padding: 30px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border: 1px solid #e1e5e9;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .post-detail-title h1 {
@@ -192,66 +215,372 @@
   background: #5a67d8;
 }
 
+/* 写真関連のスタイル */
+.post-photos-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.photos-label {
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+}
+
+.photos-count {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.post-photos-section {
+  margin: 30px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.post-photos-section h3 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.photos-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.photo-item {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.photo-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.photo-image-container {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.photo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.photo-item:hover .photo-image {
+  transform: scale(1.05);
+}
+
+.photo-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.photo-item:hover .photo-overlay {
+  opacity: 1;
+}
+
+.photo-view-text {
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+}
+
+.photo-info {
+  padding: 15px;
+}
+
+.photo-title {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.photo-description {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* 投稿詳細のカルーセル表示 */
+.post-carousel {
+  position: relative;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  min-width: 600px;
+}
+
+.carousel-main-photo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0; /* 点との間隔を調整 */
+  width: 100%;
+  height: auto; /* 固定高さを解除して写真サイズに応じて調整 */
+  min-height: 300px; /* 最小高さを設定 */
+  max-height: 600px; /* 最大高さを増やして縦長画像に対応 */
+  box-sizing: border-box;
+}
+
+/* 前後の写真の端を表示 */
+.carousel-prev-photo,
+.carousel-next-photo {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 15%;
+  overflow: hidden;
+  border-radius: 8px;
+  z-index: 1;
+}
+
+.carousel-prev-photo {
+  left: -20%;
+}
+
+.carousel-next-photo {
+  right: -20%;
+}
+
+.carousel-edge-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.3;
+  filter: blur(1px);
+}
+
+.main-carousel-photo {
+  max-width: 100%;
+  max-height: none;
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  position: relative;
+  flex-shrink: 0; /* 画像の縮小を防ぐ */
+}
+
+.carousel-photo-info {
+  margin-top: 15px;
+  text-align: center;
+  max-width: 600px;
+  z-index: 3;
+  position: relative;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.carousel-photo-title {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.carousel-photo-description {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ナビゲーションボタン */
+.carousel-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(102, 126, 234, 0.6);
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.carousel-nav-button:hover {
+  background: rgba(102, 126, 234, 0.8);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-nav-button.prev {
+  left: 20px;
+}
+
+.carousel-nav-button.next {
+  right: 20px;
+}
+
+/* 写真枚数インジケーター（点のみ） */
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 0; /* 上下のマージンを縮小 */
+}
+
+.carousel-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(102, 126, 234, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0; /* 点の縮小を防ぐ */
+}
+
+.carousel-indicator.active {
+  background: #667eea;
+  transform: scale(1.2);
+}
+
+.carousel-indicator:hover {
+  background: rgba(102, 126, 234, 0.6);
+}
+
+/* サムネイル（非表示） */
+.carousel-thumbnails {
+  display: none;
+}
+
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
-  .post-detail-container {
+  .post-carousel {
     padding: 15px;
-  }
-  
-  .post-detail-header {
-    flex-direction: column;
-    gap: 15px;
-    align-items: stretch;
-  }
-  
-  .post-actions {
-    justify-content: center;
-  }
-  
-  .post-detail-card {
-    padding: 20px;
-  }
-  
-  .post-detail-title h1 {
-    font-size: 24px;
-  }
-  
-  .post-detail-meta {
-    padding: 15px;
-  }
-  
-  .post-author,
-  .post-date,
-  .post-location {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
-  
-  .author-label,
-  .date-label,
-  .location-label {
+    max-width: 100%;
     min-width: auto;
+  }
+
+  .carousel-main-photo {
+    min-height: 200px;
+    max-height: 300px;
+  }
+
+  .main-carousel-photo {
+    max-height: 250px;
+    max-width: 90%;
+  }
+
+  .carousel-nav-button {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .carousel-nav-button.prev {
+    left: 10px;
+  }
+
+  .carousel-nav-button.next {
+    right: 10px;
+  }
+
+  .carousel-photo-title {
+    font-size: 18px;
+  }
+
+  .carousel-photo-description {
+    font-size: 14px;
+  }
+
+  .carousel-photo-info {
+    padding: 10px;
+  }
+
+  /* スマホでは前後の写真の端を非表示 */
+  .carousel-prev-photo,
+  .carousel-next-photo {
+    display: none;
   }
 }
 
 @media (max-width: 480px) {
-  .post-detail-title h1 {
-    font-size: 20px;
+  .post-detail-container {
+    padding: 10px;
   }
-  
-  .post-detail-content h3 {
-    font-size: 18px;
+
+  .post-detail-card {
+    padding: 15px;
   }
-  
-  .post-description {
-    font-size: 14px;
+
+  .carousel-main-photo {
+    min-height: 150px;
+    max-height: 250px;
   }
-  
-  .back-button,
-  .edit-button,
-  .delete-button {
-    padding: 8px 12px;
+
+  .main-carousel-photo {
+    max-height: 200px;
+    max-width: 95%;
+  }
+
+  /* スマホではナビゲーションボタンを非表示（スワイプで操作） */
+  .carousel-nav-button {
+    display: none;
+  }
+
+  /* スワイプヒントを表示 */
+  .carousel-main-photo::after {
+    content: '← スワイプで写真を切り替え →';
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 12px;
+    color: #666;
+    white-space: nowrap;
   }
 } 

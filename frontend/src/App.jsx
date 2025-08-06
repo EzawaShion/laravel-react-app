@@ -11,6 +11,7 @@ import EmailVerificationRequest from './components/EmailVerificationRequest'
 import CreatePost from './components/CreatePost'
 import PostList from './components/PostList'
 import PostDetail from './components/PostDetail'
+import PhotoUpload from './components/PhotoUpload'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -25,6 +26,7 @@ function App() {
   const [showCreatePost, setShowCreatePost] = useState(false)
   const [showPostList, setShowPostList] = useState(false)
   const [showPostDetail, setShowPostDetail] = useState(false)
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false)
   const [selectedPostId, setSelectedPostId] = useState(null)
   const [user, setUser] = useState(null)
 
@@ -211,10 +213,29 @@ function App() {
     console.log('投稿編集:', post);
   };
 
-  const handleDeletePost = () => {
-    setShowPostDetail(false);
-    setSelectedPostId(null);
-    setShowPostList(true);
+  const handleDeletePost = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:8000/api/posts/${selectedPostId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('投稿が削除されました');
+        setShowPostDetail(false);
+        setSelectedPostId(null);
+        setShowPostList(true);
+      } else {
+        alert(data.message || '投稿の削除に失敗しました');
+      }
+    } catch (error) {
+      alert('ネットワークエラーが発生しました');
+    }
   };
 
   // ログアウト処理
@@ -222,6 +243,37 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+  };
+
+  // 写真アップロード画面を表示
+  const handleSwitchToPhotoUpload = (postId) => {
+    setSelectedPostId(postId);
+    setShowPhotoUpload(true);
+    setShowPostDetail(false);
+  };
+
+  // 写真アップロード完了時の処理
+  const handlePhotoUploadSuccess = (photos) => {
+    setShowPhotoUpload(false);
+    setShowPostDetail(true);
+    alert(`${photos.length}枚の写真がアップロードされました！`);
+    // 投稿詳細画面を再表示して写真一覧を更新
+    window.location.reload();
+  };
+
+  // 投稿作成後の写真アップロード完了時の処理
+  const handleCreatePostPhotoUploadSuccess = (photos) => {
+    setShowPhotoUpload(false);
+    setShowPostList(true);
+    alert(`${photos.length}枚の写真がアップロードされました！`);
+    // 投稿一覧を再読み込み
+    window.location.reload();
+  };
+
+  // 写真アップロードキャンセル時の処理
+  const handlePhotoUploadCancel = () => {
+    setShowPhotoUpload(false);
+    setShowPostDetail(true);
   };
 
   // 投稿詳細画面を表示
@@ -232,6 +284,18 @@ function App() {
         onBackToList={handleBackToPostList}
         onEditPost={handleEditPost}
         onDeletePost={handleDeletePost}
+        onPhotoUpload={() => handleSwitchToPhotoUpload(selectedPostId)}
+      />
+    );
+  }
+
+  // 写真アップロード画面を表示
+  if (showPhotoUpload && selectedPostId) {
+    return (
+      <PhotoUpload
+        postId={selectedPostId}
+        onUploadSuccess={showCreatePost ? handleCreatePostPhotoUploadSuccess : handlePhotoUploadSuccess}
+        onCancel={handlePhotoUploadCancel}
       />
     );
   }
@@ -252,6 +316,7 @@ function App() {
       <CreatePost 
         onPostCreated={handlePostCreated}
         onCancel={handleCancelCreatePost}
+        onPhotoUpload={handleSwitchToPhotoUpload}
       />
     );
   }

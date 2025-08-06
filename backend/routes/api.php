@@ -6,6 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\PhotoController;
+use App\Http\Controllers\PhotoGroupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +42,12 @@ Route::post('/password/reset', [PasswordResetController::class, 'reset']);
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
 
+// 写真関連のルート（読み取りは認証不要）
+Route::get('/photos/post/{postId}', [PhotoController::class, 'getByPost']);
+Route::get('/photos/{id}', [PhotoController::class, 'show']);
+Route::get('/photo-groups/post/{postId}', [PhotoGroupController::class, 'getByPost']);
+Route::get('/photo-groups/{id}', [PhotoGroupController::class, 'show']);
+
 // 認証が必要なルート
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -49,6 +57,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{id}', [PostController::class, 'update']);
     Route::delete('/posts/{id}', [PostController::class, 'destroy']);
+    
+    // 写真関連のルート（作成・更新・削除は認証必要）
+    Route::post('/photos/upload', [PhotoController::class, 'upload']);
+    Route::put('/photos/{id}', [PhotoController::class, 'update']);
+    Route::delete('/photos/{id}', [PhotoController::class, 'destroy']);
+    Route::post('/photos/reorder', [PhotoController::class, 'reorder']);
+    
+    // 写真グループ関連のルート
+    Route::post('/photo-groups', [PhotoGroupController::class, 'store']);
+    Route::put('/photo-groups/{id}', [PhotoGroupController::class, 'update']);
+    Route::delete('/photo-groups/{id}', [PhotoGroupController::class, 'destroy']);
+    Route::post('/photo-groups/reorder', [PhotoGroupController::class, 'reorder']);
 });
 
 // テスト用のAPIエンドポイント

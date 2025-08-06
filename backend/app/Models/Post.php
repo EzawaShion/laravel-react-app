@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Post extends Model
 {
@@ -48,5 +49,34 @@ class Post extends Model
     public function photos()
     {
         return $this->hasMany(Photo::class);
+    }
+
+    /**
+     * 投稿削除時の処理
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($post) {
+            // 関連する写真のファイルを削除
+            foreach ($post->photos as $photo) {
+                if (Storage::disk('public')->exists($photo->file_path)) {
+                    Storage::disk('public')->delete($photo->file_path);
+                }
+                
+                // サムネイルも削除
+                $thumbnailPath = str_replace('photos/', 'photos/thumbnails/', $photo->file_path);
+                if (Storage::disk('public')->exists($thumbnailPath)) {
+                    Storage::disk('public')->delete($thumbnailPath);
+                }
+            }
+            
+            // 関連する写真レコードを先に削除（外部キー制約を回避）
+            $post->photos()->delete();
+            
+            // 関連する写真グループも削除
+            $post->photoGroups()->delete();
+        });
     }
 }

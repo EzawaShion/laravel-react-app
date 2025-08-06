@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './CreatePost.css';
 
-function CreatePost({ onPostCreated, onCancel }) {
+function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -14,6 +14,8 @@ function CreatePost({ onPostCreated, onCancel }) {
   const [prefectures, setPrefectures] = useState([]);
   const [cities, setCities] = useState([]);
   const [loadingLocations, setLoadingLocations] = useState(false);
+  const [createdPostId, setCreatedPostId] = useState(null);
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -92,8 +94,8 @@ function CreatePost({ onPostCreated, onCancel }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert('投稿が作成されました！');
-        onPostCreated(data.post);
+        setCreatedPostId(data.post.id);
+        // 投稿作成後は写真アップロード画面を表示
       } else {
         if (data.errors) {
           setErrors(data.errors);
@@ -107,6 +109,33 @@ function CreatePost({ onPostCreated, onCancel }) {
       setLoading(false);
     }
   };
+
+  // 写真アップロード画面を表示
+  if (createdPostId) {
+    return (
+      <div className="create-post-container">
+        <div className="create-post-card">
+          <h2>📸 写真を追加</h2>
+          <p className="success-message">投稿が作成されました！写真を追加しましょう。</p>
+          
+          <div className="photo-upload-actions">
+            <button 
+              onClick={() => onPhotoUpload(createdPostId)}
+              className="photo-upload-button"
+            >
+              📷 写真をアップロード
+            </button>
+            <button 
+              onClick={() => onPostCreated({ id: createdPostId })}
+              className="skip-button"
+            >
+              写真をスキップ
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="create-post-container">

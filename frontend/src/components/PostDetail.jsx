@@ -1,11 +1,78 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './PostDetail.css';
 
-function PostDetail({ postId, onBackToList, onEditPost, onDeletePost }) {
+function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpload }) {
   const [post, setPost] = useState(null);
+  const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isOwner, setIsOwner] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const carouselRef = useRef(null);
+
+  // 最小スワイプ距離
+  const minSwipeDistance = 50;
+
+  // タッチ開始
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  // タッチ移動
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  // タッチ終了
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      // 左スワイプ（次の写真）
+      setCurrentIndex(prev => prev === photos.length - 1 ? 0 : prev + 1);
+    } else if (isRightSwipe) {
+      // 右スワイプ（前の写真）
+      setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1);
+    }
+  };
+
+  // マウスドラッグ対応
+  const onMouseDown = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.clientX);
+  };
+
+  const onMouseMove = (e) => {
+    if (touchStart !== null) {
+      setTouchEnd(e.clientX);
+    }
+  };
+
+  const onMouseUp = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      // 左スワイプ（次の写真）
+      setCurrentIndex(prev => prev === photos.length - 1 ? 0 : prev + 1);
+    } else if (isRightSwipe) {
+      // 右スワイプ（前の写真）
+      setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1);
+    }
+    
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
 
   // 投稿詳細を取得
   const fetchPostDetail = async () => {
@@ -30,6 +97,20 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost }) {
       setError('ネットワークエラーが発生しました');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 写真一覧を取得
+  const fetchPhotos = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/photos/post/${postId}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setPhotos(data.photos || []);
+      }
+    } catch (error) {
+      console.error('写真の取得に失敗しました:', error);
     }
   };
 
@@ -61,9 +142,10 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost }) {
     }
   };
 
-  // コンポーネントマウント時に投稿詳細を取得
+  // コンポーネントマウント時に投稿詳細と写真を取得
   useEffect(() => {
     fetchPostDetail();
+    fetchPhotos();
   }, [postId]);
 
   // 投稿の作成日をフォーマット
@@ -77,6 +159,15 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost }) {
       minute: '2-digit'
     });
   };
+
+  // 写真のURLを生成
+  const getPhotoUrl = (filePath) => {
+    return `http://localhost:8000/storage/${filePath}`;
+  };
+
+
+
+
 
   if (loading) {
     return (
@@ -123,6 +214,12 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost }) {
         
         {isOwner && (
           <div className="post-actions">
+            <button 
+              onClick={onPhotoUpload}
+              className="photo-upload-button"
+            >
+              📷 写真を追加
+            </button>
             <button 
               onClick={() => onEditPost(post)}
               className="edit-button"
@@ -171,8 +268,16 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost }) {
               )}
             </div>
           )}
+
+          {photos.length > 0 && (
+            <div className="post-photos-count">
+              <span className="photos-label">写真:</span>
+              <span className="photos-count">{photos.length}枚</span>
+            </div>
+          )}
         </div>
 
+        {/* 投稿内容 */}
         <div className="post-detail-content">
           <h3>投稿内容</h3>
           <div className="post-description">
@@ -181,6 +286,100 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost }) {
             ))}
           </div>
         </div>
+
+        {/* 写真ギャラリー */}
+        {photos.length > 0 && (
+          <div className="post-photos-section">
+            <h3>📸 写真 ({photos.length}枚)</h3>
+            
+            {/* カルーセル表示 */}
+            <div 
+              className="post-carousel"
+              ref={carouselRef}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+              onMouseDown={onMouseDown}
+              onMouseMove={onMouseMove}
+              onMouseUp={onMouseUp}
+              onMouseLeave={onMouseUp}
+            >
+              <div className="carousel-main-photo">
+                {/* 前の写真の端 */}
+                {photos.length > 1 && (
+                  <div className="carousel-prev-photo">
+                    <img 
+                      src={getPhotoUrl(photos[currentIndex === 0 ? photos.length - 1 : currentIndex - 1].file_path)} 
+                      alt="前の写真"
+                      className="carousel-edge-photo"
+                    />
+                  </div>
+                )}
+                
+                {/* メイン写真 */}
+                <img 
+                  src={getPhotoUrl(photos[currentIndex].file_path)} 
+                  alt={photos[currentIndex].title || `写真 ${currentIndex + 1}`}
+                  className="main-carousel-photo"
+                />
+                
+                {/* 次の写真の端 */}
+                {photos.length > 1 && (
+                  <div className="carousel-next-photo">
+                    <img 
+                      src={getPhotoUrl(photos[currentIndex === photos.length - 1 ? 0 : currentIndex + 1].file_path)} 
+                      alt="次の写真"
+                      className="carousel-edge-photo"
+                    />
+                  </div>
+                )}
+              </div>
+              
+              {/* 写真枚数インジケーター（点のみ）- 写真と説明の間に配置 */}
+              {photos.length > 1 && (
+                <div className="carousel-indicators">
+                  {photos.map((_, index) => (
+                    <div 
+                      key={index}
+                      className={`carousel-indicator ${index === currentIndex ? 'active' : ''}`}
+                      onClick={() => setCurrentIndex(index)}
+                    />
+                  ))}
+                </div>
+              )}
+              
+              {/* 写真情報 */}
+              {(photos[currentIndex].title || photos[currentIndex].description) && (
+                <div className="carousel-photo-info">
+                  {photos[currentIndex].title && (
+                    <h4 className="carousel-photo-title">{photos[currentIndex].title}</h4>
+                  )}
+                  {photos[currentIndex].description && (
+                    <p className="carousel-photo-description">{photos[currentIndex].description}</p>
+                  )}
+                </div>
+              )}
+              
+              {/* ナビゲーションボタン */}
+              {photos.length > 1 && (
+                <>
+                  <button 
+                    onClick={() => setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1)}
+                    className="carousel-nav-button prev"
+                  >
+                    ‹
+                  </button>
+                  <button 
+                    onClick={() => setCurrentIndex(prev => prev === photos.length - 1 ? 0 : prev + 1)}
+                    className="carousel-nav-button next"
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         {post.updated_at !== post.created_at && (
           <div className="post-updated">

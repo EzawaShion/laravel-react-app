@@ -1,0 +1,293 @@
+.photo-carousel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+}
+
+.photo-carousel-overlay.fullscreen {
+  background: #000;
+}
+
+.photo-carousel-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ヘッダー */
+.carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.carousel-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.photo-counter {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.photo-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.carousel-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.fullscreen-button,
+.close-button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.fullscreen-button:hover,
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* メイン写真エリア */
+.carousel-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 80px 20px 120px 20px;
+}
+
+.main-photo-container {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main-photo {
+  max-width: 80%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.photo-description {
+  margin-top: 15px;
+  text-align: center;
+  color: white;
+  max-width: 600px;
+}
+
+.photo-description p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ナビゲーションボタン */
+.nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.nav-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.prev-button {
+  left: 20px;
+}
+
+.next-button {
+  right: 20px;
+}
+
+/* サムネイル */
+.carousel-thumbnails {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 15px;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  justify-content: center;
+}
+
+.thumbnail-item {
+  flex-shrink: 0;
+  width: 80px;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.thumbnail-item:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.05);
+}
+
+.thumbnail-item.active {
+  border-color: #667eea;
+  transform: scale(1.1);
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ナビゲーションヒント */
+.carousel-hints {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  text-align: center;
+}
+
+.carousel-hints p {
+  margin: 0;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .carousel-header {
+    padding: 15px;
+  }
+
+  .photo-counter {
+    font-size: 14px;
+  }
+
+  .photo-title {
+    font-size: 16px;
+  }
+
+  .carousel-main {
+    padding: 70px 10px 100px 10px;
+  }
+
+  .nav-button {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .prev-button {
+    left: 10px;
+  }
+
+  .next-button {
+    right: 10px;
+  }
+
+  .carousel-thumbnails {
+    padding: 10px;
+  }
+
+  .thumbnail-item {
+    width: 60px;
+    height: 45px;
+  }
+
+  .carousel-hints {
+    bottom: 70px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-header {
+    padding: 10px;
+  }
+
+  .carousel-info {
+    gap: 10px;
+  }
+
+  .photo-counter {
+    font-size: 12px;
+  }
+
+  .photo-title {
+    font-size: 14px;
+  }
+
+  .carousel-main {
+    padding: 60px 5px 80px 5px;
+  }
+
+  .nav-button {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+  }
+
+  .thumbnail-item {
+    width: 50px;
+    height: 40px;
+  }
+} 

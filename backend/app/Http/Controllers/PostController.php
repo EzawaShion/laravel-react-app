@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
@@ -182,28 +183,37 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        $post = Post::find($id);
-        
-        if (!$post) {
+        try {
+            $post = Post::with(['photos'])->find($id);
+            
+            if (!$post) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '投稿が見つかりません'
+                ], 404);
+            }
+
+            // 自分の投稿のみ削除可能
+            if ($post->user_id !== auth()->id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'この投稿を削除する権限がありません'
+                ], 403);
+            }
+
+            // 投稿と関連データを削除（モデルのbootメソッドでファイル削除処理が実行される）
+            $post->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => '投稿が削除されました'
+            ]);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => '投稿が見つかりません'
-            ], 404);
+                'message' => '投稿の削除に失敗しました: ' . $e->getMessage()
+            ], 500);
         }
-
-        // 自分の投稿のみ削除可能
-        if ($post->user_id !== auth()->id()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'この投稿を削除する権限がありません'
-            ], 403);
-        }
-
-        $post->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => '投稿が削除されました'
-        ]);
     }
 }
