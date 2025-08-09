@@ -8,6 +8,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\PhotoGroupController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +70,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/photo-groups/{id}', [PhotoGroupController::class, 'update']);
     Route::delete('/photo-groups/{id}', [PhotoGroupController::class, 'destroy']);
     Route::post('/photo-groups/reorder', [PhotoGroupController::class, 'reorder']);
+    
+    // プロフィール関連のルート
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::post('/profile', [ProfileController::class, 'update']); // POSTリクエストにも対応
+    Route::get('/profile/posts', [ProfileController::class, 'posts']);
 });
 
 // テスト用のAPIエンドポイント

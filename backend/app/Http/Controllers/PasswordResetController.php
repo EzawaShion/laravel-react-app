@@ -31,10 +31,10 @@ class PasswordResetController extends Controller
             $token = Str::random(60);
             $resetUrl = "http://localhost:5173/password/reset?token=" . $token . "&email=" . $request->email;
 
-            // リセットトークンをデータベースに保存
+            // リセットトークンをデータベースに保存（セキュリティのためハッシュ化）
             DB::table('password_reset_tokens')->insert([
                 'email' => $request->email,
-                'token' => Hash::make($token),
+                'token' => Hash::make($token), // セキュリティのためハッシュ化
                 'created_at' => now()
             ]);
 
@@ -60,7 +60,7 @@ class PasswordResetController extends Controller
             'password' => 'required|min:8|confirmed'
         ]);
 
-        // リセットトークンを検証
+        // リセットトークンを検証（ハッシュ化されたトークンと比較）
         $reset = DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->first();

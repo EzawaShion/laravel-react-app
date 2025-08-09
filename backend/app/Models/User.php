@@ -23,6 +23,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'google_id',
+        'username',
+        'display_name',
+        'bio',
+        'location',
+        'website',
+        'profile_image',
     ];
 
     /**
@@ -46,5 +52,40 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * プロフィール画像のURLを取得
+     */
+    public function getProfileImageUrlAttribute()
+    {
+        if ($this->profile_image) {
+            return url('storage/' . $this->profile_image);
+        }
+        return url('images/default-avatar.svg');
+    }
+
+    /**
+     * 表示名を取得（display_nameがない場合はnameを使用）
+     */
+    public function getDisplayNameAttribute($value)
+    {
+        return $value ?: $this->name;
+    }
+
+    /**
+     * 投稿数を取得
+     */
+    public function getPostsCountAttribute()
+    {
+        return $this->posts()->count();
+    }
+
+    /**
+     * ユーザーの投稿を取得
+     */
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
     }
 }

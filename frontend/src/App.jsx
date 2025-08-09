@@ -12,6 +12,7 @@ import CreatePost from './components/CreatePost'
 import PostList from './components/PostList'
 import PostDetail from './components/PostDetail'
 import PhotoUpload from './components/PhotoUpload'
+import Profile from './components/Profile'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -27,6 +28,7 @@ function App() {
   const [showPostList, setShowPostList] = useState(false)
   const [showPostDetail, setShowPostDetail] = useState(false)
   const [showPhotoUpload, setShowPhotoUpload] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
   const [selectedPostId, setSelectedPostId] = useState(null)
   const [user, setUser] = useState(null)
 
@@ -276,6 +278,47 @@ function App() {
     setShowPostDetail(true);
   };
 
+  // プロフィール画面に切り替え
+  const handleSwitchToProfile = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8000/api/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setShowProfile(true);
+      } else {
+        console.error('プロフィールの取得に失敗しました');
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
+
+  // プロフィール画面から戻る
+  const handleProfileBack = () => {
+    setShowProfile(false);
+  };
+
+  // プロフィール更新時の処理
+  const handleProfileUpdated = (updatedUser) => {
+    console.log('Profile updated in App.jsx:', updatedUser);
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // プロフィール画面を閉じる
+    setShowProfile(false);
+    
+    // 成功メッセージを表示
+    alert('プロフィールが正常に更新されました！');
+  };
+
   // 投稿詳細画面を表示
   if (showPostDetail && selectedPostId) {
     return (
@@ -285,6 +328,16 @@ function App() {
         onEditPost={handleEditPost}
         onDeletePost={handleDeletePost}
         onPhotoUpload={() => handleSwitchToPhotoUpload(selectedPostId)}
+      />
+    );
+  }
+
+  // プロフィール画面を表示
+  if (showProfile) {
+    return (
+      <Profile
+        onBack={handleProfileBack}
+        onProfileUpdated={handleProfileUpdated}
       />
     );
   }
@@ -415,6 +468,12 @@ function App() {
                 className="create-post-button"
               >
                 新規投稿
+              </button>
+              <button 
+                onClick={handleSwitchToProfile}
+                className="profile-button"
+              >
+                プロフィール
               </button>
               <button onClick={handleLogout} className="logout-button">
                 ログアウト
