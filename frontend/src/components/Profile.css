@@ -81,6 +81,11 @@
   white-space: pre-wrap;
 }
 
+.empty-bio {
+  color: #9ca3af;
+  font-style: italic;
+}
+
 .profile-details {
   margin-bottom: 30px;
 }
@@ -96,6 +101,11 @@
   color: #374151;
   min-width: 100px;
   margin-right: 12px;
+}
+
+.empty-value {
+  color: #9ca3af;
+  font-style: italic;
 }
 
 .detail-item a {

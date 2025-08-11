@@ -13,15 +13,31 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         
+        // null値と「null」文字列を適切に処理
+        $bio = $user->bio;
+        if ($bio === 'null' || $bio === null) {
+            $bio = null;
+        }
+        
+        $website = $user->website;
+        if ($website === 'null' || $website === null) {
+            $website = null;
+        }
+        
+        $displayName = $user->display_name;
+        if ($displayName === 'null' || $displayName === null) {
+            $displayName = null;
+        }
+        
         return response()->json([
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'username' => $user->username,
-                'display_name' => $user->display_name,
+                'display_name' => $displayName,
                 'email' => $user->email,
-                'bio' => $user->bio,
-                'website' => $user->website,
+                'bio' => $bio,
+                'website' => $website,
                 'profile_image_url' => $user->profile_image_url,
                 'posts_count' => $user->posts_count,
                 'created_at' => $user->created_at,
@@ -79,10 +95,13 @@ class ProfileController extends Controller
 
         $data = $validator->validated();
         
-        // 空文字列をnullに変換
-        foreach ($data as $key => $value) {
-            if ($value === '') {
-                $data[$key] = null;
+        // プロフィールフィールドを明示的に設定（送信されていない場合はnull）
+        $profileFields = ['display_name', 'bio', 'website'];
+        foreach ($profileFields as $field) {
+            if (!isset($data[$field])) {
+                $data[$field] = null;
+            } else if ($data[$field] === '' || $data[$field] === 'null') {
+                $data[$field] = null;
             }
         }
         
@@ -134,10 +153,10 @@ class ProfileController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'username' => $user->username,
-                'display_name' => $user->display_name,
+                'display_name' => $user->display_name === 'null' ? null : $user->display_name,
                 'email' => $user->email,
-                'bio' => $user->bio,
-                'website' => $user->website,
+                'bio' => $user->bio === 'null' ? null : $user->bio,
+                'website' => $user->website === 'null' ? null : $user->website,
                 'profile_image_url' => $user->profile_image_url,
                 'posts_count' => $user->posts_count,
                 'created_at' => $user->created_at,

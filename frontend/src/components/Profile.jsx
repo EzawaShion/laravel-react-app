@@ -123,17 +123,12 @@ function Profile({ onBack, onProfileUpdated }) {
       const token = localStorage.getItem('token');
       const formData = new FormData();
 
-      // テキストフィールド - 空文字列チェックを改善
+      // テキストフィールド - 空文字列も含めて全て送信
       Object.keys(editForm).forEach(key => {
         if (key !== 'profile_image_preview') {
           const value = editForm[key];
-          // ウェブサイトフィールドは空文字列でも送信（バックエンドで適切に処理）
-          if (key === 'website') {
-            formData.append(key, value);
-          } else {
-            // その他のフィールドは空文字列の場合はnullを送信
-            formData.append(key, value === '' ? null : value);
-          }
+          // 空文字列も含めて全て送信（バックエンドで適切に処理）
+          formData.append(key, value);
         }
       });
 
@@ -232,13 +227,13 @@ function Profile({ onBack, onProfileUpdated }) {
           </div>
 
           <div className="profile-info">
-            <h2>{user.display_name}</h2>
+            <h2>{user.display_name || user.name || user.username}</h2>
             <p className="username">@{user.username}</p>
             
-            {user.bio && <p className="bio">{user.bio}</p>}
+            {user.bio && user.bio !== 'null' && user.bio.trim() !== '' && <p className="bio">{user.bio}</p>}
             
             <div className="profile-details">
-              {user.website && (
+              {user.website && user.website !== 'null' && user.website.trim() !== '' && (
                 <div className="detail-item">
                   <span className="label">ウェブサイト:</span>
                   <a href={user.website} target="_blank" rel="noopener noreferrer">
@@ -249,7 +244,7 @@ function Profile({ onBack, onProfileUpdated }) {
               
               <div className="detail-item">
                 <span className="label">投稿数:</span>
-                <span>{user.posts_count}</span>
+                <span>{user.posts_count || 0}</span>
               </div>
               
               <div className="detail-item">
