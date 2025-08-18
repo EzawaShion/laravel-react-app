@@ -15,8 +15,18 @@ RUN echo "upload_max_filesize = 20M" >> /usr/local/etc/php/conf.d/uploads.ini &&
     echo "post_max_size = 20M" >> /usr/local/etc/php/conf.d/uploads.ini && \
     echo "max_file_uploads = 20" >> /usr/local/etc/php/conf.d/uploads.ini && \
     echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/uploads.ini && \
-    echo "max_execution_time = 300" >> /usr/local/etc/php/conf.d/uploads.ini && \
-    echo "set_time_limit(300);" >> /usr/local/etc/php/conf.d/uploads.ini
+    echo "max_execution_time = 300" >> /usr/local/etc/php/conf.d/uploads.ini
+
+# Xdebugをインストール
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
+
+# Xdebug設定
+RUN echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.client_port=9003" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.log=/var/log/xdebug.log" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 # Nginxの設定
 COPY nginx.conf /etc/nginx/nginx.conf

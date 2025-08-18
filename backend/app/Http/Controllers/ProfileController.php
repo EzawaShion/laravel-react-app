@@ -49,32 +49,12 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         
-        // デバッグログを追加
-        \Log::info('Profile update request received');
-        \Log::info('Request Content-Type: ' . $request->header('Content-Type'));
-        \Log::info('Request method: ' . $request->method());
-        \Log::info('Request all data keys: ', array_keys($request->all()));
-        \Log::info('Request files keys: ', array_keys($request->allFiles()));
-        \Log::info('Request has file profile_image: ' . ($request->hasFile('profile_image') ? 'yes' : 'no'));
-        
-        // 詳細なデータログを追加
-        \Log::info('Request all data: ', $request->all());
-        \Log::info('Request input method: ' . $request->input('name'));
-        \Log::info('Request input username: ' . $request->input('username'));
-        \Log::info('Request get method: ' . $request->get('name'));
-        \Log::info('Request get username: ' . $request->get('username'));
-        
         // リクエストメソッドの確認
         if (!in_array($request->method(), ['PUT', 'POST'])) {
             return response()->json(['message' => 'Method not allowed'], 405);
         }
         
         $profileImageFile = $request->file('profile_image');
-        if ($profileImageFile) {
-            \Log::info('Request file profile_image: ' . $profileImageFile->getClientOriginalName());
-        } else {
-            \Log::info('Request file profile_image: null');
-        }
         
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -86,7 +66,6 @@ class ProfileController extends Controller
         ]);
 
         if ($validator->fails()) {
-            \Log::info('Validation failed:', $validator->errors()->toArray());
             return response()->json([
                 'message' => 'バリデーションエラー',
                 'errors' => $validator->errors()
@@ -104,16 +83,12 @@ class ProfileController extends Controller
                 $data[$field] = null;
             }
         }
-        
-        \Log::info('Validated data after processing:', $data);
 
         // プロフィール画像の処理
         if ($request->hasFile('profile_image')) {
             $profileImageFile = $request->file('profile_image');
             
             if ($profileImageFile && $profileImageFile->isValid()) {
-                \Log::info('Processing profile image upload');
-                
                 // 古い画像を削除
                 if ($user->profile_image) {
                     Storage::disk('public')->delete($user->profile_image);
@@ -131,21 +106,10 @@ class ProfileController extends Controller
                 // ファイルを保存
                 Storage::disk('public')->put($filePath, file_get_contents($profileImageFile));
                 $data['profile_image'] = $filePath;
-                
-                \Log::info('Profile image saved to: ' . $filePath);
             }
-        } else {
-            \Log::info('No profile image file in request');
         }
 
-        // データ配列をログに出力
-        \Log::info('Data array before update: ', $data ?: []);
-
         $user->update($data);
-
-        // 更新後のユーザーデータをログに出力
-        \Log::info('Updated user data: ', $user->toArray());
-        \Log::info('Profile image in database: ' . ($user->profile_image ?: 'null'));
 
         return response()->json([
             'message' => 'プロフィールが更新されました',

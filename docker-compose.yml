@@ -5,8 +5,12 @@ services:
     container_name: laravel-app
     ports:
       - "8000:80"
+      - "9020:9003"  # Xdebug用ポート（ホスト側を9020に変更）
     volumes:
       - ./backend:/var/www/html
+    environment:
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: "client_host=host.docker.internal client_port=9003"
     depends_on:
       - db
 
