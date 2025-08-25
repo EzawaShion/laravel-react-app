@@ -10,6 +10,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
   const carouselRef = useRef(null);
 
   // 最小スワイプ距離
@@ -142,6 +143,24 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
     }
   };
 
+  // キーボードナビゲーション
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (showPhotoCarousel) {
+        if (e.key === 'Escape') {
+          closePhotoCarousel();
+        } else if (e.key === 'ArrowLeft') {
+          setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1);
+        } else if (e.key === 'ArrowRight') {
+          setCurrentIndex(prev => prev === photos.length - 1 ? 0 : prev + 1);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showPhotoCarousel, photos.length]);
+
   // コンポーネントマウント時に投稿詳細と写真を取得
   useEffect(() => {
     fetchPostDetail();
@@ -163,6 +182,16 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
   // 写真のURLを生成
   const getPhotoUrl = (filePath) => {
     return `http://localhost:8000/storage/${filePath}`;
+  };
+
+  // PhotoCarouselの制御
+  const openPhotoCarousel = (index) => {
+    setCurrentIndex(index);
+    setShowPhotoCarousel(true);
+  };
+
+  const closePhotoCarousel = () => {
+    setShowPhotoCarousel(false);
   };
 
 
@@ -320,7 +349,8 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 <img 
                   src={getPhotoUrl(photos[currentIndex].file_path)} 
                   alt={photos[currentIndex].title || `写真 ${currentIndex + 1}`}
-                  className="main-carousel-photo"
+                  className="main-carousel-photo clickable"
+                  onClick={() => openPhotoCarousel(currentIndex)}
                 />
                 
                 {/* 次の写真の端 */}
@@ -384,6 +414,75 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         {post.updated_at !== post.created_at && (
           <div className="post-updated">
             <p>最終更新: {formatDate(post.updated_at)}</p>
+          </div>
+        )}
+
+        {/* PhotoCarousel */}
+        {showPhotoCarousel && photos.length > 0 && (
+          <div className="photo-carousel-overlay">
+            <div className="photo-carousel-container">
+              {/* ヘッダー */}
+              <div className="carousel-header">
+                <div className="carousel-info">
+                  <span className="photo-counter">
+                    {currentIndex + 1} / {photos.length}
+                  </span>
+                  {photos[currentIndex].title && (
+                    <span className="photo-title">
+                      {photos[currentIndex].title}
+                    </span>
+                  )}
+                </div>
+                <div className="carousel-controls">
+                  <button onClick={closePhotoCarousel} className="close-button">
+                    ×
+                  </button>
+                </div>
+              </div>
+
+              {/* メイン写真 */}
+              <div className="carousel-main">
+                <button 
+                  onClick={() => setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1)}
+                  className="nav-button prev-button"
+                >
+                  ‹
+                </button>
+                
+                <div className="main-photo-container">
+                  <img 
+                    src={getPhotoUrl(photos[currentIndex].file_path)}
+                    alt={photos[currentIndex].title || `写真 ${currentIndex + 1}`}
+                    className="main-photo"
+                  />
+                  {photos[currentIndex].description && (
+                    <div className="photo-description">
+                      <p>{photos[currentIndex].description}</p>
+                    </div>
+                  )}
+                </div>
+                
+                <button 
+                  onClick={() => setCurrentIndex(prev => prev === photos.length - 1 ? 0 : prev + 1)}
+                  className="nav-button next-button"
+                >
+                  ›
+                </button>
+              </div>
+
+              {/* サムネイル */}
+              <div className="carousel-thumbnails">
+                {photos.map((photo, index) => (
+                  <img
+                    key={photo.id}
+                    src={getPhotoUrl(photo.file_path)}
+                    alt={`サムネイル ${index + 1}`}
+                    className={`thumbnail ${index === currentIndex ? 'active' : ''}`}
+                    onClick={() => setCurrentIndex(index)}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -225,4 +225,534 @@
   background: #f7fafc;
   border-color: #cbd5e0;
   color: #4a5568;
+}
+
+/* 写真選択・プレビュー関連 */
+.photo-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
+  background: white;
+}
+
+/* アップロード方法選択 */
+.upload-methods {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.upload-button,
+.camera-button {
+  flex: 1;
+  padding: 12px 20px;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  background: white;
+  color: #667eea;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.upload-button:hover,
+.camera-button:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.upload-button:active,
+.camera-button:active {
+  transform: translateY(0);
+}
+
+.photo-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.photo-help-text {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
+.photo-previews {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+}
+
+/* PhotoUpload風のカルーセル */
+.photo-carousel {
+  margin: 20px 0;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-main-photo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  background: #f8f9fa;
+}
+
+.carousel-prev-photo,
+.carousel-next-photo {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+  border-radius: 8px;
+  opacity: 0.6;
+  z-index: 1;
+}
+
+.carousel-prev-photo {
+  left: 20px;
+}
+
+.carousel-next-photo {
+  right: 20px;
+}
+
+.carousel-edge-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-image-container {
+  position: relative;
+  max-width: 400px;
+  max-height: 300px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.main-carousel-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px;
+  background: white;
+}
+
+.carousel-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e1e5e9;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.carousel-indicator.active {
+  background: #667eea;
+}
+
+.carousel-indicator:hover {
+  background: rgba(102, 126, 234, 0.6);
+}
+
+.carousel-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.carousel-nav-button:hover {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-nav-button.prev {
+  left: 20px;
+}
+
+.carousel-nav-button.next {
+  right: 20px;
+}
+
+.photo-details {
+  padding: 20px;
+  background: white;
+  border-top: 1px solid #e1e5e9;
+}
+
+.photo-title-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  transition: border-color 0.2s ease;
+}
+
+.photo-title-input:focus,
+.photo-description-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.photo-title-input::placeholder,
+.photo-description-input::placeholder {
+  color: #999;
+}
+
+.photo-description-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  transition: border-color 0.2s ease;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.photo-previews h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* 写真コメント入力 */
+.photo-comment-input {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px;
+}
+
+.comment-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  background: white;
+  color: #333;
+}
+
+.comment-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+}
+
+.comment-input::placeholder {
+  color: #999;
+  font-size: 11px;
+}
+
+/* PhotoCarousel スタイル */
+.photo-carousel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-carousel-container {
+  width: 90%;
+  max-width: 800px;
+  height: 80%;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.carousel-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.carousel-info {
+  color: white;
+}
+
+.photo-counter {
+  font-size: 14px;
+  margin-right: 15px;
+}
+
+.photo-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.carousel-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.close-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.carousel-main {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  z-index: 10;
+}
+
+.nav-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.prev-button {
+  left: 20px;
+}
+
+.next-button {
+  right: 20px;
+}
+
+.main-photo-container {
+  text-align: center;
+}
+
+.main-photo {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.photo-description {
+  margin-top: 15px;
+  color: white;
+  padding: 0 20px;
+}
+
+.photo-description p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.carousel-thumbnails {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 15px;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  justify-content: center;
+}
+
+.thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.thumbnail:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.thumbnail.active {
+  border-color: #667eea;
+}
+
+/* 写真アップロード画面のスタイル */
+.success-message {
+  text-align: center;
+  color: #38a169;
+  font-size: 16px;
+  margin-bottom: 30px;
+  padding: 15px;
+  background: #f0fff4;
+  border-radius: 8px;
+  border: 1px solid #9ae6b4;
+}
+
+.photo-upload-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.photo-upload-button {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  max-width: 300px;
+}
+
+.photo-upload-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(72, 187, 120, 0.3);
+}
+
+.skip-button {
+  background: white;
+  color: #718096;
+  border: 2px solid #e2e8f0;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 300px;
+}
+
+.skip-button:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+  color: #4a5568;
+}
+
+/* 写真プレビューのクリック可能スタイル */
+.main-carousel-photo.clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.main-carousel-photo.clickable:hover {
+  transform: scale(1.05);
+}
+
+/* 投稿プレビュー */
+.post-preview {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+}
+
+.post-preview h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.post-preview-content {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.post-preview-content p {
+  margin: 8px 0;
+}
+
+.post-preview-content strong {
+  color: #333;
+  font-weight: 600;
 } 

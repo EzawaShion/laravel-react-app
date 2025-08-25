@@ -13,6 +13,7 @@ import PostList from './components/PostList'
 import PostDetail from './components/PostDetail'
 import PhotoUpload from './components/PhotoUpload'
 import Profile from './components/Profile'
+import EditPost from './components/EditPost'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -29,7 +30,9 @@ function App() {
   const [showPostDetail, setShowPostDetail] = useState(false)
   const [showPhotoUpload, setShowPhotoUpload] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
+  const [showEditPost, setShowEditPost] = useState(false)
   const [selectedPostId, setSelectedPostId] = useState(null)
+  const [selectedPost, setSelectedPost] = useState(null)
   const [user, setUser] = useState(null)
 
   // ユーザー認証状態の確認
@@ -203,16 +206,20 @@ function App() {
   const handlePostClick = (post) => {
     setSelectedPostId(post.id);
     setShowPostDetail(true);
+    setShowPostList(false);
   };
 
   const handleBackToPostList = () => {
     setShowPostDetail(false);
     setSelectedPostId(null);
+    setShowPostList(true);
   };
 
   const handleEditPost = (post) => {
-    // 投稿編集機能（将来的に実装）
-    console.log('投稿編集:', post);
+    // 投稿編集画面に切り替え
+    setSelectedPost(post);
+    setShowEditPost(true);
+    setShowPostDetail(false);
   };
 
   const handleDeletePost = async () => {
@@ -304,6 +311,22 @@ function App() {
   // プロフィール画面から戻る
   const handleProfileBack = () => {
     setShowProfile(false);
+  };
+
+  // 投稿編集完了時の処理
+  const handleEditPostSuccess = (updatedPost) => {
+    setShowEditPost(false);
+    setSelectedPost(null);
+    setShowPostDetail(true);
+    // 投稿詳細画面を再表示して更新されたデータを反映
+    window.location.reload();
+  };
+
+  // 投稿編集画面から戻る
+  const handleEditPostBack = () => {
+    setShowEditPost(false);
+    setSelectedPost(null);
+    setShowPostDetail(true);
   };
 
   // プロフィール更新時の処理
@@ -435,6 +458,72 @@ function App() {
     return (
       <ResetPassword 
         onResetSuccess={handleResetSuccess}
+      />
+    );
+  }
+
+  // 投稿編集画面
+  if (showEditPost && selectedPost) {
+    return (
+      <EditPost
+        post={selectedPost}
+        onBack={handleEditPostBack}
+        onUpdateSuccess={handleEditPostSuccess}
+      />
+    );
+  }
+
+  // 投稿一覧画面
+  if (showPostList) {
+    return (
+      <PostList
+        onPostClick={handlePostClick}
+        onCreatePost={handleSwitchToCreatePost}
+      />
+    );
+  }
+
+  // 投稿詳細画面
+  if (showPostDetail && selectedPostId) {
+    return (
+      <PostDetail
+        postId={selectedPostId}
+        onBackToList={handleBackToPostList}
+        onEditPost={handleEditPost}
+        onDeletePost={handleDeletePost}
+        onPhotoUpload={handleSwitchToPhotoUpload}
+      />
+    );
+  }
+
+  // 投稿作成画面
+  if (showCreatePost) {
+    return (
+      <CreatePost
+        onBackToList={handleBackToPostList}
+        onPhotoUpload={handleSwitchToPhotoUpload}
+        onPhotoUploadSuccess={handleCreatePostPhotoUploadSuccess}
+      />
+    );
+  }
+
+  // プロフィール画面
+  if (showProfile) {
+    return (
+      <Profile
+        onBack={handleProfileBack}
+        onProfileUpdated={handleProfileUpdated}
+      />
+    );
+  }
+
+  // 写真アップロード画面
+  if (showPhotoUpload && selectedPostId) {
+    return (
+      <PhotoUpload
+        postId={selectedPostId}
+        onBack={handlePhotoUploadCancel}
+        onUploadSuccess={handlePhotoUploadSuccess}
       />
     );
   }

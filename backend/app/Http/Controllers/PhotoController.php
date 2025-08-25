@@ -75,8 +75,8 @@ class PhotoController extends Controller
                 // 画像を読み込み（リサイズなし）
                 $image = $manager->read($photo);
                 
-                // 品質を設定（85%）
-                $image->toJpeg(85);
+                // 品質を設定（80%に下げてファイルサイズを削減）
+                $image->toJpeg(80);
                 
                 // ファイルを保存
                 Storage::disk('public')->put($filePath, $image->encode());
@@ -84,16 +84,16 @@ class PhotoController extends Controller
                 // メモリを解放
                 unset($image);
 
-                // サムネイルも作成
+                // サムネイルも作成（サイズ制限を追加）
                 $thumbnailPath = 'photos/thumbnails/' . $fileName;
                 $thumbnail = $manager->read($photo);
                 
-                // サムネイルもリサイズなし
-                // $thumbnail->resize(300, 300, function ($constraint) {
-                //     $constraint->aspectRatio();
-                //     $constraint->upsize();
-                // });
-                $thumbnail->toJpeg(85);
+                // サムネイルは300x300にリサイズしてファイルサイズを削減
+                $thumbnail->resize(300, 300, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+                $thumbnail->toJpeg(75);
                 Storage::disk('public')->put($thumbnailPath, $thumbnail->encode());
                 
                 // メモリを解放

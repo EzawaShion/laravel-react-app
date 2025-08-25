@@ -9,13 +9,13 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
     city_id: '',
     custom_location: ''
   });
+  const [createdPostId, setCreatedPostId] = useState(null);
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [prefectures, setPrefectures] = useState([]);
   const [cities, setCities] = useState([]);
   const [loadingLocations, setLoadingLocations] = useState(false);
-  const [createdPostId, setCreatedPostId] = useState(null);
-  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,6 +70,8 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
     }
   };
 
+
+
   // コンポーネントマウント時に都道府県を取得
   React.useEffect(() => {
     fetchPrefectures();
@@ -82,7 +84,9 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/posts', {
+      
+      // 1. 投稿を作成
+      const postResponse = await fetch('http://localhost:8000/api/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,18 +95,23 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
         body: JSON.stringify(formData)
       });
 
-      const data = await response.json();
+      const postData = await postResponse.json();
 
-      if (response.ok) {
-        setCreatedPostId(data.post.id);
-        // 投稿作成後は写真アップロード画面を表示
-      } else {
-        if (data.errors) {
-          setErrors(data.errors);
+      if (!postResponse.ok) {
+        if (postData.errors) {
+          setErrors(postData.errors);
         } else {
-          setErrors({ general: data.message || '投稿の作成に失敗しました' });
+          setErrors({ general: postData.message || '投稿の作成に失敗しました' });
         }
+        return;
       }
+
+      const postId = postData.post.id;
+
+      // 2. 仮投稿完了 - 写真の有無に関わらず写真追加画面を表示
+      setCreatedPostId(postId);
+      setShowPhotoUpload(true);
+
     } catch (error) {
       setErrors({ general: 'ネットワークエラーが発生しました' });
     } finally {
@@ -110,27 +119,46 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
     }
   };
 
-  // 写真アップロード画面を表示
-  if (createdPostId) {
+
+
+  // 仮投稿完了後の写真追加画面
+  if (showPhotoUpload && createdPostId) {
     return (
       <div className="create-post-container">
         <div className="create-post-card">
-          <h2>📸 写真を追加</h2>
-          <p className="success-message">投稿が作成されました！写真を追加しましょう。</p>
+          <h2>✅ 仮投稿が完了しました</h2>
+          <p className="success-message">
+            文字の投稿が作成されました！<br />
+            写真を追加して投稿を完成させましょう。
+          </p>
           
           <div className="photo-upload-actions">
             <button 
               onClick={() => onPhotoUpload(createdPostId)}
               className="photo-upload-button"
             >
-              📷 写真をアップロード
+              📷 写真を追加
             </button>
             <button 
               onClick={() => onPostCreated({ id: createdPostId })}
               className="skip-button"
             >
-              写真をスキップ
+              このまま投稿を完了
             </button>
+          </div>
+          
+          <div className="post-preview">
+            <h4>📝 作成された投稿</h4>
+            <div className="post-preview-content">
+              <p><strong>タイトル:</strong> {formData.title}</p>
+              <p><strong>内容:</strong> {formData.description}</p>
+              {formData.city && (
+                <p><strong>場所:</strong> {formData.city.name} ({formData.city.prefecture.name})</p>
+              )}
+              {formData.custom_location && (
+                <p><strong>カスタム場所:</strong> {formData.custom_location}</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -248,11 +276,13 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
               className="submit-button"
               disabled={loading}
             >
-              {loading ? '投稿中...' : '投稿する'}
+              {loading ? '投稿中...' : '仮投稿'}
             </button>
           </div>
         </form>
       </div>
+
+
     </div>
   );
 }

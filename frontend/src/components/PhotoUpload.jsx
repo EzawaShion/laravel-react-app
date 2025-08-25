@@ -114,13 +114,20 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
       });
 
       const token = localStorage.getItem('token');
+      // アップロードタイムアウトを設定（5分）
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+
       const response = await fetch('http://localhost:8000/api/photos/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
         },
-        body: formData
+        body: formData,
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       const data = await response.json();
 
@@ -141,7 +148,14 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
         }
       }
     } catch (err) {
-      setError('ネットワークエラーが発生しました');
+      console.error('アップロードエラー:', err);
+      if (err.name === 'AbortError') {
+        setError('アップロードがタイムアウトしました。しばらく待ってから再試行してください。');
+      } else if (err.message.includes('413')) {
+        setError('ファイルサイズが大きすぎます。10枚の写真を一度にアップロードする場合は、各写真を10MB以下にしてください。');
+      } else {
+        setError('ネットワークエラーが発生しました。10枚の写真を一度にアップロードする場合は、ファイルサイズを確認してください。');
+      }
     } finally {
       setLoading(false);
     }
