@@ -34,6 +34,7 @@ function App() {
   const [selectedPostId, setSelectedPostId] = useState(null)
   const [selectedPost, setSelectedPost] = useState(null)
   const [user, setUser] = useState(null)
+  
 
   // ユーザー認証状態の確認
   useEffect(() => {
@@ -44,6 +45,7 @@ function App() {
       setUser(JSON.parse(userData));
     }
   }, []);
+
 
   // Google OAuthコールバック処理
   useEffect(() => {
@@ -87,6 +89,8 @@ function App() {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
+
+
 
   // LaravelのAPIを呼び出す関数
   const fetchApiData = async () => {
@@ -473,28 +477,8 @@ function App() {
     );
   }
 
-  // 投稿一覧画面
-  if (showPostList) {
-    return (
-      <PostList
-        onPostClick={handlePostClick}
-        onCreatePost={handleSwitchToCreatePost}
-      />
-    );
-  }
 
-  // 投稿詳細画面
-  if (showPostDetail && selectedPostId) {
-    return (
-      <PostDetail
-        postId={selectedPostId}
-        onBackToList={handleBackToPostList}
-        onEditPost={handleEditPost}
-        onDeletePost={handleDeletePost}
-        onPhotoUpload={handleSwitchToPhotoUpload}
-      />
-    );
-  }
+
 
   // 投稿作成画面
   if (showCreatePost) {

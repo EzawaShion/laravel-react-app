@@ -1,0 +1,63 @@
+.like-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.like-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.like-icon {
+  font-size: 18px;
+  transition: transform 0.2s ease;
+}
+
+.like-button.liked .like-icon {
+  animation: heartBeat 0.3s ease;
+}
+
+/*.like-button.not-liked:hover .like-icon {
+  transform: scale(1.1);
+} */
+
+.like-count {
+  font-weight: 500;
+  color: #666;
+  min-width: 16px;
+  text-align: center;
+}
+
+.like-button.liked .like-count {
+  color: #e53e3e;
+  font-weight: 600;
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

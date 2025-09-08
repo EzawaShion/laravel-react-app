@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import LikeButton from './LikeButton';
+import FollowButton from './FollowButton';
 import './PostDetail.css';
 
 function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpload }) {
@@ -12,6 +14,13 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
   const [touchEnd, setTouchEnd] = useState(null);
   const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
   const carouselRef = useRef(null);
+
+  // photos配列が変更された時にcurrentIndexを安全に設定
+  useEffect(() => {
+    if (photos && photos.length > 0 && currentIndex >= photos.length) {
+      setCurrentIndex(0);
+    }
+  }, [photos, currentIndex]);
 
   // 最小スワイプ距離
   const minSwipeDistance = 50;
@@ -75,14 +84,23 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
     setTouchEnd(null);
   };
 
+
   // 投稿詳細を取得
   const fetchPostDetail = async () => {
     setLoading(true);
     setError('');
     
     try {
-      const response = await fetch(`http://localhost:8000/api/posts/${postId}`);
-
+      const token = localStorage.getItem('token');
+      const headers = {};
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`http://localhost:8000/api/posts/${postId}`, {
+        headers
+      });
       const data = await response.json();
 
       if (response.ok) {
@@ -91,6 +109,21 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         // 現在のユーザーが投稿者かどうかをチェック
         const currentUser = JSON.parse(localStorage.getItem('user'));
         setIsOwner(currentUser && currentUser.id === data.post.user_id);
+        
+        // いいね状態を確認・更新（グローバル状態を絶対に上書きしない）
+        if (data.post.is_liked !== undefined) {
+          if (!postsLikes[data.post.id]) {
+            onUpdatePostLike(data.post.id, data.post.is_liked, data.post.likes_count);
+          }
+          // グローバル状態がある場合は、何もしない（絶対に上書きしない）
+        }
+
+        // フォロー状態も確認
+        if (data.post.user && data.post.user.id !== JSON.parse(localStorage.getItem('user'))?.id) {
+          if (!usersFollows[data.post.user.id]) {
+            checkFollowStatus(data.post.user.id);
+          }
+        }
       } else {
         setError(data.message || '投稿の取得に失敗しました');
       }
@@ -101,17 +134,17 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
     }
   };
 
-  // 写真一覧を取得
+  // 写真を取得
   const fetchPhotos = async () => {
     try {
       const response = await fetch(`http://localhost:8000/api/photos/post/${postId}`);
       const data = await response.json();
 
       if (response.ok) {
-        setPhotos(data.photos || []);
+        setPhotos(data.photos);
       }
     } catch (error) {
-      console.error('写真の取得に失敗しました:', error);
+      // 写真取得エラーは無視
     }
   };
 
@@ -163,9 +196,12 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
 
   // コンポーネントマウント時に投稿詳細と写真を取得
   useEffect(() => {
-    fetchPostDetail();
-    fetchPhotos();
+    if (postId) {
+      fetchPostDetail();
+      fetchPhotos();
+    }
   }, [postId]);
+
 
   // 投稿の作成日をフォーマット
   const formatDate = (dateString) => {
@@ -194,10 +230,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
     setShowPhotoCarousel(false);
   };
 
-
-
-
-
+  // ローディング中
   if (loading) {
     return (
       <div className="post-detail-container">
@@ -208,6 +241,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
     );
   }
 
+  // エラーが発生した場合
   if (error) {
     return (
       <div className="post-detail-container">
@@ -221,6 +255,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
     );
   }
 
+  // 投稿データがない場合
   if (!post) {
     return (
       <div className="post-detail-container">
@@ -274,11 +309,33 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
           <div className="post-author">
             <span className="author-label">投稿者:</span>
             <span className="author-name">{post.user?.name}</span>
+            {post.user && post.user.id !== JSON.parse(localStorage.getItem('user'))?.id && (
+              <FollowButton 
+                userId={post.user.id} 
+                initialIsFollowing={usersFollows?.[post.user.id]?.isFollowing ?? false}
+                onFollowChange={(isFollowing, followersCount) => {
+                  onUpdateUserFollow(post.user.id, isFollowing, followersCount);
+                }}
+              />
+            )}
           </div>
           
           <div className="post-date">
             <span className="date-label">投稿日時:</span>
             <span className="date-value">{formatDate(post.created_at)}</span>
+          </div>
+
+          <div className="post-likes">
+            <span className="likes-label">いいね:</span>
+            <LikeButton 
+              postId={post.id} 
+              initialIsLiked={(() => {
+                // APIから取得したcurrent_user_idまたはローカルストレージのユーザーIDを使用
+                const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;
+                return post.liked_user_ids?.includes(currentUserId) ?? false;
+              })()}
+              initialLikesCount={post.likes_count ?? 0}
+            />
           </div>
 
           {(post.city || post.custom_location) && (
@@ -317,7 +374,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         </div>
 
         {/* 写真ギャラリー */}
-        {photos.length > 0 && (
+        {photos && photos.length > 0 && (
           <div className="post-photos-section">
             <h3>📸 写真 ({photos.length}枚)</h3>
             
@@ -338,7 +395,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 {photos.length > 1 && (
                   <div className="carousel-prev-photo">
                     <img 
-                      src={getPhotoUrl(photos[currentIndex === 0 ? photos.length - 1 : currentIndex - 1].file_path)} 
+                      src={getPhotoUrl(photos[currentIndex === 0 ? photos.length - 1 : currentIndex - 1]?.file_path)} 
                       alt="前の写真"
                       className="carousel-edge-photo"
                     />
@@ -347,8 +404,8 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 
                 {/* メイン写真 */}
                 <img 
-                  src={getPhotoUrl(photos[currentIndex].file_path)} 
-                  alt={photos[currentIndex].title || `写真 ${currentIndex + 1}`}
+                  src={getPhotoUrl(photos[currentIndex]?.file_path)} 
+                  alt={photos[currentIndex]?.title || `写真 ${currentIndex + 1}`}
                   className="main-carousel-photo clickable"
                   onClick={() => openPhotoCarousel(currentIndex)}
                 />
@@ -357,7 +414,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 {photos.length > 1 && (
                   <div className="carousel-next-photo">
                     <img 
-                      src={getPhotoUrl(photos[currentIndex === photos.length - 1 ? 0 : currentIndex + 1].file_path)} 
+                      src={getPhotoUrl(photos[currentIndex === photos.length - 1 ? 0 : currentIndex + 1]?.file_path)} 
                       alt="次の写真"
                       className="carousel-edge-photo"
                     />
@@ -379,12 +436,12 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
               )}
               
               {/* 写真情報 */}
-              {(photos[currentIndex].title || photos[currentIndex].description) && (
+              {(photos[currentIndex]?.title || photos[currentIndex]?.description) && (
                 <div className="carousel-photo-info">
-                  {photos[currentIndex].title && (
+                  {photos[currentIndex]?.title && (
                     <h4 className="carousel-photo-title">{photos[currentIndex].title}</h4>
                   )}
-                  {photos[currentIndex].description && (
+                  {photos[currentIndex]?.description && (
                     <p className="carousel-photo-description">{photos[currentIndex].description}</p>
                   )}
                 </div>
@@ -418,7 +475,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         )}
 
         {/* PhotoCarousel */}
-        {showPhotoCarousel && photos.length > 0 && (
+        {showPhotoCarousel && photos && photos.length > 0 && (
           <div className="photo-carousel-overlay">
             <div className="photo-carousel-container">
               {/* ヘッダー */}
@@ -427,9 +484,9 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                   <span className="photo-counter">
                     {currentIndex + 1} / {photos.length}
                   </span>
-                  {photos[currentIndex].title && (
+                  {photos[currentIndex]?.title && (
                     <span className="photo-title">
-                      {photos[currentIndex].title}
+                      {photos[currentIndex]?.title}
                     </span>
                   )}
                 </div>
@@ -451,13 +508,13 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 
                 <div className="main-photo-container">
                   <img 
-                    src={getPhotoUrl(photos[currentIndex].file_path)}
-                    alt={photos[currentIndex].title || `写真 ${currentIndex + 1}`}
+                    src={getPhotoUrl(photos[currentIndex]?.file_path)}
+                    alt={photos[currentIndex]?.title || `写真 ${currentIndex + 1}`}
                     className="main-photo"
                   />
-                  {photos[currentIndex].description && (
+                  {photos[currentIndex]?.description && (
                     <div className="photo-description">
-                      <p>{photos[currentIndex].description}</p>
+                      <p>{photos[currentIndex]?.description}</p>
                     </div>
                   )}
                 </div>
@@ -475,7 +532,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 {photos.map((photo, index) => (
                   <img
                     key={photo.id}
-                    src={getPhotoUrl(photo.file_path)}
+                    src={getPhotoUrl(photo?.file_path)}
                     alt={`サムネイル ${index + 1}`}
                     className={`thumbnail ${index === currentIndex ? 'active' : ''}`}
                     onClick={() => setCurrentIndex(index)}
@@ -490,4 +547,4 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
   );
 }
 
-export default PostDetail; 
+export default PostDetail;

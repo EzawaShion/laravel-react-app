@@ -9,6 +9,8 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\PhotoGroupController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FollowController;
+use App\Http\Controllers\LikeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,6 +78,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::post('/profile', [ProfileController::class, 'update']); // POSTリクエストにも対応
     Route::get('/profile/posts', [ProfileController::class, 'posts']);
+    
+    // フォロー関連のルート
+    Route::post('/follow', [FollowController::class, 'follow']);
+    Route::post('/unfollow', [FollowController::class, 'unfollow']);
+    Route::get('/follow/status/{userId}', [FollowController::class, 'getFollowStatus']);
+    Route::get('/follow/followers/{userId}', [FollowController::class, 'getFollowers']);
+    Route::get('/follow/followings/{userId}', [FollowController::class, 'getFollowings']);
+    
+    // いいね関連のルート
+    Route::post('/like', [LikeController::class, 'like']);
+    Route::get('/like/status/{postId}', [LikeController::class, 'getLikeStatus']);
+    Route::get('/like/post/{postId}', [LikeController::class, 'getPostLikes']);
 });
 
 // テスト用のAPIエンドポイント

@@ -52,6 +52,38 @@ class Post extends Model
     }
 
     /**
+     * いいねとのリレーションシップ
+     */
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    /**
+     * いいねしたユーザーとのリレーションシップ
+     */
+    public function likedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'likes', 'post_id', 'user_id');
+    }
+
+    /**
+     * 特定のユーザーがいいねしているかチェック
+     */
+    public function isLikedBy(User $user)
+    {
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
+
+    /**
+     * いいね数を取得
+     */
+    public function getLikesCountAttribute()
+    {
+        return $this->likes()->count();
+    }
+
+    /**
      * 投稿削除時の処理
      */
     protected static function boot()

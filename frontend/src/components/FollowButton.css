@@ -1,0 +1,115 @@
+.follow-button {
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.follow-button.not-following {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.follow-button.not-following:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+}
+
+.follow-button.following {
+  background: #f7fafc;
+  color: #2d3748;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.follow-button.following:hover {
+  background: #edf2f7;
+  border-color: #cbd5e0;
+  color: #1a202c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.follow-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.follow-button .button-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.follow-button .follow-icon {
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.follow-button .follow-text {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.follow-button .loading {
+  display: inline-block;
+  animation: pulse 1.5s ease-in-out infinite;
+  font-size: 14px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* フォロー状態のアニメーション */
+.follow-button.following .follow-icon {
+  animation: checkmark 0.3s ease-in-out;
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* コンテナとエラー表示 */
+.follow-button-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.follow-button.error {
+  border-color: #e53e3e !important;
+  background: #fed7d7 !important;
+  color: #c53030 !important;
+}
+
+.follow-error {
+  color: #e53e3e;
+  font-size: 12px;
+  cursor: help;
+}

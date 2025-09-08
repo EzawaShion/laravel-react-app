@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import LikeButton from './LikeButton';
+import FollowButton from './FollowButton';
 import './PostList.css';
 
 function PostList({ onPostClick, onCreatePost }) {
@@ -6,20 +8,30 @@ function PostList({ onPostClick, onCreatePost }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+
   // 投稿一覧を取得
   const fetchPosts = async () => {
     setLoading(true);
     setError('');
     
     try {
-      const response = await fetch('http://localhost:8000/api/posts');
+      const token = localStorage.getItem('token');
+      const headers = {};
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch('http://localhost:8000/api/posts', {
+        headers
+      });
 
       const data = await response.json();
 
       if (response.ok) {
         setPosts(data.posts);
       } else {
-        setError(data.message || '投稿の取得に失敗しました');
+        setError('投稿の取得に失敗しました');
       }
     } catch (error) {
       setError('ネットワークエラーが発生しました');
@@ -32,6 +44,7 @@ function PostList({ onPostClick, onCreatePost }) {
   useEffect(() => {
     fetchPosts();
   }, []);
+
 
   // 投稿の作成日をフォーマット
   const formatDate = (dateString) => {
@@ -113,6 +126,12 @@ function PostList({ onPostClick, onCreatePost }) {
               <div className="post-footer">
                 <div className="post-author">
                   <span className="author-name">{post.user?.name}</span>
+                  {post.user && post.user.id !== JSON.parse(localStorage.getItem('user'))?.id && (
+                    <FollowButton 
+                      userId={post.user.id} 
+                      initialIsFollowing={false}
+                    />
+                  )}
                 </div>
                 
                 <div className="post-location">
@@ -127,6 +146,18 @@ function PostList({ onPostClick, onCreatePost }) {
                       📍 {post.custom_location}
                     </span>
                   )}
+                </div>
+                
+                <div className="post-actions" onClick={(e) => e.stopPropagation()}>
+                  <LikeButton 
+                    postId={post.id} 
+                    initialIsLiked={(() => {
+                      // APIから取得したcurrent_user_idまたはローカルストレージのユーザーIDを使用
+                      const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;
+                      return post.liked_user_ids?.includes(currentUserId) ?? false;
+                    })()}
+                    initialLikesCount={post.likes_count ?? 0}
+                  />
                 </div>
               </div>
             </div>

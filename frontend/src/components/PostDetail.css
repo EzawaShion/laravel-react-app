@@ -116,8 +116,15 @@
   border-left: 4px solid #667eea;
 }
 
-.post-author,
+.post-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .post-date,
+.post-likes,
 .post-location {
   display: flex;
   align-items: center;
@@ -126,9 +133,9 @@
 
 .author-label,
 .date-label,
+.likes-label,
 .location-label {
   color: #666;
-  font-weight: 600;
   font-size: 14px;
   min-width: 80px;
 }

@@ -16,6 +16,23 @@ class PostController extends Controller
     {
         $posts = Post::with(['user', 'city'])->latest()->get();
         
+        // 各投稿にいいね状態とカウントを追加
+        $posts->each(function ($post) {
+            $post->likes_count = $post->likes()->count();
+            
+            // いいねしたユーザーIDのリストを取得
+            $post->liked_user_ids = $post->likes()->pluck('user_id')->toArray();
+            
+            // ログインユーザーがいる場合、いいね状態を確認
+            if (auth()->check()) {
+                $post->is_liked = $post->isLikedBy(auth()->user());
+                $post->current_user_id = auth()->id();
+            } else {
+                $post->is_liked = false;
+                $post->current_user_id = null;
+            }
+        });
+        
         return response()->json([
             'success' => true,
             'posts' => $posts
@@ -84,6 +101,21 @@ class PostController extends Controller
                     'success' => false,
                     'message' => '投稿が見つかりません'
                 ], 404);
+            }
+
+            // いいね状態とカウントを追加
+            $post->likes_count = $post->likes()->count();
+            
+            // いいねしたユーザーIDのリストを取得
+            $post->liked_user_ids = $post->likes()->pluck('user_id')->toArray();
+            
+            // ログインユーザーがいる場合、いいね状態を確認
+            if (auth()->check()) {
+                $post->is_liked = $post->isLikedBy(auth()->user());
+                $post->current_user_id = auth()->id();
+            } else {
+                $post->is_liked = false;
+                $post->current_user_id = null;
             }
 
             return response()->json([

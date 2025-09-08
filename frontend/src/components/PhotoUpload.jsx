@@ -28,48 +28,49 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
     fetchExistingPhotoCount();
   }, [postId]);
 
-  // ファイル選択時の処理
+  // ファイル選択時の処理（1件ずつ）
   const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files);
+    const file = e.target.files[0]; // 1件のみ取得
     
-    // 既存の写真数 + 選択中の写真数 + 新しく選択した写真数の合計が10枚を超えないかチェック
-    const totalPhotoCount = existingPhotoCount + selectedFiles.length + files.length;
+    if (!file) return;
+    
+    // 既存の写真数 + 選択中の写真数が10枚を超えないかチェック
+    const totalPhotoCount = existingPhotoCount + selectedFiles.length + 1;
     if (totalPhotoCount > 10) {
-      const remainingSlots = 10 - existingPhotoCount - selectedFiles.length;
-      setError(`写真は合計10枚までです。既存: ${existingPhotoCount}枚, 選択中: ${selectedFiles.length}枚, 追加可能: ${remainingSlots}枚`);
+      setError(`写真は合計10枚までです。既存: ${existingPhotoCount}枚, 選択中: ${selectedFiles.length}枚`);
       return;
     }
 
     // ファイルサイズチェック（最大10MB）
-    const oversizedFiles = files.filter(file => file.size > 10 * 1024 * 1024);
-    if (oversizedFiles.length > 0) {
+    if (file.size > 10 * 1024 * 1024) {
       setError('ファイルサイズは10MB以下にしてください');
       return;
     }
 
-    setSelectedFiles(prev => [...prev, ...files]);
+    // ファイルを追加
+    setSelectedFiles(prev => [...prev, file]);
     setError('');
 
     // プレビュー生成
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreviews(prev => [...prev, {
-          id: Date.now() + Math.random(),
-          src: e.target.result,
-          file: file
-        }]);
-      };
-      reader.readAsDataURL(file);
-    });
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPreviews(prev => [...prev, {
+        id: Date.now() + Math.random(),
+        src: e.target.result,
+        file: file
+      }]);
+    };
+    reader.readAsDataURL(file);
 
-    // 写真データの初期化
-    const newPhotoData = files.map(file => ({
+    // 写真データを追加
+    setPhotoData(prev => [...prev, {
       title: '',
       description: '',
       tags: []
-    }));
-    setPhotoData(prev => [...prev, ...newPhotoData]);
+    }]);
+
+    // ファイル入力をリセット（同じファイルを再度選択できるように）
+    e.target.value = '';
   };
 
   // 写真データの更新
@@ -183,20 +184,19 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
           onClick={() => fileInputRef.current.click()} 
           className="upload-button"
         >
-          📁 ファイルから選択
+          写真を追加
         </button>
         <button 
           onClick={handleCameraCapture} 
           className="camera-button"
         >
-          📷 カメラで撮影
+          カメラで撮影
         </button>
       </div>
 
       <input
         ref={fileInputRef}
         type="file"
-        multiple
         accept="image/*"
         onChange={handleFileSelect}
         style={{ display: 'none' }}
@@ -207,6 +207,8 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
       {previews.length > 0 && (
         <div className="photo-previews">
           <h3>選択された写真 ({previews.length}枚) - 合計: {existingPhotoCount + selectedFiles.length}/10枚</h3>
+          
+
           
           {/* カルーセル表示 */}
           <div className="photo-carousel">
