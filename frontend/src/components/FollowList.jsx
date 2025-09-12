@@ -47,7 +47,13 @@ function FollowList({ userId, type, onClose, onUserClick }) {
         setLastPage(data.last_page || 1);
         setHasMore((data.current_page || page) < (data.last_page || 1));
       } else {
-        setError(`${type === 'followers' ? 'フォロワー' : 'フォロー中'}の取得に失敗しました`);
+        // プライバシー設定によるアクセス拒否の場合
+        if (response.status === 403) {
+          const data = await response.json();
+          setError(data.message || 'このユーザーはフォローリストを非公開にしています');
+        } else {
+          setError(`${type === 'followers' ? 'フォロワー' : 'フォロー中'}の取得に失敗しました`);
+        }
       }
     } catch (error) {
       setError('ネットワークエラーが発生しました');

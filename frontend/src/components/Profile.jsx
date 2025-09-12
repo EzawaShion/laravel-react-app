@@ -10,10 +10,13 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
   const [editForm, setEditForm] = useState({
     name: '',
     username: '',
-    display_name: '',
     bio: '',
     website: '',
-    profile_image_preview: null
+    profile_image_preview: null,
+    privacy_settings: {
+      show_followers: true,
+      show_followings: true
+    }
   });
   const [selectedProfileImage, setSelectedProfileImage] = useState(null);
   const [showFollowList, setShowFollowList] = useState(false);
@@ -43,10 +46,13 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
         setEditForm({
           name: data.user.name || '',
           username: data.user.username || '',
-          display_name: data.user.display_name || '',
           bio: data.user.bio || '',
           website: data.user.website || '',
-          profile_image_preview: null
+          profile_image_preview: null,
+          privacy_settings: data.user.privacy_settings || {
+            show_followers: true,
+            show_followings: true
+          }
         });
       } else {
         setError('プロフィールの取得に失敗しました');
@@ -172,8 +178,13 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
       Object.keys(editForm).forEach(key => {
         if (key !== 'profile_image_preview') {
           const value = editForm[key];
-          // 空文字列も含めて全て送信（バックエンドで適切に処理）
-          formData.append(key, value);
+          if (key === 'privacy_settings') {
+            // privacy_settingsはJSON文字列として送信
+            formData.append(key, JSON.stringify(value));
+          } else {
+            // 空文字列も含めて全て送信（バックエンドで適切に処理）
+            formData.append(key, value);
+          }
         }
       });
 
@@ -222,6 +233,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
       } else {
         const errorData = await response.json();
         console.error('Profile update error:', errorData);
+        console.error('Validation errors:', errorData.errors);
         setError(errorData.message || 'プロフィールの更新に失敗しました');
         
         if (errorData.errors) {
@@ -272,7 +284,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
           </div>
 
           <div className="profile-info">
-            <h2>{user.display_name || user.name || user.username}</h2>
+            <h2>{user.name || user.username}</h2>
             <p className="username">@{user.username}</p>
             
             {user.bio && user.bio !== 'null' && user.bio.trim() !== '' && <p className="bio">{user.bio}</p>}
@@ -320,17 +332,23 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
                   setEditForm({
                     name: user.name || '',
                     username: user.username || '',
-                    display_name: user.display_name || '',
                     bio: user.bio || '',
                     website: user.website || '',
-                    profile_image_preview: null
+                    profile_image_preview: null,
+                    privacy_settings: user.privacy_settings || {
+                      show_followers: true,
+                      show_followings: true
+                    }
                   });
                   console.log('Edit form initialized:', {
                     name: user.name || '',
                     username: user.username || '',
-                    display_name: user.display_name || '',
                     bio: user.bio || '',
-                    website: user.website || ''
+                    website: user.website || '',
+                    privacy_settings: user.privacy_settings || {
+                      show_followers: true,
+                      show_followings: true
+                    }
                   });
                 }}
               >
@@ -361,15 +379,6 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
             />
           </div>
 
-          <div className="form-group">
-            <label>表示名</label>
-            <input
-              type="text"
-              value={editForm.display_name}
-              onChange={(e) => setEditForm(prev => ({ ...prev, display_name: e.target.value }))}
-              placeholder="表示したい名前"
-            />
-          </div>
 
           <div className="form-group">
             <label>自己紹介</label>
@@ -389,6 +398,46 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
               onChange={(e) => setEditForm(prev => ({ ...prev, website: e.target.value }))}
               placeholder="https://example.com"
             />
+          </div>
+
+          <div className="form-group">
+            <label>プライバシー設定</label>
+            <div className="privacy-settings">
+              <div className="privacy-setting-item">
+                <span className="privacy-label">フォロワーリストを公開する</span>
+                <label className="toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={editForm.privacy_settings.show_followers}
+                    onChange={(e) => setEditForm(prev => ({
+                      ...prev,
+                      privacy_settings: {
+                        ...prev.privacy_settings,
+                        show_followers: e.target.checked
+                      }
+                    }))}
+                  />
+                  <span className="toggle-slider"></span>
+                </label>
+              </div>
+              <div className="privacy-setting-item">
+                <span className="privacy-label">フォロー中リストを公開する</span>
+                <label className="toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={editForm.privacy_settings.show_followings}
+                    onChange={(e) => setEditForm(prev => ({
+                      ...prev,
+                      privacy_settings: {
+                        ...prev.privacy_settings,
+                        show_followings: e.target.checked
+                      }
+                    }))}
+                  />
+                  <span className="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
           </div>
 
           <div className="form-group">
@@ -452,10 +501,13 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
                 setEditForm({
                   name: user.name || '',
                   username: user.username || '',
-                  display_name: user.display_name || '',
                   bio: user.bio || '',
                   website: user.website || '',
-                  profile_image_preview: null
+                  profile_image_preview: null,
+                  privacy_settings: user.privacy_settings || {
+                    show_followers: true,
+                    show_followings: true
+                  }
                 });
                 setSelectedProfileImage(null);
               }}

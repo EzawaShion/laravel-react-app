@@ -24,11 +24,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'google_id',
         'username',
-        'display_name',
         'bio',
         'location',
         'website',
         'profile_image',
+        'privacy_settings',
     ];
 
     /**
@@ -51,6 +51,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'privacy_settings' => 'array',
         ];
     }
 
@@ -65,13 +66,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return url('images/default-avatar.svg');
     }
 
-    /**
-     * 表示名を取得（display_nameがない場合はnameを使用）
-     */
-    public function getDisplayNameAttribute($value)
-    {
-        return $value ?: $this->name;
-    }
 
     /**
      * 投稿数を取得
@@ -135,5 +129,39 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getFollowersCountAttribute()
     {
         return $this->followers()->count();
+    }
+
+    /**
+     * プライバシー設定を取得（デフォルト値付き）
+     */
+    public function getPrivacySettingsAttribute($value)
+    {
+        $defaultSettings = [
+            'show_followers' => true,
+            'show_followings' => true,
+        ];
+        
+        if ($value) {
+            $settings = is_string($value) ? json_decode($value, true) : $value;
+            return array_merge($defaultSettings, $settings);
+        }
+        
+        return $defaultSettings;
+    }
+
+    /**
+     * フォロワーリストを表示可能かチェック
+     */
+    public function canShowFollowers()
+    {
+        return $this->privacy_settings['show_followers'] ?? true;
+    }
+
+    /**
+     * フォロー中リストを表示可能かチェック
+     */
+    public function canShowFollowings()
+    {
+        return $this->privacy_settings['show_followings'] ?? true;
     }
 }

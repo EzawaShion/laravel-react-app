@@ -333,6 +333,9 @@ function App() {
       setShowPostDetail(true);
     } else if (previousScreen === 'profile') {
       setShowProfile(true);
+    } else if (previousScreen === 'userProfile') {
+      // 他のユーザープロフィールから別のユーザープロフィールに戻る場合は何もしない
+      // （既にsetShowUserProfile(false)とsetSelectedUserId(null)が実行されている）
     } else {
       // デフォルトは投稿一覧
       setShowPostList(true);
@@ -412,6 +415,17 @@ function App() {
       <UserProfile
         userId={selectedUserId}
         onBack={handleUserProfileBack}
+        onSwitchToProfile={() => {
+          setShowUserProfile(false);
+          setSelectedUserId(null);
+          setShowProfile(true);
+        }}
+        onUserClick={(userId) => {
+          setPreviousScreen('userProfile');
+          setShowUserProfile(false);
+          setSelectedUserId(userId);
+          setShowUserProfile(true);
+        }}
       />
     );
   }

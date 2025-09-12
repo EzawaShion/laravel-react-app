@@ -117,6 +117,21 @@ class FollowController extends Controller
     public function getFollowers($userId)
     {
         $user = User::findOrFail($userId);
+        $currentUser = Auth::user();
+        
+        // プライバシー設定をチェック
+        if ($user->id !== $currentUser->id && !$user->canShowFollowers()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'このユーザーはフォロワーリストを非公開にしています',
+                'followers' => [],
+                'current_page' => 1,
+                'last_page' => 1,
+                'per_page' => 20,
+                'total' => 0
+            ], 403);
+        }
+        
         $followers = $user->followers()->paginate(20);
 
         // 各フォロワーのフォロー状態を追加
@@ -142,6 +157,21 @@ class FollowController extends Controller
     public function getFollowings($userId)
     {
         $user = User::findOrFail($userId);
+        $currentUser = Auth::user();
+        
+        // プライバシー設定をチェック
+        if ($user->id !== $currentUser->id && !$user->canShowFollowings()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'このユーザーはフォロー中リストを非公開にしています',
+                'followings' => [],
+                'current_page' => 1,
+                'last_page' => 1,
+                'per_page' => 20,
+                'total' => 0
+            ], 403);
+        }
+        
         $followings = $user->followings()->paginate(20);
 
         // 各フォロー中のユーザーのフォロー状態を追加

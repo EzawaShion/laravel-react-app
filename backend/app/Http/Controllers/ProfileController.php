@@ -24,17 +24,11 @@ class ProfileController extends Controller
             $website = null;
         }
         
-        $displayName = $user->display_name;
-        if ($displayName === 'null' || $displayName === null) {
-            $displayName = null;
-        }
-        
         return response()->json([
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'username' => $user->username,
-                'display_name' => $displayName,
                 'email' => $user->email,
                 'bio' => $bio,
                 'website' => $website,
@@ -42,6 +36,7 @@ class ProfileController extends Controller
                 'posts_count' => $user->posts_count,
                 'followers_count' => $user->followers()->count(),
                 'followings_count' => $user->followings()->count(),
+                'privacy_settings' => $user->privacy_settings,
                 'created_at' => $user->created_at,
             ]
         ]);
@@ -61,10 +56,10 @@ class ProfileController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
-            'display_name' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
             'website' => 'nullable|string|max:255', // urlバリデーションを削除し、nullableに変更
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480'
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
+            'privacy_settings' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
@@ -77,13 +72,28 @@ class ProfileController extends Controller
         $data = $validator->validated();
         
         // プロフィールフィールドを明示的に設定（送信されていない場合はnull）
-        $profileFields = ['display_name', 'bio', 'website'];
+        $profileFields = ['bio', 'website'];
         foreach ($profileFields as $field) {
             if (!isset($data[$field])) {
                 $data[$field] = null;
             } else if ($data[$field] === '' || $data[$field] === 'null') {
                 $data[$field] = null;
             }
+        }
+
+        // プライバシー設定の処理
+        if (isset($data['privacy_settings'])) {
+            $privacySettings = $data['privacy_settings'];
+            
+            // JSON文字列の場合はデコード
+            if (is_string($privacySettings)) {
+                $privacySettings = json_decode($privacySettings, true);
+            }
+            
+            $data['privacy_settings'] = [
+                'show_followers' => $privacySettings['show_followers'] ?? true,
+                'show_followings' => $privacySettings['show_followings'] ?? true,
+            ];
         }
 
         // プロフィール画像の処理
@@ -119,7 +129,6 @@ class ProfileController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'username' => $user->username,
-                'display_name' => $user->display_name === 'null' ? null : $user->display_name,
                 'email' => $user->email,
                 'bio' => $user->bio === 'null' ? null : $user->bio,
                 'website' => $user->website === 'null' ? null : $user->website,
@@ -127,6 +136,7 @@ class ProfileController extends Controller
                 'posts_count' => $user->posts_count,
                 'followers_count' => $user->followers()->count(),
                 'followings_count' => $user->followings()->count(),
+                'privacy_settings' => $user->privacy_settings,
                 'created_at' => $user->created_at,
             ]
         ]);
@@ -186,6 +196,7 @@ class ProfileController extends Controller
                 'posts_count' => $user->posts_count,
                 'followers_count' => $user->followers()->count(),
                 'followings_count' => $user->followings()->count(),
+                'privacy_settings' => $user->privacy_settings,
                 'created_at' => $user->created_at,
             ]
         ]);

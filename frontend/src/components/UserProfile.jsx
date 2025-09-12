@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import FollowButton from './FollowButton';
+import FollowList from './FollowList';
 import './UserProfile.css';
 
-function UserProfile({ userId, onBack }) {
+function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -11,11 +12,28 @@ function UserProfile({ userId, onBack }) {
     followers_count: 0,
     followings_count: 0
   });
+  const [showFollowList, setShowFollowList] = useState(false);
+  const [followListType, setFollowListType] = useState('followers');
+
+  // 現在のユーザーIDを取得
+  const getCurrentUserId = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user?.id;
+  };
 
   useEffect(() => {
+    // 自分のプロフィールの場合はProfileコンポーネントに切り替え
+    const currentUserId = getCurrentUserId();
+    if (currentUserId && parseInt(userId) === parseInt(currentUserId)) {
+      if (onSwitchToProfile) {
+        onSwitchToProfile();
+        return;
+      }
+    }
+    
     fetchUserProfile();
     fetchFollowStatus();
-  }, [userId]);
+  }, [userId, onSwitchToProfile]);
 
   const fetchUserProfile = async () => {
     try {
@@ -68,6 +86,22 @@ function UserProfile({ userId, onBack }) {
     setIsFollowing(isFollowing);
     // フォロー状態が変わったら統計を更新
     fetchUserProfile();
+  };
+
+  const showFollowListModal = (type) => {
+    setFollowListType(type);
+    setShowFollowList(true);
+  };
+
+  const closeFollowListModal = () => {
+    setShowFollowList(false);
+  };
+
+  const handleUserClick = (clickedUserId) => {
+    setShowFollowList(false); // Close the follow list modal
+    if (onUserClick) {
+      onUserClick(clickedUserId);
+    }
   };
 
   if (loading) {
@@ -131,11 +165,11 @@ function UserProfile({ userId, onBack }) {
             </div>
             
             <div className="follow-stats">
-              <div className="follow-stat-item">
+              <div className="follow-stat-item" onClick={() => showFollowListModal('followers')}>
                 <span className="follow-count">{followStats.followers_count}</span>
                 <span className="follow-label">フォロワー</span>
               </div>
-              <div className="follow-stat-item">
+              <div className="follow-stat-item" onClick={() => showFollowListModal('followings')}>
                 <span className="follow-count">{followStats.followings_count}</span>
                 <span className="follow-label">フォロー中</span>
               </div>
@@ -156,6 +190,15 @@ function UserProfile({ userId, onBack }) {
           </div>
         </div>
       </div>
+
+      {showFollowList && (
+        <FollowList
+          userId={user.id}
+          type={followListType}
+          onClose={closeFollowListModal}
+          onUserClick={handleUserClick}
+        />
+      )}
     </div>
   );
 }

@@ -121,7 +121,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
   min-width: 80px;
+}
+
+.follow-stat-item:hover {
+  background-color: #f9fafb;
 }
 
 .follow-count {

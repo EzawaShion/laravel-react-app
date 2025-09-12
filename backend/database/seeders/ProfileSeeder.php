@@ -20,7 +20,6 @@ class ProfileSeeder extends Seeder
             if (!$user->username) {
                 $user->update([
                     'username' => 'user_' . $user->id,
-                    'display_name' => $user->name,
                     'bio' => '自己紹介を追加してください',
                     'location' => '場所を設定してください',
                     'website' => null,
