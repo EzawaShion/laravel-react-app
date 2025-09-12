@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import FollowList from './FollowList';
 import './Profile.css';
 
-function Profile({ onBack, onProfileUpdated }) {
+function Profile({ onBack, onProfileUpdated, onUserClick }) {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState('');
@@ -15,9 +16,16 @@ function Profile({ onBack, onProfileUpdated }) {
     profile_image_preview: null
   });
   const [selectedProfileImage, setSelectedProfileImage] = useState(null);
+  const [showFollowList, setShowFollowList] = useState(false);
+  const [followListType, setFollowListType] = useState('followers');
+  const [followStats, setFollowStats] = useState({
+    followers_count: 0,
+    followings_count: 0
+  });
 
   useEffect(() => {
     fetchProfile();
+    fetchFollowStats();
   }, []);
 
   const fetchProfile = async () => {
@@ -46,6 +54,43 @@ function Profile({ onBack, onProfileUpdated }) {
     } catch (error) {
       console.error('Error fetching profile:', error);
       setError('ネットワークエラーが発生しました');
+    }
+  };
+
+  const fetchFollowStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8000/api/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFollowStats({
+          followers_count: data.user.followers_count || 0,
+          followings_count: data.user.followings_count || 0
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching follow stats:', error);
+    }
+  };
+
+  const showFollowListModal = (type) => {
+    setFollowListType(type);
+    setShowFollowList(true);
+  };
+
+  const closeFollowListModal = () => {
+    setShowFollowList(false);
+  };
+
+  const handleUserClick = (userId) => {
+    setShowFollowList(false);
+    if (onUserClick) {
+      onUserClick(userId);
     }
   };
 
@@ -247,6 +292,17 @@ function Profile({ onBack, onProfileUpdated }) {
                 <span>{user.posts_count || 0}</span>
               </div>
               
+              <div className="follow-stats">
+                <div className="follow-stat-item" onClick={() => showFollowListModal('followers')}>
+                  <span className="follow-count">{followStats.followers_count}</span>
+                  <span className="follow-label">フォロワー</span>
+                </div>
+                <div className="follow-stat-item" onClick={() => showFollowListModal('followings')}>
+                  <span className="follow-count">{followStats.followings_count}</span>
+                  <span className="follow-label">フォロー中</span>
+                </div>
+              </div>
+              
               <div className="detail-item">
                 <span className="label">登録日:</span>
                 <span>{new Date(user.created_at).toLocaleDateString('ja-JP')}</span>
@@ -408,6 +464,15 @@ function Profile({ onBack, onProfileUpdated }) {
             </button>
           </div>
         </div>
+      )}
+
+      {showFollowList && (
+        <FollowList
+          userId={user.id}
+          type={followListType}
+          onClose={closeFollowListModal}
+          onUserClick={handleUserClick}
+        />
       )}
     </div>
   );

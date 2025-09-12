@@ -3,12 +3,14 @@ import LikeButton from './LikeButton';
 import FollowButton from './FollowButton';
 import './PostDetail.css';
 
-function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpload }) {
+function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpload, onUserClick }) {
+  console.log('PostDetail rendered with onUserClick:', onUserClick);
   const [post, setPost] = useState(null);
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isOwner, setIsOwner] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
@@ -110,24 +112,16 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         const currentUser = JSON.parse(localStorage.getItem('user'));
         setIsOwner(currentUser && currentUser.id === data.post.user_id);
         
-        // いいね状態を確認・更新（グローバル状態を絶対に上書きしない）
-        if (data.post.is_liked !== undefined) {
-          if (!postsLikes[data.post.id]) {
-            onUpdatePostLike(data.post.id, data.post.is_liked, data.post.likes_count);
-          }
-          // グローバル状態がある場合は、何もしない（絶対に上書きしない）
+        // 投稿者が自分でない場合、フォロー状態を取得
+        if (data.post.user && data.post.user.id !== currentUser?.id) {
+          fetchFollowStatus(data.post.user.id);
         }
-
-        // フォロー状態も確認
-        if (data.post.user && data.post.user.id !== JSON.parse(localStorage.getItem('user'))?.id) {
-          if (!usersFollows[data.post.user.id]) {
-            checkFollowStatus(data.post.user.id);
-          }
-        }
+        
       } else {
         setError(data.message || '投稿の取得に失敗しました');
       }
     } catch (error) {
+      console.error('PostDetail: Network error:', error);
       setError('ネットワークエラーが発生しました');
     } finally {
       setLoading(false);
@@ -146,6 +140,32 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
     } catch (error) {
       // 写真取得エラーは無視
     }
+  };
+
+  // フォロー状態を取得
+  const fetchFollowStatus = async (userId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`http://localhost:8000/api/follow/status/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsFollowing(data.is_following);
+      }
+    } catch (error) {
+      console.error('フォロー状態の取得に失敗しました:', error);
+    }
+  };
+
+  // フォロー状態の変更を処理
+  const handleFollowChange = (isFollowing) => {
+    setIsFollowing(isFollowing);
   };
 
   // 投稿を削除
@@ -308,14 +328,36 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         <div className="post-detail-meta">
           <div className="post-author">
             <span className="author-label">投稿者:</span>
-            <span className="author-name">{post.user?.name}</span>
+            <div 
+              className="author-info" 
+              onClick={() => {
+                console.log('PostDetail author-info clicked', {
+                  postUser: post.user,
+                  onUserClick: onUserClick,
+                  userId: post.user?.id
+                });
+                if (post.user && onUserClick) {
+                  console.log('Calling onUserClick with userId:', post.user.id);
+                  onUserClick(post.user.id);
+                } else {
+                  console.log('Not calling onUserClick - missing user or callback');
+                }
+              }}
+            >
+              <img
+                src={post.user?.profile_image_url || '/images/default-avatar.svg'}
+                alt={post.user?.username}
+                className="author-avatar"
+              />
+              <div className="author-details">
+                <span className="author-username">@{post.user?.username}</span>
+              </div>
+            </div>
             {post.user && post.user.id !== JSON.parse(localStorage.getItem('user'))?.id && (
               <FollowButton 
                 userId={post.user.id} 
-                initialIsFollowing={usersFollows?.[post.user.id]?.isFollowing ?? false}
-                onFollowChange={(isFollowing, followersCount) => {
-                  onUpdateUserFollow(post.user.id, isFollowing, followersCount);
-                }}
+                initialIsFollowing={isFollowing}
+                onFollowChange={handleFollowChange}
               />
             )}
           </div>

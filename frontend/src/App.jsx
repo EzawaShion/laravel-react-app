@@ -14,6 +14,7 @@ import PostDetail from './components/PostDetail'
 import PhotoUpload from './components/PhotoUpload'
 import Profile from './components/Profile'
 import EditPost from './components/EditPost'
+import UserProfile from './components/UserProfile'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -31,6 +32,9 @@ function App() {
   const [showPhotoUpload, setShowPhotoUpload] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [showEditPost, setShowEditPost] = useState(false)
+  const [showUserProfile, setShowUserProfile] = useState(false)
+  const [selectedUserId, setSelectedUserId] = useState(null)
+  const [previousScreen, setPreviousScreen] = useState(null)
   const [selectedPostId, setSelectedPostId] = useState(null)
   const [selectedPost, setSelectedPost] = useState(null)
   const [user, setUser] = useState(null)
@@ -317,6 +321,26 @@ function App() {
     setShowProfile(false);
   };
 
+  // 他のユーザーのプロフィール画面から戻る
+  const handleUserProfileBack = () => {
+    setShowUserProfile(false);
+    setSelectedUserId(null);
+    
+    // 前の画面に戻る
+    if (previousScreen === 'postList') {
+      setShowPostList(true);
+    } else if (previousScreen === 'postDetail') {
+      setShowPostDetail(true);
+    } else if (previousScreen === 'profile') {
+      setShowProfile(true);
+    } else {
+      // デフォルトは投稿一覧
+      setShowPostList(true);
+    }
+    
+    setPreviousScreen(null);
+  };
+
   // 投稿編集完了時の処理
   const handleEditPostSuccess = (updatedPost) => {
     setShowEditPost(false);
@@ -355,6 +379,13 @@ function App() {
         onEditPost={handleEditPost}
         onDeletePost={handleDeletePost}
         onPhotoUpload={() => handleSwitchToPhotoUpload(selectedPostId)}
+        onUserClick={(userId) => {
+          console.log('PostDetail onUserClick called with userId:', userId);
+          setPreviousScreen('postDetail');
+          setShowPostDetail(false);
+          setSelectedUserId(userId);
+          setShowUserProfile(true);
+        }}
       />
     );
   }
@@ -365,6 +396,22 @@ function App() {
       <Profile
         onBack={handleProfileBack}
         onProfileUpdated={handleProfileUpdated}
+        onUserClick={(userId) => {
+          setPreviousScreen('profile');
+          setShowProfile(false);
+          setSelectedUserId(userId);
+          setShowUserProfile(true);
+        }}
+      />
+    );
+  }
+
+  // 他のユーザーのプロフィール画面を表示
+  if (showUserProfile && selectedUserId) {
+    return (
+      <UserProfile
+        userId={selectedUserId}
+        onBack={handleUserProfileBack}
       />
     );
   }
@@ -386,6 +433,12 @@ function App() {
       <PostList 
         onPostClick={handlePostClick}
         onCreatePost={handleSwitchToCreatePost}
+        onUserClick={(userId) => {
+          setPreviousScreen('postList');
+          setShowPostList(false);
+          setSelectedUserId(userId);
+          setShowUserProfile(true);
+        }}
       />
     );
   }

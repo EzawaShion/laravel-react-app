@@ -40,6 +40,8 @@ class ProfileController extends Controller
                 'website' => $website,
                 'profile_image_url' => $user->profile_image_url,
                 'posts_count' => $user->posts_count,
+                'followers_count' => $user->followers()->count(),
+                'followings_count' => $user->followings()->count(),
                 'created_at' => $user->created_at,
             ]
         ]);
@@ -123,6 +125,8 @@ class ProfileController extends Controller
                 'website' => $user->website === 'null' ? null : $user->website,
                 'profile_image_url' => $user->profile_image_url,
                 'posts_count' => $user->posts_count,
+                'followers_count' => $user->followers()->count(),
+                'followings_count' => $user->followings()->count(),
                 'created_at' => $user->created_at,
             ]
         ]);
@@ -152,6 +156,38 @@ class ProfileController extends Controller
                     'updated_at' => $post->updated_at
                 ];
             })
+        ]);
+    }
+
+    public function showUser($userId)
+    {
+        $user = User::findOrFail($userId);
+        
+        // null値と「null」文字列を適切に処理
+        $bio = $user->bio;
+        if ($bio === 'null' || $bio === null) {
+            $bio = null;
+        }
+        
+        $website = $user->website;
+        if ($website === 'null' || $website === null) {
+            $website = null;
+        }
+        
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'username' => $user->username,
+                'email' => $user->email,
+                'bio' => $bio,
+                'website' => $website,
+                'profile_image_url' => $user->profile_image_url,
+                'posts_count' => $user->posts_count,
+                'followers_count' => $user->followers()->count(),
+                'followings_count' => $user->followings()->count(),
+                'created_at' => $user->created_at,
+            ]
         ]);
     }
 }

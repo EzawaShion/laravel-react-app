@@ -3,10 +3,11 @@ import LikeButton from './LikeButton';
 import FollowButton from './FollowButton';
 import './PostList.css';
 
-function PostList({ onPostClick, onCreatePost }) {
+function PostList({ onPostClick, onCreatePost, onUserClick }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [followStates, setFollowStates] = useState({});
 
 
   // 投稿一覧を取得
@@ -40,10 +41,54 @@ function PostList({ onPostClick, onCreatePost }) {
     }
   };
 
+  // フォロー状態を取得
+  const fetchFollowStatus = async (userId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+        const response = await fetch(`http://localhost:8000/api/follow/status/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFollowStates(prev => ({
+          ...prev,
+          [userId]: data.is_following
+        }));
+      }
+    } catch (error) {
+      console.error('フォロー状態の取得に失敗しました:', error);
+    }
+  };
+
   // コンポーネントマウント時に投稿一覧を取得
   useEffect(() => {
     fetchPosts();
   }, []);
+
+  // 投稿が読み込まれた後、各投稿者のフォロー状態を取得
+  useEffect(() => {
+    if (posts.length > 0) {
+      const currentUser = JSON.parse(localStorage.getItem('user'));
+      posts.forEach(post => {
+        if (post.user && post.user.id !== currentUser?.id) {
+          fetchFollowStatus(post.user.id);
+        }
+      });
+    }
+  }, [posts]);
+
+  // フォロー状態の変更を処理
+  const handleFollowChange = (userId, isFollowing) => {
+    setFollowStates(prev => ({
+      ...prev,
+      [userId]: isFollowing
+    }));
+  };
 
 
   // 投稿の作成日をフォーマット
@@ -125,11 +170,29 @@ function PostList({ onPostClick, onCreatePost }) {
 
               <div className="post-footer">
                 <div className="post-author">
-                  <span className="author-name">{post.user?.name}</span>
+                  <div 
+                    className="author-info" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (post.user && onUserClick) {
+                        onUserClick(post.user.id);
+                      }
+                    }}
+                  >
+                    <img
+                      src={post.user?.profile_image_url || '/images/default-avatar.svg'}
+                      alt={post.user?.username}
+                      className="author-avatar"
+                    />
+                    <div className="author-details">
+                      <span className="author-username">@{post.user?.username}</span>
+                    </div>
+                  </div>
                   {post.user && post.user.id !== JSON.parse(localStorage.getItem('user'))?.id && (
                     <FollowButton 
                       userId={post.user.id} 
-                      initialIsFollowing={false}
+                      initialIsFollowing={followStates[post.user.id] || false}
+                      onFollowChange={(isFollowing) => handleFollowChange(post.user.id, isFollowing)}
                     />
                   )}
                 </div>

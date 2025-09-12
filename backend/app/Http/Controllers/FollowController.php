@@ -119,9 +119,20 @@ class FollowController extends Controller
         $user = User::findOrFail($userId);
         $followers = $user->followers()->paginate(20);
 
+        // 各フォロワーのフォロー状態を追加
+        $followers->getCollection()->transform(function ($follower) {
+            $follower->is_following = Auth::user()->isFollowing($follower);
+            $follower->profile_image_url = $follower->profile_image_url;
+            return $follower;
+        });
+
         return response()->json([
             'success' => true,
-            'followers' => $followers
+            'followers' => $followers->items(),
+            'current_page' => $followers->currentPage(),
+            'last_page' => $followers->lastPage(),
+            'per_page' => $followers->perPage(),
+            'total' => $followers->total()
         ]);
     }
 
@@ -133,9 +144,20 @@ class FollowController extends Controller
         $user = User::findOrFail($userId);
         $followings = $user->followings()->paginate(20);
 
+        // 各フォロー中のユーザーのフォロー状態を追加
+        $followings->getCollection()->transform(function ($following) {
+            $following->is_following = Auth::user()->isFollowing($following);
+            $following->profile_image_url = $following->profile_image_url;
+            return $following;
+        });
+
         return response()->json([
             'success' => true,
-            'followings' => $followings
+            'followings' => $followings->items(),
+            'current_page' => $followings->currentPage(),
+            'last_page' => $followings->lastPage(),
+            'per_page' => $followings->perPage(),
+            'total' => $followings->total()
         ]);
     }
 }

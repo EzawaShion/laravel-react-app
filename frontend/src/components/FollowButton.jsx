@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './FollowButton.css';
 
 function FollowButton({ userId, initialIsFollowing = false, onFollowChange }) {
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // initialIsFollowingが変更された時に状態を更新
+  useEffect(() => {
+    setIsFollowing(initialIsFollowing);
+  }, [initialIsFollowing]);
 
   const handleFollowToggle = async () => {
     if (isLoading) return;
@@ -31,6 +36,7 @@ function FollowButton({ userId, initialIsFollowing = false, onFollowChange }) {
         const newFollowingState = !isFollowing;
         setIsFollowing(newFollowingState);
         
+        // 親コンポーネントに状態変更を通知
         if (onFollowChange) {
           onFollowChange(newFollowingState, data.followers_count);
         }

@@ -78,6 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::post('/profile', [ProfileController::class, 'update']); // POSTリクエストにも対応
     Route::get('/profile/posts', [ProfileController::class, 'posts']);
+    Route::get('/users/{userId}', [ProfileController::class, 'showUser']);
     
     // フォロー関連のルート
     Route::post('/follow', [FollowController::class, 'follow']);

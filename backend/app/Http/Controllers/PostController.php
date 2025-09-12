@@ -23,6 +23,11 @@ class PostController extends Controller
             // いいねしたユーザーIDのリストを取得
             $post->liked_user_ids = $post->likes()->pluck('user_id')->toArray();
             
+            // ユーザーのプロフィール画像URLを明示的に設定
+            if ($post->user) {
+                $post->user->profile_image_url = $post->user->profile_image_url;
+            }
+            
             // ログインユーザーがいる場合、いいね状態を確認
             if (auth()->check()) {
                 $post->is_liked = $post->isLikedBy(auth()->user());
@@ -108,6 +113,11 @@ class PostController extends Controller
             
             // いいねしたユーザーIDのリストを取得
             $post->liked_user_ids = $post->likes()->pluck('user_id')->toArray();
+            
+            // ユーザーのプロフィール画像URLを明示的に設定
+            if ($post->user) {
+                $post->user->profile_image_url = $post->user->profile_image_url;
+            }
             
             // ログインユーザーがいる場合、いいね状態を確認
             if (auth()->check()) {
