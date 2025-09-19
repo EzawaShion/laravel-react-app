@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import FollowList from './FollowList';
 import './Profile.css';
 
-function Profile({ onBack, onProfileUpdated, onUserClick }) {
+function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick }) {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState('');
@@ -25,11 +25,20 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
     followers_count: 0,
     followings_count: 0
   });
+  const [myPosts, setMyPosts] = useState([]);
+  const [postsLoading, setPostsLoading] = useState(true);
 
   useEffect(() => {
     fetchProfile();
     fetchFollowStats();
   }, []);
+
+  // userが読み込まれた後に投稿を取得
+  useEffect(() => {
+    if (user && user.id) {
+      fetchMyPosts();
+    }
+  }, [user]);
 
   const fetchProfile = async () => {
     try {
@@ -84,6 +93,49 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
     }
   };
 
+  const fetchMyPosts = async () => {
+    try {
+      setPostsLoading(true);
+      
+      // プロフィール情報から現在のユーザーIDを取得
+      if (!user || !user.id) {
+        console.log('User not loaded yet, skipping posts fetch');
+        setPostsLoading(false);
+        return;
+      }
+      
+      // 全ての投稿を取得して、現在のユーザーの投稿をフィルタリング
+      const response = await fetch('http://localhost:8000/api/posts', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      console.log('Posts response status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('=== All Posts Response ===');
+        console.log('Total posts:', data.posts?.length || 0);
+        
+        // 現在のユーザーの投稿のみをフィルタリング
+        const myPosts = data.posts?.filter(post => post.user_id === user.id) || [];
+        console.log('My posts:', myPosts.length);
+        
+        setMyPosts(myPosts);
+      } else {
+        console.error('投稿の取得に失敗しました');
+        setMyPosts([]);
+      }
+    } catch (error) {
+      console.error('投稿の取得エラー:', error);
+      setMyPosts([]);
+    } finally {
+      setPostsLoading(false);
+    }
+  };
+
   const showFollowListModal = (type) => {
     setFollowListType(type);
     setShowFollowList(true);
@@ -108,17 +160,17 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
         setError('ファイルサイズは20MB以下にしてください');
         return;
       }
-      
+
       // ファイル形式のチェック
       const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
       if (!allowedTypes.includes(file.type)) {
         setError('JPEG、PNG、JPG、GIF形式のファイルのみアップロードできます');
         return;
       }
-      
+
       setSelectedProfileImage(file);
       setError(''); // エラーをクリア
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setEditForm(prev => ({
@@ -138,7 +190,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
           'Authorization': `Bearer ${token}`,
         },
       });
-      
+
       if (response.ok) {
         setSuccess('API接続は正常です');
         setTimeout(() => setSuccess(''), 3000);
@@ -154,23 +206,23 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
     try {
       setError('');
       setSuccess('');
-      
+
       console.log('=== Profile Update Debug ===');
       console.log('editForm state:', editForm);
       console.log('editForm.name:', editForm.name, 'type:', typeof editForm.name);
       console.log('editForm.username:', editForm.username, 'type:', typeof editForm.username);
-      
+
       // 必須フィールドの検証
       if (!editForm.name || editForm.name.trim() === '') {
         setError('名前は必須です');
         return;
       }
-      
+
       if (!editForm.username || editForm.username.trim() === '') {
         setError('ユーザー名は必須です');
         return;
       }
-      
+
       const token = localStorage.getItem('token');
       const formData = new FormData();
 
@@ -213,7 +265,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
       if (response.ok) {
         const data = await response.json();
         console.log('Profile update response:', data);
-        
+
         setUser(data.user);
         setIsEditing(false);
         setError('');
@@ -223,11 +275,11 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
           profile_image_preview: null
         }));
         setSelectedProfileImage(null);
-        
+
         if (onProfileUpdated) {
           onProfileUpdated(data.user);
         }
-        
+
         // 3秒後に成功メッセージを消す
         setTimeout(() => setSuccess(''), 3000);
       } else {
@@ -235,7 +287,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
         console.error('Profile update error:', errorData);
         console.error('Validation errors:', errorData.errors);
         setError(errorData.message || 'プロフィールの更新に失敗しました');
-        
+
         if (errorData.errors) {
           const errorMessages = Object.values(errorData.errors).flat().join(', ');
           setError(errorMessages);
@@ -243,16 +295,16 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      
+
       // エラーの詳細を表示
       let errorMessage = 'ネットワークエラーが発生しました';
-      
+
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
         errorMessage = 'サーバーに接続できません。サーバーが起動しているか確認してください。';
       } else if (error.message) {
         errorMessage = `エラー: ${error.message}`;
       }
-      
+
       setError(errorMessage);
     }
   };
@@ -286,9 +338,9 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
           <div className="profile-info">
             <h2>{user.name || user.username}</h2>
             <p className="username">@{user.username}</p>
-            
+
             {user.bio && user.bio !== 'null' && user.bio.trim() !== '' && <p className="bio">{user.bio}</p>}
-            
+
             <div className="profile-details">
               {user.website && user.website !== 'null' && user.website.trim() !== '' && (
                 <div className="detail-item">
@@ -298,12 +350,12 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
                   </a>
                 </div>
               )}
-              
+
               <div className="detail-item">
                 <span className="label">投稿数:</span>
                 <span>{user.posts_count || 0}</span>
               </div>
-              
+
               <div className="follow-stats">
                 <div className="follow-stat-item" onClick={() => showFollowListModal('followers')}>
                   <span className="follow-count">{followStats.followers_count}</span>
@@ -314,7 +366,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
                   <span className="follow-label">フォロー中</span>
                 </div>
               </div>
-              
+
               <div className="detail-item">
                 <span className="label">登録日:</span>
                 <span>{new Date(user.created_at).toLocaleDateString('ja-JP')}</span>
@@ -322,7 +374,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
             </div>
 
             <div className="profile-actions">
-              <button 
+              <button
                 className="edit-button"
                 onClick={() => {
                   console.log('=== Entering Edit Mode ===');
@@ -451,7 +503,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
                   className="current-profile-image"
                 />
               </div>
-              
+
               <div className="new-image-upload">
                 <p>新しい画像を選択:</p>
                 <input
@@ -462,7 +514,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
                 />
                 <div className="file-requirements">
                   <small>
-                    • 対応形式: JPEG, PNG, JPG, GIF<br/>
+                    • 対応形式: JPEG, PNG, JPG, GIF<br />
                     • 最大ファイルサイズ: 20MB
                   </small>
                 </div>
@@ -481,20 +533,20 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
           </div>
 
           <div className="form-actions">
-            <button 
+            <button
               className="save-button"
               onClick={handleUpdateProfile}
             >
               保存
             </button>
-            <button 
+            <button
               className="test-connection-button"
               onClick={testApiConnection}
               type="button"
             >
               接続テスト
             </button>
-            <button 
+            <button
               className="cancel-button"
               onClick={() => {
                 setIsEditing(false);
@@ -517,6 +569,65 @@ function Profile({ onBack, onProfileUpdated, onUserClick }) {
           </div>
         </div>
       )}
+
+      {/* 自分の投稿一覧セクション */}
+      <div className="profile-posts-section">
+        <h3 className="posts-section-title">自分の投稿</h3>
+
+        {postsLoading ? (
+          <div className="posts-loading">
+            <p>投稿を読み込み中...</p>
+          </div>
+        ) : myPosts.length === 0 ? (
+          <div className="no-posts">
+            <p>まだ投稿がありません</p>
+          </div>
+        ) : (
+          <div className="posts-grid">
+            {myPosts.map((post) => (
+              <div key={post.id} className="post-card" onClick={() => onPostClick && onPostClick(post.id)}>
+                <div className="post-header">
+                  <h4 className="post-title">{post.title}</h4>
+                  <span className="post-date">
+                    {new Date(post.created_at).toLocaleDateString('ja-JP')}
+                  </span>
+                </div>
+
+                <div className="post-content">
+                  {post.first_photo_url && (
+                    <div className="post-image">
+                      <img 
+                        src={post.first_photo_url} 
+                        alt={post.title}
+                        className="post-thumbnail"
+                      />
+                    </div>
+                  )}
+                  
+                  <p className="post-description">{post.description}</p>
+
+                  {post.city && (
+                    <div className="post-location">
+                      📍 {post.city.prefecture?.name} {post.city.name}
+                    </div>
+                  )}
+
+                  {post.custom_location && (
+                    <div className="post-location">
+                      📍 {post.custom_location}
+                    </div>
+                  )}
+                </div>
+
+                <div className="post-stats">
+                  <span className="likes-count">❤️ {post.likes_count}</span>
+                  <span className="photos-count">📷 {post.total_photos || 0}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {showFollowList && (
         <FollowList

@@ -14,7 +14,9 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with(['user', 'city'])->latest()->get();
+        $posts = Post::with(['user', 'city.prefecture', 'photos' => function($query) {
+            $query->orderBy('order_num')->limit(1); // 最初の写真のみを取得
+        }])->latest()->get();
         
         // 各投稿にいいね状態とカウントを追加
         $posts->each(function ($post) {
@@ -27,6 +29,9 @@ class PostController extends Controller
             if ($post->user) {
                 $post->user->profile_image_url = $post->user->profile_image_url;
             }
+            
+            // 最初の写真のURLを設定
+            $post->first_photo_url = $post->photos->first() ? $post->photos->first()->image_url : null;
             
             // ログインユーザーがいる場合、いいね状態を確認
             if (auth()->check()) {
@@ -42,6 +47,59 @@ class PostController extends Controller
             'success' => true,
             'posts' => $posts
         ]);
+    }
+
+    /**
+     * 自分の投稿一覧を表示
+     * 将来的にprofile画面の投稿の表示はここの処理を使用したい
+     */
+    public function myPosts()
+    {
+        try {
+            // 認証されたユーザーのIDを取得
+            $userId = auth()->id();
+            
+            if (!$userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '認証が必要です'
+                ], 401);
+            }
+            
+            // ユーザーの投稿を取得（city.prefectureリレーションを含める）
+            $posts = Post::with(['user', 'city.prefecture'])
+                ->where('user_id', $userId)
+                ->latest()
+                ->get();
+            
+            // 各投稿にいいね状態とカウントを追加
+            $posts->each(function ($post) {
+                $post->likes_count = $post->likes()->count();
+                
+                // いいねしたユーザーIDのリストを取得
+                $post->liked_user_ids = $post->likes()->pluck('user_id')->toArray();
+                
+                // ユーザーのプロフィール画像URLを明示的に設定
+                if ($post->user) {
+                    $post->user->profile_image_url = $post->user->profile_image_url;
+                }
+                
+                // ログインユーザーのいいね状態を確認
+                $post->is_liked = $post->isLikedBy(auth()->user());
+                $post->current_user_id = auth()->id();
+            });
+            
+            return response()->json([
+                'success' => true,
+                'posts' => $posts
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'エラーが発生しました: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

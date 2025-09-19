@@ -3,7 +3,7 @@ import FollowButton from './FollowButton';
 import FollowList from './FollowList';
 import './UserProfile.css';
 
-function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick }) {
+function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostClick }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -14,6 +14,8 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick }) {
   });
   const [showFollowList, setShowFollowList] = useState(false);
   const [followListType, setFollowListType] = useState('followers');
+  const [userPosts, setUserPosts] = useState([]);
+  const [postsLoading, setPostsLoading] = useState(true);
 
   // 現在のユーザーIDを取得
   const getCurrentUserId = () => {
@@ -34,6 +36,13 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick }) {
     fetchUserProfile();
     fetchFollowStatus();
   }, [userId, onSwitchToProfile]);
+
+  // userが読み込まれた後に投稿を取得
+  useEffect(() => {
+    if (user && user.id) {
+      fetchUserPosts();
+    }
+  }, [user]);
 
   const fetchUserProfile = async () => {
     try {
@@ -101,6 +110,42 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick }) {
     setShowFollowList(false); // Close the follow list modal
     if (onUserClick) {
       onUserClick(clickedUserId);
+    }
+  };
+
+  const fetchUserPosts = async () => {
+    try {
+      setPostsLoading(true);
+      
+      // 全ての投稿を取得して、指定されたユーザーの投稿をフィルタリング
+      const response = await fetch('http://localhost:8000/api/posts', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      console.log('User posts response status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('=== All Posts Response ===');
+        console.log('Total posts:', data.posts?.length || 0);
+        
+        // 指定されたユーザーの投稿のみをフィルタリング
+        const filteredPosts = data.posts?.filter(post => post.user_id === parseInt(userId)) || [];
+        console.log('User posts:', filteredPosts.length);
+        
+        setUserPosts(filteredPosts);
+      } else {
+        console.error('投稿の取得に失敗しました');
+        setUserPosts([]);
+      }
+    } catch (error) {
+      console.error('投稿の取得エラー:', error);
+      setUserPosts([]);
+    } finally {
+      setPostsLoading(false);
     }
   };
 
@@ -189,6 +234,65 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick }) {
             />
           </div>
         </div>
+      </div>
+
+      {/* ユーザーの投稿一覧セクション */}
+      <div className="user-posts-section">
+        <h3 className="posts-section-title">{user.name}の投稿</h3>
+        
+        {postsLoading ? (
+          <div className="posts-loading">
+            <p>投稿を読み込み中...</p>
+          </div>
+        ) : userPosts.length === 0 ? (
+          <div className="no-posts">
+            <p>まだ投稿がありません</p>
+          </div>
+        ) : (
+          <div className="posts-grid">
+            {userPosts.map((post) => (
+              <div key={post.id} className="post-card" onClick={() => onPostClick && onPostClick(post.id)}>
+                <div className="post-header">
+                  <h4 className="post-title">{post.title}</h4>
+                  <span className="post-date">
+                    {new Date(post.created_at).toLocaleDateString('ja-JP')}
+                  </span>
+                </div>
+
+                <div className="post-content">
+                  {post.first_photo_url && (
+                    <div className="post-image">
+                      <img 
+                        src={post.first_photo_url} 
+                        alt={post.title}
+                        className="post-thumbnail"
+                      />
+                    </div>
+                  )}
+                  
+                  <p className="post-description">{post.description}</p>
+
+                  {post.city && (
+                    <div className="post-location">
+                      📍 {post.city.prefecture?.name} {post.city.name}
+                    </div>
+                  )}
+
+                  {post.custom_location && (
+                    <div className="post-location">
+                      📍 {post.custom_location}
+                    </div>
+                  )}
+                </div>
+
+                <div className="post-stats">
+                  <span className="likes-count">❤️ {post.likes_count}</span>
+                  <span className="photos-count">📷 {post.total_photos || 0}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {showFollowList && (

@@ -57,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     
     // 投稿関連のルート（作成・更新・削除は認証必要）
+    Route::get('/posts/my', [PostController::class, 'myPosts']);
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{id}', [PostController::class, 'update']);
     Route::delete('/posts/{id}', [PostController::class, 'destroy']);

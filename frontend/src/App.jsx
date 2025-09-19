@@ -405,6 +405,11 @@ function App() {
           setSelectedUserId(userId);
           setShowUserProfile(true);
         }}
+        onPostClick={(postId) => {
+          setSelectedPostId(postId);
+          setShowPostDetail(true);
+          setShowProfile(false);
+        }}
       />
     );
   }
@@ -425,6 +430,11 @@ function App() {
           setShowUserProfile(false);
           setSelectedUserId(userId);
           setShowUserProfile(true);
+        }}
+        onPostClick={(postId) => {
+          setSelectedPostId(postId);
+          setShowPostDetail(true);
+          setShowUserProfile(false);
         }}
       />
     );
@@ -564,6 +574,11 @@ function App() {
       <Profile
         onBack={handleProfileBack}
         onProfileUpdated={handleProfileUpdated}
+        onPostClick={(postId) => {
+          setSelectedPostId(postId);
+          setShowPostDetail(true);
+          setShowProfile(false);
+        }}
       />
     );
   }

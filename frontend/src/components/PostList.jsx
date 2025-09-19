@@ -160,6 +160,24 @@ function PostList({ onPostClick, onCreatePost, onUserClick }) {
               </div>
               
               <div className="post-content">
+                {post.first_photo_url ? (
+                  <div className="post-image">
+                    <img 
+                      src={post.first_photo_url} 
+                      alt={post.title}
+                      className="post-thumbnail"
+                      onError={(e) => {
+                        console.error('Image load error:', post.first_photo_url);
+                        e.target.style.display = 'none';
+                      }}
+                      onLoad={() => console.log('Image loaded:', post.first_photo_url)}
+                    />
+                  </div>
+                ) : (
+                  <div style={{fontSize: '12px', color: '#999'}}>
+                    Debug: No first_photo_url for post {post.id}
+                  </div>
+                )}
                 <p className="post-description">
                   {post.description.length > 100 
                     ? `${post.description.substring(0, 100)}...` 
