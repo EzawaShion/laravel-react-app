@@ -11,7 +11,15 @@ class Prefecture extends Model
 
     protected $fillable = [
         'name',
-        'code'
+        'code',
+        'latitude',
+        'longitude',
+        'capital_city_id'
+    ];
+
+    protected $casts = [
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     /**
@@ -20,5 +28,13 @@ class Prefecture extends Model
     public function cities()
     {
         return $this->hasMany(City::class);
+    }
+
+    /**
+     * 県庁所在地とのリレーションシップ
+     */
+    public function capitalCity()
+    {
+        return $this->belongsTo(City::class, 'capital_city_id');
     }
 }

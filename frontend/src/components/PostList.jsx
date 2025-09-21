@@ -3,7 +3,7 @@ import LikeButton from './LikeButton';
 import FollowButton from './FollowButton';
 import './PostList.css';
 
-function PostList({ onPostClick, onCreatePost, onUserClick }) {
+function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -130,15 +130,23 @@ function PostList({ onPostClick, onCreatePost, onUserClick }) {
     <div className="post-list-container">
       <div className="post-list-header">
         <h2>投稿一覧</h2>
-        <button 
-          onClick={() => {
-            console.log('PostListの新規投稿ボタンがクリックされました');
-            onCreatePost();
-          }}
-          className="create-post-button"
-        >
-          新規投稿
-        </button>
+        <div className="header-buttons">
+          <button 
+            onClick={() => onMapView && onMapView()}
+            className="map-view-button"
+          >
+            🗺️ マップ表示
+          </button>
+          <button 
+            onClick={() => {
+              console.log('PostListの新規投稿ボタンがクリックされました');
+              onCreatePost();
+            }}
+            className="create-post-button"
+          >
+            新規投稿
+          </button>
+        </div>
       </div>
 
       {posts.length === 0 ? (

@@ -14,7 +14,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with(['user', 'city.prefecture', 'photos' => function($query) {
+        $posts = Post::with(['user', 'city.prefecture.capitalCity', 'photos' => function($query) {
             $query->orderBy('order_num')->limit(1); // 最初の写真のみを取得
         }])->latest()->get();
         
@@ -32,6 +32,29 @@ class PostController extends Controller
             
             // 最初の写真のURLを設定
             $post->first_photo_url = $post->photos->first() ? $post->photos->first()->image_url : null;
+            
+            // 座標情報を設定（city > prefecture capital の優先順位）
+            if ($post->city && $post->city->latitude && $post->city->longitude) {
+                // 市区町村の座標を使用
+                $post->latitude = $post->city->latitude;
+                $post->longitude = $post->city->longitude;
+                $post->location_name = $post->city->prefecture->name . ' ' . $post->city->name;
+            } elseif ($post->city && $post->city->prefecture && $post->city->prefecture->capitalCity && 
+                     $post->city->prefecture->capitalCity->latitude && $post->city->prefecture->capitalCity->longitude) {
+                // 県庁所在地の座標を使用
+                $post->latitude = $post->city->prefecture->capitalCity->latitude;
+                $post->longitude = $post->city->prefecture->capitalCity->longitude;
+                $post->location_name = $post->city->prefecture->name . ' (県庁所在地: ' . $post->city->prefecture->capitalCity->name . ')';
+            } elseif ($post->city && $post->city->prefecture && $post->city->prefecture->latitude && $post->city->prefecture->longitude) {
+                // 都道府県の座標を使用（フォールバック）
+                $post->latitude = $post->city->prefecture->latitude;
+                $post->longitude = $post->city->prefecture->longitude;
+                $post->location_name = $post->city->prefecture->name . ' (県庁所在地)';
+            } else {
+                $post->latitude = null;
+                $post->longitude = null;
+                $post->location_name = $post->custom_location;
+            }
             
             // ログインユーザーがいる場合、いいね状態を確認
             if (auth()->check()) {
@@ -124,6 +147,7 @@ class PostController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'city_id' => 'nullable|integer|exists:cities,id',
+            'prefecture_id' => 'nullable|integer|exists:prefectures,id',
             'custom_location' => 'nullable|string|max:255',
         ]);
 
@@ -134,12 +158,23 @@ class PostController extends Controller
             ], 422);
         }
 
+        // city_idの決定ロジック
+        $cityId = $request->city_id;
+        
+        // 県のみ選択された場合は県庁所在地を設定
+        if (!$cityId && $request->prefecture_id) {
+            $prefecture = \App\Models\Prefecture::find($request->prefecture_id);
+            if ($prefecture && $prefecture->capital_city_id) {
+                $cityId = $prefecture->capital_city_id;
+            }
+        }
+        
         // 投稿を作成
         $post = Post::create([
             'user_id' => $request->user()->id,
             'title' => $request->title,
             'description' => $request->description,
-            'city_id' => $request->city_id,
+            'city_id' => $cityId,
             'custom_location' => $request->custom_location,
             'total_photos' => 0
         ]);

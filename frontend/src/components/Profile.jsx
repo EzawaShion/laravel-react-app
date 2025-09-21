@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import FollowList from './FollowList';
 import './Profile.css';
 
-function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick }) {
+function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout }) {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState('');
@@ -320,6 +320,18 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick }) {
           ← 戻る
         </button>
         <h1>プロフィール</h1>
+        {onLogout && (
+          <button 
+            className="logout-button"
+            onClick={() => {
+              if (window.confirm('ログアウトしますか？')) {
+                onLogout();
+              }
+            }}
+          >
+            ログアウト
+          </button>
+        )}
       </div>
 
       {error && <div className="error-message">{error}</div>}

@@ -35,6 +35,24 @@
   color: #1f2937;
   font-size: 28px;
   font-weight: 600;
+  flex: 1;
+}
+
+.logout-button {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.logout-button:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
 }
 
 .profile-content {

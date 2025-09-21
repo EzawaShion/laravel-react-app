@@ -13,6 +13,7 @@ import PostList from './components/PostList'
 import PostDetail from './components/PostDetail'
 import PhotoUpload from './components/PhotoUpload'
 import Profile from './components/Profile'
+import MapView from './components/MapView'
 import EditPost from './components/EditPost'
 import UserProfile from './components/UserProfile'
 
@@ -33,6 +34,7 @@ function App() {
   const [showProfile, setShowProfile] = useState(false)
   const [showEditPost, setShowEditPost] = useState(false)
   const [showUserProfile, setShowUserProfile] = useState(false)
+  const [showMapView, setShowMapView] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState(null)
   const [previousScreen, setPreviousScreen] = useState(null)
   const [selectedPostId, setSelectedPostId] = useState(null)
@@ -47,6 +49,8 @@ function App() {
     
     if (token && userData) {
       setUser(JSON.parse(userData));
+      // ログイン済みの場合はホーム画面（MapView）を表示
+      // showMapViewは使わず、条件分岐で判定
     }
   }, []);
 
@@ -65,6 +69,9 @@ function App() {
       
       // URLからパラメータを削除
       window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // ログイン後はホーム画面（MapView）を表示
+      // showMapViewは使わず、条件分岐で判定
     }
   }, []);
 
@@ -197,7 +204,7 @@ function App() {
 
   const handleCancelCreatePost = () => {
     setShowCreatePost(false);
-    setShowPostList(true);
+    // MapViewホーム画面に戻る
   };
 
   const handlePostCreated = (post) => {
@@ -373,6 +380,23 @@ function App() {
     alert('プロフィールが正常に更新されました！');
   };
 
+  // マップ画面を表示
+  if (showMapView) {
+    return (
+      <MapView
+        onBack={() => {
+          setShowMapView(false);
+          setShowPostList(true);
+        }}
+        onPostClick={(postId) => {
+          setSelectedPostId(postId);
+          setShowPostDetail(true);
+          setShowMapView(false);
+        }}
+      />
+    );
+  }
+
   // 投稿詳細画面を表示
   if (showPostDetail && selectedPostId) {
     return (
@@ -410,6 +434,7 @@ function App() {
           setShowPostDetail(true);
           setShowProfile(false);
         }}
+        onLogout={handleLogout}
       />
     );
   }
@@ -462,6 +487,9 @@ function App() {
           setShowPostList(false);
           setSelectedUserId(userId);
           setShowUserProfile(true);
+        }}
+        onMapView={() => {
+          setShowPostList(false);
         }}
       />
     );
@@ -590,6 +618,40 @@ function App() {
         postId={selectedPostId}
         onBack={handlePhotoUploadCancel}
         onUploadSuccess={handlePhotoUploadSuccess}
+      />
+    );
+  }
+
+  // ログイン済みユーザーの場合、MapViewをホーム画面として表示
+  if (user && !showSignUp && !showLogin && !showForgotPassword && !showResendVerification && !showEmailVerificationRequest && !showCreatePost && !showPostList && !showPostDetail && !showPhotoUpload && !showProfile && !showEditPost && !showUserProfile) {
+    // デバッグ用ログ
+    console.log('App.jsx: Rendering MapView with navigation functions');
+    
+    const handleNavigateToPostList = () => {
+      console.log('App.jsx: Navigate to PostList');
+      setShowPostList(true);
+    };
+    
+    const handleNavigateToCreatePost = () => {
+      console.log('App.jsx: Navigate to CreatePost');
+      setShowCreatePost(true);
+    };
+    
+    const handleNavigateToProfile = () => {
+      console.log('App.jsx: Navigate to Profile');
+      setShowProfile(true);
+    };
+    
+    return (
+      <MapView
+        onBack={() => {}} // ホーム画面なのでバック機能は不要
+        onPostClick={(postId) => {
+          setSelectedPostId(postId);
+          setShowPostDetail(true);
+        }}
+        onNavigateToPostList={handleNavigateToPostList}
+        onNavigateToCreatePost={handleNavigateToCreatePost}
+        onNavigateToProfile={handleNavigateToProfile}
       />
     );
   }

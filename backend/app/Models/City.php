@@ -12,7 +12,14 @@ class City extends Model
     protected $fillable = [
         'prefecture_id',
         'name',
-        'code'
+        'code',
+        'latitude',
+        'longitude'
+    ];
+
+    protected $casts = [
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     /**
