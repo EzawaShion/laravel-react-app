@@ -3,12 +3,125 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Prefecture;
+use App\Models\City;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
+    /**
+     * 投稿検索
+     */
+    public function search(Request $request)
+    {
+        $query = Post::with(['user', 'city.prefecture.capitalCity', 'photos' => function($query) {
+            $query->orderBy('order_num')->limit(1); // 最初の写真のみを取得
+        }]);
+
+        // 都道府県で絞り込み
+        if ($request->filled('prefecture_id')) {
+            $query->whereHas('city.prefecture', function($q) use ($request) {
+                $q->where('id', $request->prefecture_id);
+            });
+        }
+
+        // 市町村で絞り込み
+        if ($request->filled('city_id')) {
+            $query->where('city_id', $request->city_id);
+        }
+
+        // キーワード検索（タイトル、内容、住所で検索）
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function($q) use ($keyword) {
+                $q->where('title', 'LIKE', "%{$keyword}%")
+                  ->orWhere('content', 'LIKE', "%{$keyword}%");
+            });
+        }
+
+        // いいね数順でソート（多い順）
+        $posts = $query->withCount('likes')
+                      ->orderBy('likes_count', 'desc')
+                      ->orderBy('created_at', 'desc')
+                      ->get();
+        
+        // 各投稿にいいね状態とカウントを追加
+        $posts->each(function ($post) {
+            $post->likes_count = $post->likes()->count();
+            
+            // いいねしたユーザーIDのリストを取得
+            $post->liked_user_ids = $post->likes()->pluck('user_id')->toArray();
+            
+            // ユーザーのプロフィール画像URLを明示的に設定
+            if ($post->user) {
+                $post->user->profile_image_url = $post->user->profile_image_url;
+            }
+            
+            // 最初の写真のURLを設定
+            $post->first_photo_url = $post->photos->first() ? $post->photos->first()->image_url : null;
+            
+            // 座標情報を設定（city > prefecture capital の優先順位）
+            if ($post->city && $post->city->latitude && $post->city->longitude) {
+                // 市区町村の座標を使用
+                $post->latitude = $post->city->latitude;
+                $post->longitude = $post->city->longitude;
+                $post->location_name = $post->city->prefecture->name . ' ' . $post->city->name;
+            } elseif ($post->city && $post->city->prefecture && $post->city->prefecture->capitalCity && 
+                     $post->city->prefecture->capitalCity->latitude && $post->city->prefecture->capitalCity->longitude) {
+                // 県庁所在地の座標を使用
+                $post->latitude = $post->city->prefecture->capitalCity->latitude;
+                $post->longitude = $post->city->prefecture->capitalCity->longitude;
+                $post->location_name = $post->city->prefecture->name . ' (県庁所在地: ' . $post->city->prefecture->capitalCity->name . ')';
+            } elseif ($post->city && $post->city->prefecture && $post->city->prefecture->latitude && $post->city->prefecture->longitude) {
+                // 都道府県の座標を使用（フォールバック）
+                $post->latitude = $post->city->prefecture->latitude;
+                $post->longitude = $post->city->prefecture->longitude;
+                $post->location_name = $post->city->prefecture->name;
+            }
+        });
+
+        return response()->json([
+            'posts' => $posts,
+            'total' => $posts->count()
+        ]);
+    }
+
+    /**
+     * 都道府県一覧を取得
+     */
+    public function getPrefectures()
+    {
+        $prefectures = Prefecture::orderBy('id')->get(['id', 'name']);
+        
+        return response()->json([
+            'prefectures' => $prefectures
+        ]);
+    }
+
+    /**
+     * 指定された都道府県の市町村一覧を取得
+     */
+    public function getCities(Request $request)
+    {
+        $prefectureId = $request->query('prefecture_id');
+        
+        if (!$prefectureId) {
+            return response()->json([
+                'cities' => []
+            ]);
+        }
+
+        $cities = City::where('prefecture_id', $prefectureId)
+                     ->orderBy('id')
+                     ->get(['id', 'name', 'prefecture_id']);
+        
+        return response()->json([
+            'cities' => $cities
+        ]);
+    }
+
     /**
      * 投稿一覧を表示
      */

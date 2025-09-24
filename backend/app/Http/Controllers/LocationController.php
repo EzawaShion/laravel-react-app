@@ -27,7 +27,7 @@ class LocationController extends Controller
     public function getCitiesByPrefecture($prefectureId)
     {
         $cities = City::where('prefecture_id', $prefectureId)
-                     ->orderBy('name')
+                     ->orderBy('id')
                      ->get();
         
         return response()->json([

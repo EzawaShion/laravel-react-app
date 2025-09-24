@@ -43,6 +43,9 @@ Route::post('/password/reset', [PasswordResetController::class, 'reset']);
 
 // 投稿関連のルート（読み取りは認証不要）
 Route::get('/posts', [PostController::class, 'index']);
+Route::get('/posts/search', [PostController::class, 'search']);
+Route::get('/posts/prefectures', [PostController::class, 'getPrefectures']);
+Route::get('/posts/cities', [PostController::class, 'getCities']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
 
 // 写真関連のルート（読み取りは認証不要）

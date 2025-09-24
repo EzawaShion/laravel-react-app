@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import SearchPanel from './SearchPanel';
 import './MapView.css';
 
 // Leafletのデフォルトアイコンを修正
@@ -26,8 +27,10 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   });
   const [center, setCenter] = useState([35.6762, 139.6503]); // 東京駅を中心
   const [selectedLocationPosts, setSelectedLocationPosts] = useState([]);
-  const [showSidePanel, setShowSidePanel] = useState(false);
-  const [selectedLocationName, setSelectedLocationName] = useState('');
+  const [showSidePanel, setShowSidePanel] = useState(true); // 常に表示
+  const [selectedLocationName, setSelectedLocationName] = useState('すべての投稿');
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); // サイドバーが折りたたまれているか
   
   // 日本の地理的境界（少し余裕を持たせた範囲）
   const japanBounds = [
@@ -39,6 +42,21 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
     fetchPostsWithCoordinates();
     getUserLocation();
   }, []);
+
+  // 初期表示時にすべての投稿を表示
+  useEffect(() => {
+    if (posts.length > 0 && selectedLocationPosts.length === 0) {
+      setSelectedLocationPosts(posts);
+    }
+  }, [posts, selectedLocationPosts.length]);
+
+  // ピンクリック時の投稿リスト表示を確実にする
+  useEffect(() => {
+    if (selectedLocationPosts.length > 0 && showSidePanel && isSidebarCollapsed) {
+      console.log('投稿データが設定されたので、サイドバーを表示します');
+      setIsSidebarCollapsed(false);
+    }
+  }, [selectedLocationPosts.length, showSidePanel]);
 
   // 座標情報がある投稿を取得
   const fetchPostsWithCoordinates = async () => {
@@ -114,18 +132,47 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
     );
     
     if (uniquePosts.length > 0) {
+      console.log('ピンクリック - 投稿数:', uniquePosts.length);
       setSelectedLocationPosts(uniquePosts);
       setSelectedLocationName(uniquePosts[0].location_name || '選択された場所');
       setShowSidePanel(true);
-      console.log('Selected location posts:', uniquePosts);
+      console.log('ピンクリック後の状態:', { showSidePanel: true, isSidebarCollapsed: false });
     }
   };
 
-  // サイドパネルを閉じる
+  // 検索結果を処理
+  const handleSearchResults = (searchResults, searchTitle) => {
+    setSelectedLocationPosts(searchResults);
+    setSelectedLocationName(searchTitle);
+    setShowSidePanel(true);
+    setShowSearchPanel(false);
+  };
+
+  // サイドパネルを閉じる（折りたたむ）
   const closeSidePanel = () => {
+    console.log('サイドバーを折りたたみ中...', { 
+      before: { isSidebarCollapsed, showSidePanel },
+      after: { isSidebarCollapsed: true, showSidePanel: false }
+    });
+    setIsSidebarCollapsed(true);
     setShowSidePanel(false);
+    // 選択された投稿をクリアして、useEffectが動作しないようにする
     setSelectedLocationPosts([]);
-    setSelectedLocationName('');
+  };
+
+  // サイドパネルを開く
+  const openSidePanel = () => {
+    console.log('サイドバーを表示中...', { 
+      before: { isSidebarCollapsed, showSidePanel, selectedLocationPosts: selectedLocationPosts.length },
+      after: { isSidebarCollapsed: false, showSidePanel: true }
+    });
+    setShowSidePanel(true);
+    setIsSidebarCollapsed(false);
+    // 投稿データがない場合は全ての投稿を表示
+    if (selectedLocationPosts.length === 0 && posts.length > 0) {
+      setSelectedLocationPosts(posts);
+      setSelectedLocationName('すべての投稿');
+    }
   };
 
   if (loading) {
@@ -218,6 +265,23 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
           >
             👤 プロフィール
           </button>
+          <button 
+            onClick={() => {
+              console.log('検索ボタンクリック');
+              setShowSearchPanel(true);
+            }}
+            style={{
+              padding: '8px 12px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            🔍 検索
+          </button>
         </div>
         <h1 style={{margin: 0, fontSize: '20px'}}>📍 投稿マップ</h1>
         <div style={{
@@ -231,7 +295,14 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
         </div>
       </div>
 
-      <div className="map-main-content">
+      <div className={`map-main-content ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        {console.log('現在の状態:', { 
+          isSidebarCollapsed, 
+          showSidePanel, 
+          '投稿リスト表示中': showSidePanel && !isSidebarCollapsed,
+          'selectedLocationPosts数': selectedLocationPosts.length,
+          'selectedLocationName': selectedLocationName
+        })}
         <div className="map-container">
           <MapContainer
             center={center}
@@ -240,7 +311,12 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
             maxZoom={18}
             maxBounds={japanBounds}
             maxBoundsViscosity={1.0}
-            style={{ height: '100%', width: '100%' }}
+            style={{ 
+              height: '100%', 
+              width: '100%',
+              minWidth: '100%',
+              maxWidth: '100%'
+            }}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -315,24 +391,46 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
               ))}
             </MarkerClusterGroup>
           </MapContainer>
+          
+          {/* 地図の右上端の矢印ボタン */}
+          <div className="arrow-buttons-container">
+            {showSidePanel && isSidebarCollapsed ? (
+              <button 
+                className="arrow-button show-button" 
+                onClick={openSidePanel}
+                title="投稿リストを表示"
+              >
+                <span className="arrow-icon">›</span>
+              </button>
+            ) : (
+              <button 
+                className="arrow-button hide-button" 
+                onClick={closeSidePanel}
+                title="投稿リストを非表示"
+              >
+                <span className="arrow-icon">‹</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* サイドパネル - flexboxで並列表示 */}
-        {showSidePanel && (
-          <>
-            <div 
-              className="map-sidebar-overlay"
-              onClick={closeSidePanel}
-            />
-            <div className="map-sidebar">
-              <div className="sidebar-header">
-                <h3>{selectedLocationName}の投稿</h3>
-                <button className="close-sidebar" onClick={closeSidePanel}>
-                  ✕
-                </button>
-              </div>
-            
+        {/* サイドパネル - 常に表示 */}
+        {showSidePanel && !isSidebarCollapsed && (
+          <div className="map-sidebar">
             <div className="sidebar-content">
+              <div className="sidebar-header">
+                <button 
+                  className="hide-sidebar-btn" 
+                  onClick={() => {
+                    console.log('非表示ボタンがクリックされました');
+                    closeSidePanel();
+                  }} 
+                  title="投稿リストを非表示"
+                >
+                  <span className="hide-icon">−</span>
+                </button>
+                <h3>{selectedLocationName}の投稿</h3>
+              </div>
               <div className="location-posts-count">
                 {selectedLocationPosts.length}件の投稿
               </div>
@@ -377,8 +475,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                 ))}
               </div>
             </div>
-            </div>
-          </>
+          </div>
         )}
       </div>
       
@@ -387,7 +484,13 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
           <p>位置情報付きの投稿がまだありません</p>
           <p>投稿作成時に位置情報を追加すると、地図上に表示されます</p>
         </div>
-      )}
+        )}
+
+      <SearchPanel
+        isVisible={showSearchPanel}
+        onSearch={handleSearchResults}
+        onClose={() => setShowSearchPanel(false)}
+      />
     </div>
   );
 }
