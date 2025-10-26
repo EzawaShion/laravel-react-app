@@ -16,6 +16,7 @@ import Profile from './components/Profile'
 import MapView from './components/MapView'
 import EditPost from './components/EditPost'
 import UserProfile from './components/UserProfile'
+import UserSearch from './components/UserSearch'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -35,6 +36,7 @@ function App() {
   const [showEditPost, setShowEditPost] = useState(false)
   const [showUserProfile, setShowUserProfile] = useState(false)
   const [showMapView, setShowMapView] = useState(false)
+  const [showUserSearch, setShowUserSearch] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState(null)
   const [previousScreen, setPreviousScreen] = useState(null)
   const [selectedPostId, setSelectedPostId] = useState(null)
@@ -435,6 +437,10 @@ function App() {
           setShowProfile(false);
         }}
         onLogout={handleLogout}
+        onNavigateToUserSearch={() => {
+          setShowProfile(false);
+          setShowUserSearch(true);
+        }}
       />
     );
   }
@@ -596,20 +602,21 @@ function App() {
     );
   }
 
-  // プロフィール画面
-  if (showProfile) {
-    return (
-      <Profile
-        onBack={handleProfileBack}
-        onProfileUpdated={handleProfileUpdated}
-        onPostClick={(postId) => {
-          setSelectedPostId(postId);
-          setShowPostDetail(true);
-          setShowProfile(false);
-        }}
-      />
-    );
-  }
+  // プロフィール画面（重複チェック用 - 既に上で定義済み）
+  // この部分は削除予定
+  // if (showProfile) {
+  //   return (
+  //     <Profile
+  //       onBack={handleProfileBack}
+  //       onProfileUpdated={handleProfileUpdated}
+  //       onPostClick={(postId) => {
+  //         setSelectedPostId(postId);
+  //         setShowPostDetail(true);
+  //         setShowProfile(false);
+  //       }}
+  //     />
+  //   );
+  // }
 
   // 写真アップロード画面
   if (showPhotoUpload && selectedPostId) {
@@ -622,8 +629,26 @@ function App() {
     );
   }
 
+  // ユーザー検索画面を表示
+  if (showUserSearch) {
+    return (
+      <UserSearch
+        onNavigateToProfile={() => {
+          setShowUserSearch(false);
+          setShowProfile(true);
+        }}
+        onNavigateToUserProfile={(userId) => {
+          setPreviousScreen('userSearch');
+          setShowUserSearch(false);
+          setSelectedUserId(userId);
+          setShowUserProfile(true);
+        }}
+      />
+    );
+  }
+
   // ログイン済みユーザーの場合、MapViewをホーム画面として表示
-  if (user && !showSignUp && !showLogin && !showForgotPassword && !showResendVerification && !showEmailVerificationRequest && !showCreatePost && !showPostList && !showPostDetail && !showPhotoUpload && !showProfile && !showEditPost && !showUserProfile) {
+  if (user && !showSignUp && !showLogin && !showForgotPassword && !showResendVerification && !showEmailVerificationRequest && !showCreatePost && !showPostList && !showPostDetail && !showPhotoUpload && !showProfile && !showEditPost && !showUserProfile && !showUserSearch) {
     // デバッグ用ログ
     console.log('App.jsx: Rendering MapView with navigation functions');
     

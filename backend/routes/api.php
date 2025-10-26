@@ -11,6 +11,7 @@ use App\Http\Controllers\PhotoGroupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +55,10 @@ Route::get('/photos/{id}', [PhotoController::class, 'show']);
 Route::get('/photo-groups/post/{postId}', [PhotoGroupController::class, 'getByPost']);
 Route::get('/photo-groups/{id}', [PhotoGroupController::class, 'show']);
 
+// ユーザー検索関連のルート（読み取りは認証不要）
+Route::get('/users/search', [UserController::class, 'search']);
+Route::get('/users/{id}', [UserController::class, 'show']);
+
 // 認証が必要なルート
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -95,6 +100,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/like', [LikeController::class, 'like']);
     Route::get('/like/status/{postId}', [LikeController::class, 'getLikeStatus']);
     Route::get('/like/post/{postId}', [LikeController::class, 'getPostLikes']);
+    
+    // ユーザー関連のルート（フォロー/フォロー解除は認証必要）
+    Route::post('/users/{id}/follow', [UserController::class, 'toggleFollow']);
 });
 
 // テスト用のAPIエンドポイント

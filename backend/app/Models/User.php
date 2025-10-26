@@ -84,11 +84,35 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * 都道府県を取得
+     */
+    public function prefecture()
+    {
+        return $this->belongsTo(Prefecture::class);
+    }
+
+    /**
+     * 市町村を取得
+     */
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    /**
      * フォローしているユーザー
      */
     public function followings()
     {
         return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id');
+    }
+
+    /**
+     * フォローしているユーザー（エイリアス）
+     */
+    public function following()
+    {
+        return $this->followings();
     }
 
     /**

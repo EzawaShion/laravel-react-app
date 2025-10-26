@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import FollowList from './FollowList';
 import './Profile.css';
 
-function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout }) {
+function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout, onNavigateToUserSearch }) {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState('');
@@ -51,6 +51,12 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout 
 
       if (response.ok) {
         const data = await response.json();
+        
+        // 画像URLを絶対URLに変換
+        if (data.user.profile_image_url && !data.user.profile_image_url.startsWith('http')) {
+          data.user.profile_image_url = 'http://localhost:8000' + data.user.profile_image_url;
+        }
+        
         setUser(data.user);
         setEditForm({
           name: data.user.name || '',
@@ -320,18 +326,28 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout 
           ← 戻る
         </button>
         <h1>プロフィール</h1>
-        {onLogout && (
-          <button 
-            className="logout-button"
-            onClick={() => {
-              if (window.confirm('ログアウトしますか？')) {
-                onLogout();
-              }
-            }}
-          >
-            ログアウト
-          </button>
-        )}
+        <div className="header-buttons">
+          {onNavigateToUserSearch && (
+            <button 
+              className="user-search-button"
+              onClick={onNavigateToUserSearch}
+            >
+              🔍 ユーザー検索
+            </button>
+          )}
+          {onLogout && (
+            <button 
+              className="logout-button"
+              onClick={() => {
+                if (window.confirm('ログアウトしますか？')) {
+                  onLogout();
+                }
+              }}
+            >
+              ログアウト
+            </button>
+          )}
+        </div>
       </div>
 
       {error && <div className="error-message">{error}</div>}
@@ -341,9 +357,13 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout 
         <div className="profile-content">
           <div className="profile-image-section">
             <img
-              src={user.profile_image_url}
+              src={user.profile_image_url || '/images/default-avatar.svg'}
               alt="プロフィール画像"
               className="profile-image"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = '/images/default-avatar.svg';
+              }}
             />
           </div>
 
@@ -510,9 +530,13 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout 
               <div className="current-image">
                 <p>現在の画像:</p>
                 <img
-                  src={user.profile_image_url}
+                  src={user.profile_image_url || '/images/default-avatar.svg'}
                   alt="現在のプロフィール画像"
                   className="current-profile-image"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/images/default-avatar.svg';
+                  }}
                 />
               </div>
 

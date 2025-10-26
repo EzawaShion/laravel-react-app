@@ -1,27 +1,11 @@
-/* 検索パネルのオーバーレイ */
-.search-panel-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  padding: 20px;
-}
-
-/* 検索パネル */
+/* 検索パネル（常時表示） */
 .search-panel {
   background: white;
-  border-radius: 12px;
-  max-width: 500px;
+  border-radius: 8px;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  margin-bottom: 10px;
 }
 
 /* 検索パネルヘッダー */
@@ -41,21 +25,6 @@
   color: #1f2937;
 }
 
-.close-button {
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.close-button:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
 
 /* 検索コンテンツ */
 .search-content {
@@ -212,4 +181,16 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* リアルタイム検索のローディング表示 */
+.search-loading {
+  color: #666;
+  font-size: 14px;
+  font-style: italic;
+  text-align: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin-top: 10px;
 }

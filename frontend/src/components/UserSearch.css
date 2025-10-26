@@ -1,0 +1,259 @@
+.user-search-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.user-search-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+  color: #666;
+}
+
+/* ヘッダー */
+.user-search-header {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-search-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.back-button {
+  background: #f0f0f0;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 12px;
+  transition: background 0.2s;
+}
+
+.back-button:hover {
+  background: #e0e0e0;
+}
+
+/* 検索フィルター */
+.user-search-filters {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-group-single {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.filter-group-single label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.search-input {
+  padding: 12px 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4285f4;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+}
+
+/* 検索結果 */
+.user-search-results {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-search-results h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.user-count {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+/* ユーザーなしメッセージ */
+.no-users-message {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.no-users-message p {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* ユーザーリスト */
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ユーザーカード */
+.user-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fafafa;
+  transition: all 0.2s;
+}
+
+.user-card:hover {
+  background: #f5f5f5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e0e0e0;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.user-details h4 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.user-username {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #888;
+}
+
+.user-profile {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.user-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #888;
+}
+
+.user-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.user-followers {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* フォローボタン */
+.follow-button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.follow-button:not(.following) {
+  background: #4285f4;
+  color: white;
+}
+
+.follow-button:not(.following):hover {
+  background: #3367d6;
+}
+
+.follow-button.following {
+  background: #e8f0fe;
+  color: #1967d2;
+  border: 1px solid #d2e3fc;
+}
+
+.follow-button.following:hover {
+  background: #d2e3fc;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .user-search-container {
+    padding: 12px;
+  }
+
+  .user-search-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .user-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .user-info {
+    width: 100%;
+  }
+
+  .follow-button {
+    width: 100%;
+  }
+
+  .user-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+

@@ -1,10 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import SearchPanel from './SearchPanel';
 import './MapView.css';
+
+// debounce用のカスタムhook
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
 
 // Leafletのデフォルトアイコンを修正
 delete L.Icon.Default.prototype._getIconUrl;
@@ -26,11 +43,22 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
     onNavigateToProfile: !!onNavigateToProfile
   });
   const [center, setCenter] = useState([35.6762, 139.6503]); // 東京駅を中心
+  const mapRef = useRef(null); // 地図のref
   const [selectedLocationPosts, setSelectedLocationPosts] = useState([]);
   const [showSidePanel, setShowSidePanel] = useState(true); // 常に表示
   const [selectedLocationName, setSelectedLocationName] = useState('すべての投稿');
-  const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [showSearchPanel, setShowSearchPanel] = useState(true); // 常に表示
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); // サイドバーが折りたたまれているか
+  const [searchParams, setSearchParams] = useState({
+    prefecture_id: '',
+    city_id: '',
+    keyword: ''
+  });
+  const [prefectures, setPrefectures] = useState([]);
+  const [cities, setCities] = useState([]);
+  
+  // debounceされた検索パラメータ（500ms遅延）
+  const debouncedSearchParams = useDebounce(searchParams, 500);
   
   // 日本の地理的境界（少し余裕を持たせた範囲）
   const japanBounds = [
@@ -50,9 +78,140 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
     }
   }, [posts, selectedLocationPosts.length]);
 
+  // 都道府県一覧を取得
+  useEffect(() => {
+    fetchPrefectures();
+  }, []);
+
+  // リアルタイム検索（debounceされたパラメータが変更された時）
+  useEffect(() => {
+    // 検索パラメータに何か値がある場合のみ検索実行
+    const hasSearchValue = Object.values(debouncedSearchParams).some(value => 
+      value && value.toString().trim() !== ''
+    );
+    
+    if (hasSearchValue) {
+      performRealtimeSearch(debouncedSearchParams);
+    } else if (posts.length > 0) {
+      // 検索条件がない場合は全ての投稿を表示
+      setSelectedLocationPosts(posts);
+      setSelectedLocationName('すべての投稿');
+    }
+  }, [debouncedSearchParams, posts]);
+
+  // 都道府県一覧を取得
+  const fetchPrefectures = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/prefectures');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setPrefectures(data.prefectures);
+        }
+      }
+    } catch (error) {
+      console.error('都道府県の取得に失敗しました:', error);
+    }
+  };
+
+  // 市町村一覧を取得
+  const fetchCities = async (prefectureId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/cities/${prefectureId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setCities(data.cities);
+        }
+      }
+    } catch (error) {
+      console.error('市町村の取得に失敗しました:', error);
+    }
+  };
+
+  // リアルタイム検索実行
+  const performRealtimeSearch = async (params) => {
+    try {
+      // 空の値を除外してクエリパラメータを作成
+      const queryParams = new URLSearchParams();
+      Object.keys(params).forEach(key => {
+        if (params[key] && params[key].toString().trim() !== '') {
+          queryParams.append(key, params[key]);
+        }
+      });
+
+      if (queryParams.toString() === '') {
+        // 検索条件がない場合は全ての投稿を表示
+        setSelectedLocationPosts(posts);
+        setSelectedLocationName('すべての投稿');
+        return;
+      }
+
+      const url = `http://localhost:8000/api/posts/search?${queryParams.toString()}`;
+      console.log('リアルタイム検索URL:', url);
+
+      const response = await fetch(url);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('リアルタイム検索結果:', data);
+        
+        // 検索結果が0件の場合
+        if (data.posts.length === 0) {
+          const searchTitle = getSearchTitle(params);
+          setSelectedLocationPosts([]);
+          setSelectedLocationName(`${searchTitle}に関する投稿はありませんでした。`);
+          setShowSidePanel(true);
+          return;
+        }
+        
+        // 検索タイプとデータを決定
+        const selectedPrefecture = prefectures.find(p => p.id == params.prefecture_id);
+        const selectedCity = cities.find(c => c.id == params.city_id);
+        
+        let searchType = 'keyword';
+        let searchData = {};
+        
+        if (selectedCity) {
+          searchType = 'city';
+          searchData = { city: selectedCity };
+        } else if (selectedPrefecture) {
+          searchType = 'prefecture';
+          searchData = { prefecture: selectedPrefecture };
+        }
+        
+        handleSearchResults(data.posts, getSearchTitle(params), searchType, searchData);
+      } else {
+        console.error('リアルタイム検索に失敗しました:', response.status);
+      }
+    } catch (error) {
+      console.error('リアルタイム検索エラー:', error);
+    }
+  };
+
+  // 検索タイトルを取得
+  const getSearchTitle = (params = searchParams) => {
+    let title = '検索結果';
+    const selectedPrefecture = prefectures.find(p => p.id == params.prefecture_id);
+    const selectedCity = cities.find(c => c.id == params.city_id);
+    
+    if (selectedPrefecture) {
+      title += ` - ${selectedPrefecture.name}`;
+      if (selectedCity) {
+        title += `${selectedCity.name}`;
+      }
+    }
+    
+    if (params.keyword) {
+      title += ` "${params.keyword}"`;
+    }
+    
+    return title;
+  };
+
   // ピンクリック時の投稿リスト表示を確実にする
   useEffect(() => {
-    if (selectedLocationPosts.length > 0 && showSidePanel && isSidebarCollapsed) {
+    if (selectedLocationPosts.length > 0 && showSidePanel) {
       console.log('投稿データが設定されたので、サイドバーを表示します');
       setIsSidebarCollapsed(false);
     }
@@ -141,11 +300,33 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   };
 
   // 検索結果を処理
-  const handleSearchResults = (searchResults, searchTitle) => {
+  const handleSearchResults = (searchResults, searchTitle, searchType, searchData) => {
     setSelectedLocationPosts(searchResults);
     setSelectedLocationName(searchTitle);
     setShowSidePanel(true);
-    setShowSearchPanel(false);
+    
+    // 都道府県または市町村検索の場合、地図をフォーカス
+    if (searchType === 'prefecture' && searchData.prefecture) {
+      const { latitude, longitude } = searchData.prefecture;
+      if (latitude && longitude) {
+        focusMapOnLocation(latitude, longitude, 8); // 都道府県レベルは広めに
+      }
+    } else if (searchType === 'city' && searchData.city) {
+      const { latitude, longitude } = searchData.city;
+      if (latitude && longitude) {
+        focusMapOnLocation(latitude, longitude, 12); // 市町村レベルは詳細に
+      }
+    }
+    // キーワード検索の場合は地図フォーカスしない
+  };
+
+  // 地図を指定した座標にフォーカス
+  const focusMapOnLocation = (latitude, longitude, zoom = 12) => {
+    if (mapRef.current) {
+      const map = mapRef.current;
+      map.setView([latitude, longitude], zoom);
+      console.log(`地図を座標 [${latitude}, ${longitude}] にフォーカスしました`);
+    }
   };
 
   // サイドパネルを閉じる（折りたたむ）
@@ -206,7 +387,8 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
       }}>
         <div style={{
           display: 'flex',
-          gap: '10px'
+          gap: '10px',
+          alignItems: 'center'
         }}>
           <button 
             onClick={() => {
@@ -265,23 +447,94 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
           >
             👤 プロフィール
           </button>
-          <button 
-            onClick={() => {
-              console.log('検索ボタンクリック');
-              setShowSearchPanel(true);
-            }}
+        </div>
+        
+        {/* 検索欄 */}
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          alignItems: 'center',
+          flex: 1,
+          maxWidth: '600px',
+          margin: '0 20px'
+        }}>
+          <select
             style={{
-              padding: '8px 12px',
-              backgroundColor: '#10b981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '12px'
+              padding: '6px 8px',
+              border: '1px solid #d1d5db',
+              borderRadius: '4px',
+              fontSize: '12px',
+              minWidth: '120px'
+            }}
+            value={searchParams.prefecture_id || ''}
+            onChange={(e) => {
+              const prefectureId = e.target.value;
+              setSearchParams(prev => ({
+                ...prev,
+                prefecture_id: prefectureId,
+                city_id: '' // 都道府県変更時は市町村をリセット
+              }));
+              
+              // 都道府県が選択された場合、市町村を取得
+              if (prefectureId) {
+                fetchCities(prefectureId);
+              } else {
+                setCities([]);
+              }
             }}
           >
-            🔍 検索
-          </button>
+            <option value="">都道府県</option>
+            {prefectures.map(prefecture => (
+              <option key={prefecture.id} value={prefecture.id}>
+                {prefecture.name}
+              </option>
+            ))}
+          </select>
+          
+          <select
+            style={{
+              padding: '6px 8px',
+              border: '1px solid #d1d5db',
+              borderRadius: '4px',
+              fontSize: '12px',
+              minWidth: '120px'
+            }}
+            value={searchParams.city_id || ''}
+            onChange={(e) => {
+              setSearchParams(prev => ({
+                ...prev,
+                city_id: e.target.value
+              }));
+            }}
+            disabled={!searchParams.prefecture_id}
+          >
+            <option value="">市町村</option>
+            {cities.map(city => (
+              <option key={city.id} value={city.id}>
+                {city.name}
+              </option>
+            ))}
+          </select>
+          
+          <input
+            type="text"
+            placeholder="キーワード検索"
+            style={{
+              padding: '6px 8px',
+              border: '1px solid #d1d5db',
+              borderRadius: '4px',
+              fontSize: '12px',
+              flex: 1,
+              minWidth: '150px'
+            }}
+            value={searchParams.keyword || ''}
+            onChange={(e) => {
+              setSearchParams(prev => ({
+                ...prev,
+                keyword: e.target.value
+              }));
+            }}
+          />
         </div>
         <h1 style={{margin: 0, fontSize: '20px'}}>📍 投稿マップ</h1>
         <div style={{
@@ -305,6 +558,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
         })}
         <div className="map-container">
           <MapContainer
+            ref={mapRef}
             center={center}
             zoom={8}
             minZoom={6}
@@ -391,27 +645,6 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
               ))}
             </MarkerClusterGroup>
           </MapContainer>
-          
-          {/* 地図の右上端の矢印ボタン */}
-          <div className="arrow-buttons-container">
-            {showSidePanel && isSidebarCollapsed ? (
-              <button 
-                className="arrow-button show-button" 
-                onClick={openSidePanel}
-                title="投稿リストを表示"
-              >
-                <span className="arrow-icon">›</span>
-              </button>
-            ) : (
-              <button 
-                className="arrow-button hide-button" 
-                onClick={closeSidePanel}
-                title="投稿リストを非表示"
-              >
-                <span className="arrow-icon">‹</span>
-              </button>
-            )}
-          </div>
         </div>
 
         {/* サイドパネル - 常に表示 */}
@@ -429,14 +662,19 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                 >
                   <span className="hide-icon">−</span>
                 </button>
-                <h3>{selectedLocationName}の投稿</h3>
+                <h3>{selectedLocationName}</h3>
               </div>
               <div className="location-posts-count">
-                {selectedLocationPosts.length}件の投稿
+                {selectedLocationPosts.length > 0 ? `${selectedLocationPosts.length}件の投稿` : ''}
               </div>
               
               <div className="location-posts-list">
-                {selectedLocationPosts.map((post) => (
+                {selectedLocationPosts.length === 0 ? (
+                  <div className="no-posts-message">
+                    <p>{selectedLocationName}</p>
+                  </div>
+                ) : (
+                  selectedLocationPosts.map((post) => (
                   <div 
                     key={post.id} 
                     className="sidebar-post-card"
@@ -472,7 +710,8 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                       </div>
                     </div>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -486,11 +725,6 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
         </div>
         )}
 
-      <SearchPanel
-        isVisible={showSearchPanel}
-        onSearch={handleSearchResults}
-        onClose={() => setShowSearchPanel(false)}
-      />
     </div>
   );
 }

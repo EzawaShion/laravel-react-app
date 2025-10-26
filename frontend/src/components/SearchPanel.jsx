@@ -1,5 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './SearchPanel.css';
+
+// debounce用のカスタムhook
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
 
 const SearchPanel = ({ onSearch, onClose, isVisible }) => {
   const [prefectures, setPrefectures] = useState([]);
@@ -10,13 +27,75 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
     keyword: ''
   });
   const [loading, setLoading] = useState(false);
+  
+  // debounceされた検索パラメータ（500ms遅延）
+  const debouncedSearchParams = useDebounce(searchParams, 500);
 
   // 都道府県一覧を取得
   useEffect(() => {
     fetchPrefectures();
   }, []);
 
+  // リアルタイム検索（debounceされたパラメータが変更された時）
+  useEffect(() => {
+    // 検索パラメータに何か値がある場合のみ検索実行
+    const hasSearchValue = Object.values(debouncedSearchParams).some(value => 
+      value && value.toString().trim() !== ''
+    );
+    
+    if (hasSearchValue) {
+      performRealtimeSearch(debouncedSearchParams);
+    }
+  }, [debouncedSearchParams]);
+
   // 都道府県が変更されたら市町村一覧を取得（handleInputChangeで処理するため削除）
+
+  // リアルタイム検索実行
+  const performRealtimeSearch = useCallback(async (params) => {
+    setLoading(true);
+    try {
+      // 空の値を除外してクエリパラメータを作成
+      const queryParams = new URLSearchParams();
+      Object.keys(params).forEach(key => {
+        if (params[key] && params[key].toString().trim() !== '') {
+          queryParams.append(key, params[key]);
+        }
+      });
+
+      const url = `http://localhost:8000/api/posts/search?${queryParams.toString()}`;
+      console.log('リアルタイム検索URL:', url);
+
+      const response = await fetch(url);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('リアルタイム検索結果:', data);
+        
+        // 検索タイプとデータを決定
+        const selectedPrefecture = prefectures.find(p => p.id == params.prefecture_id);
+        const selectedCity = cities.find(c => c.id == params.city_id);
+        
+        let searchType = 'keyword';
+        let searchData = {};
+        
+        if (selectedCity) {
+          searchType = 'city';
+          searchData = { city: selectedCity };
+        } else if (selectedPrefecture) {
+          searchType = 'prefecture';
+          searchData = { prefecture: selectedPrefecture };
+        }
+        
+        onSearch(data.posts, getSearchTitle(params), searchType, searchData);
+      } else {
+        console.error('リアルタイム検索に失敗しました:', response.status);
+      }
+    } catch (error) {
+      console.error('リアルタイム検索エラー:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [prefectures, cities, onSearch]);
 
   const fetchPrefectures = async () => {
     try {
@@ -90,7 +169,23 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
       if (response.ok) {
         const data = await response.json();
         console.log('検索結果:', data);
-        onSearch(data.posts, getSearchTitle());
+        
+        // 検索タイプとデータを決定
+        const selectedPrefecture = prefectures.find(p => p.id == searchParams.prefecture_id);
+        const selectedCity = cities.find(c => c.id == searchParams.city_id);
+        
+        let searchType = 'keyword';
+        let searchData = {};
+        
+        if (selectedCity) {
+          searchType = 'city';
+          searchData = { city: selectedCity };
+        } else if (selectedPrefecture) {
+          searchType = 'prefecture';
+          searchData = { prefecture: selectedPrefecture };
+        }
+        
+        onSearch(data.posts, getSearchTitle(), searchType, searchData);
       } else {
         const errorText = await response.text();
         console.error('検索に失敗しました:', response.status, errorText);
@@ -102,10 +197,10 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
     }
   };
 
-  const getSearchTitle = () => {
+  const getSearchTitle = (params = searchParams) => {
     let title = '検索結果';
-    const selectedPrefecture = prefectures.find(p => p.id == searchParams.prefecture_id);
-    const selectedCity = cities.find(c => c.id == searchParams.city_id);
+    const selectedPrefecture = prefectures.find(p => p.id == params.prefecture_id);
+    const selectedCity = cities.find(c => c.id == params.city_id);
     
     if (selectedPrefecture) {
       title += ` - ${selectedPrefecture.name}`;
@@ -114,8 +209,8 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
       }
     }
     
-    if (searchParams.keyword) {
-      title += ` "${searchParams.keyword}"`;
+    if (params.keyword) {
+      title += ` "${params.keyword}"`;
     }
     
     return title;
@@ -139,13 +234,9 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
   if (!isVisible) return null;
 
   return (
-    <div className="search-panel-overlay">
-      <div className="search-panel">
+    <div className="search-panel">
         <div className="search-header">
           <h3>投稿を検索</h3>
-          <button className="close-button" onClick={onClose}>
-            ×
-          </button>
         </div>
 
         <div className="search-content">
@@ -199,16 +290,13 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
             >
               クリア
             </button>
-            <button 
-              className="search-button" 
-              onClick={handleSearch}
-              disabled={loading}
-            >
-              {loading ? '検索中...' : '検索'}
-            </button>
+            {loading && (
+              <div className="search-loading">
+                検索中...
+              </div>
+            )}
           </div>
         </div>
-      </div>
     </div>
   );
 };

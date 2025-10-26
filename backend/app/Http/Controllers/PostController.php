@@ -32,12 +32,19 @@ class PostController extends Controller
             $query->where('city_id', $request->city_id);
         }
 
-        // キーワード検索（タイトル、内容、住所で検索）
+        // キーワード検索（タイトル、内容、住所、都道府県名、市町村名で検索）
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;
             $query->where(function($q) use ($keyword) {
                 $q->where('title', 'LIKE', "%{$keyword}%")
-                  ->orWhere('content', 'LIKE', "%{$keyword}%");
+                  ->orWhere('description', 'LIKE', "%{$keyword}%")
+                  ->orWhere('custom_location', 'LIKE', "%{$keyword}%")
+                  ->orWhereHas('city.prefecture', function($subQ) use ($keyword) {
+                      $subQ->where('name', 'LIKE', "%{$keyword}%");
+                  })
+                  ->orWhereHas('city', function($subQ) use ($keyword) {
+                      $subQ->where('name', 'LIKE', "%{$keyword}%");
+                  });
             });
         }
 

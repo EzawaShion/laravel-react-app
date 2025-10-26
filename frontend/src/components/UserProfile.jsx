@@ -58,6 +58,12 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
 
       if (response.ok) {
         const data = await response.json();
+        
+        // 画像URLを絶対URLに変換
+        if (data.user.profile_image_url && !data.user.profile_image_url.startsWith('http')) {
+          data.user.profile_image_url = 'http://localhost:8000' + data.user.profile_image_url;
+        }
+        
         setUser(data.user);
         setFollowStats({
           followers_count: data.user.followers_count || 0,
@@ -183,6 +189,10 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
             src={user.profile_image_url || '/images/default-avatar.svg'}
             alt="プロフィール画像"
             className="user-profile-image"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = '/images/default-avatar.svg';
+            }}
           />
         </div>
 
