@@ -13,6 +13,10 @@ class PrefectureFavoritePhoto extends Model
         'user_id',
         'prefecture_id',
         'photo_id',
+        'display_position',
+        'position_x',
+        'position_y',
+        'scale',
     ];
 
     public function user()

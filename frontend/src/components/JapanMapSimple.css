@@ -10,8 +10,14 @@
 }
 
 .japan-map-header {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: var(--spacing-md);
+}
+
+.header-content {
+  text-align: left;
 }
 
 .japan-map-header h3 {
@@ -26,6 +32,29 @@
   color: var(--primary-color);
   font-size: 0.9rem;
   font-weight: 500;
+}
+
+.save-map-btn {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.save-map-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.save-map-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .map-error {
@@ -67,7 +96,6 @@
 }
 
 .prefecture-block:hover {
-  transform: translateY(-2px);
   opacity: 0.9;
   fill: var(--surface-hover);
 }
@@ -79,6 +107,10 @@
 
 .prefecture-block.with-photo {
   stroke: rgba(255, 255, 255, 0.9);
+}
+
+.prefecture-block.visited.with-photo {
+  fill: rgba(255, 255, 255, 0.1);
 }
 
 .prefecture-label {
@@ -94,13 +126,15 @@
 }
 
 .map-prefecture-photo {
-  opacity: 0.95;
-  filter: saturate(1.05);
+  opacity: 1;
+  filter: none;
   transition: transform var(--transition-fast);
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .prefecture:hover .map-prefecture-photo {
-  transform: scale(1.02);
+  /* No hover effect */
 }
 
 .map-photo-modal-overlay {
@@ -281,4 +315,146 @@
   .map-photo-placeholder {
     height: 100px;
   }
+}
+
+/* Photo Adjustment Modal */
+.map-adjustment-modal {
+  background: #000;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  color: white;
+}
+
+.map-adjustment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.map-adjustment-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.map-adjustment-body {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.crop-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: #1a1a1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  cursor: grab;
+}
+
+.crop-container:active {
+  cursor: grabbing;
+}
+
+.crop-image {
+  position: absolute;
+  user-select: none;
+  pointer-events: none;
+  /* Events handled by container */
+  transform-origin: center;
+  will-change: transform;
+}
+
+.crop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* The "hole" effect using box-shadow */
+.crop-mask {
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  /* Matches map rect radius */
+  box-sizing: content-box;
+}
+
+.adjustment-controls {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.zoom-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  color: var(--text-secondary);
+}
+
+.zoom-control input[type="range"] {
+  flex: 1;
+  accent-color: var(--primary-color);
+}
+
+.map-adjustment-footer {
+  padding: var(--spacing-md);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

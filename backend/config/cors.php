@@ -15,7 +15,7 @@ return [
     |
     */
     //APIエンドポイントでCORSを有効にする
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'storage/*'],
     //すべてのHTTPメソッドを許可
     'allowed_methods' => ['*'],
     //通信を許可するドメイン

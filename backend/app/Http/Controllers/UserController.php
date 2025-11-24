@@ -234,6 +234,10 @@ class UserController extends Controller
                         'title' => $photo->title,
                         'url' => $photo->image_url ?? ($photo->file_path ? url('storage/' . $photo->file_path) : null),
                         'thumbnail_url' => $photo->thumbnail_url ?? ($photo->file_path ? url('storage/' . $photo->file_path) : null),
+                        'display_position' => $favorite->display_position ?? 'center',
+                        'position_x' => $favorite->position_x ?? 50,
+                        'position_y' => $favorite->position_y ?? 50,
+                        'scale' => $favorite->scale ?? 1.0,
                     ];
                 }
             }
@@ -274,6 +278,10 @@ class UserController extends Controller
             $validated = $request->validate([
                 'prefecture_id' => 'required|integer|exists:prefectures,id',
                 'photo_id' => 'required|integer|exists:photos,id',
+                'display_position' => 'nullable|string',
+                'position_x' => 'nullable|integer|min:0|max:100',
+                'position_y' => 'nullable|integer|min:0|max:100',
+                'scale' => 'nullable|numeric|min:0.1|max:5.0',
             ]);
 
             $photo = Photo::with(['post.city.prefecture'])->findOrFail($validated['photo_id']);
@@ -301,6 +309,10 @@ class UserController extends Controller
                 ],
                 [
                     'photo_id' => $photo->id,
+                    'display_position' => $validated['display_position'] ?? 'custom',
+                    'position_x' => $validated['position_x'] ?? 50,
+                    'position_y' => $validated['position_y'] ?? 50,
+                    'scale' => $validated['scale'] ?? 1.0,
                 ]
             );
 
@@ -312,6 +324,10 @@ class UserController extends Controller
                     'title' => $photo->title,
                     'url' => $photo->image_url ?? ($photo->file_path ? url('storage/' . $photo->file_path) : null),
                     'thumbnail_url' => $photo->thumbnail_url ?? ($photo->file_path ? url('storage/' . $photo->file_path) : null),
+                    'display_position' => $favorite->display_position,
+                    'position_x' => $favorite->position_x,
+                    'position_y' => $favorite->position_y,
+                    'scale' => $favorite->scale,
                 ],
             ]);
         } catch (\Exception $e) {

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
+import { toPng } from 'html-to-image';
 import './JapanMapSimple.css';
 
 const API_BASE_URL = 'http://localhost:8000';
@@ -335,6 +336,20 @@ const prefectureBlocks = [
   },
 ];
 
+const getPreserveAspectRatio = (position) => {
+  switch (position) {
+    case 'top': return 'xMidYMin slice';
+    case 'bottom': return 'xMidYMax slice';
+    case 'left': return 'xMinYMid slice';
+    case 'right': return 'xMaxYMid slice';
+    case 'top-left': return 'xMinYMin slice';
+    case 'top-right': return 'xMaxYMax slice';
+    case 'bottom-left': return 'xMinYMax slice';
+    case 'bottom-right': return 'xMaxYMax slice';
+    default: return 'xMidYMid slice';
+  }
+};
+
 function JapanMapSimple({ userId }) {
   const mapBlocks = useMemo(() => prefectureBlocks, []);
   const [mapData, setMapData] = useState({
@@ -347,6 +362,14 @@ function JapanMapSimple({ userId }) {
   const [selectedBlock, setSelectedBlock] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [saving, setSaving] = useState(false);
+  const mapRef = useRef(null);
+
+  // Adjustment Modal State
+  const [adjustmentPhoto, setAdjustmentPhoto] = useState(null);
+  const [adjustmentValues, setAdjustmentValues] = useState({ x: 50, y: 50, scale: 1 });
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     let isMounted = true;
@@ -426,10 +449,48 @@ function JapanMapSimple({ userId }) {
     setModalVisible(true);
   };
 
-  const handleSelectFavorite = async (photo, prefectureId) => {
-    if (!userId || !photo) {
+  const openAdjustmentModal = (photo, currentValues = null) => {
+    setAdjustmentPhoto(photo);
+    // Load image to get dimensions
+    const img = new Image();
+    img.src = photo.url;
+    img.onload = () => {
+      setImageSize({ width: img.width, height: img.height });
+      if (currentValues) {
+        setAdjustmentValues(currentValues);
+      } else {
+        // Default: Center and cover
+        // We don't need to calculate scale here because the rendering logic
+        // will automatically cover the frame when scale is 1.
+        setAdjustmentValues({ x: 50, y: 50, scale: 1 });
+      }
+    };
+  };
+
+  const handleSaveMapImage = useCallback(async () => {
+    if (mapRef.current === null) {
       return;
     }
+
+    try {
+      const dataUrl = await toPng(mapRef.current, { cacheBust: true, backgroundColor: '#ffffff' });
+      const link = document.createElement('a');
+      link.download = 'japan-map-visited.png';
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('画像の保存に失敗しました', err);
+      alert('画像の保存に失敗しました');
+    }
+  }, [mapRef]);
+
+  const closeAdjustmentModal = () => {
+    setAdjustmentPhoto(null);
+    setAdjustmentValues({ x: 50, y: 50, scale: 1 });
+  };
+
+  const handleSaveAdjustment = async () => {
+    if (!userId || !adjustmentPhoto || !selectedBlock) return;
 
     try {
       setSaving(true);
@@ -442,43 +503,77 @@ function JapanMapSimple({ userId }) {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          prefecture_id: prefectureId,
-          photo_id: photo.id,
+          prefecture_id: selectedBlock.prefectureId,
+          photo_id: adjustmentPhoto.id,
+          display_position: 'custom',
+          position_x: Math.round(adjustmentValues.x),
+          position_y: Math.round(adjustmentValues.y),
+          scale: Number(adjustmentValues.scale).toFixed(2),
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('お気に入り写真の保存に失敗しました');
-      }
+      if (!response.ok) throw new Error('保存に失敗しました');
 
       const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.message || 'お気に入り写真の保存に失敗しました');
-      }
+      if (!result.success) throw new Error(result.message);
 
       setMapData((prev) => {
         const updated = { ...prev.prefecturesById };
-        const target = updated[prefectureId];
-
+        const target = updated[selectedBlock.prefectureId];
         if (target) {
-          updated[prefectureId] = {
+          updated[selectedBlock.prefectureId] = {
             ...target,
-            favorite_photo: result.favorite_photo || null,
+            favorite_photo: {
+              ...result.favorite_photo,
+              position_x: Math.round(adjustmentValues.x),
+              position_y: Math.round(adjustmentValues.y),
+              scale: Number(adjustmentValues.scale),
+            } || null,
           };
         }
-
-        return {
-          ...prev,
-          prefecturesById: updated,
-        };
+        return { ...prev, prefecturesById: updated };
       });
+
+      closeAdjustmentModal();
     } catch (err) {
       console.error(err);
-      alert(err.message || 'お気に入り写真の保存に失敗しました');
+      alert(err.message);
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleDragStart = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    setDragStart({ x: clientX, y: clientY });
+  };
+
+  const handleDragMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    const deltaX = clientX - dragStart.x;
+    const deltaY = clientY - dragStart.y;
+
+    // Convert pixel delta to percentage movement relative to the frame size (approx 200px in modal)
+    // Sensitivity adjustment: 0.2
+    const sensitivity = 0.2;
+    setAdjustmentValues(prev => ({
+      ...prev,
+      x: prev.x + (deltaX * sensitivity),
+      y: prev.y + (deltaY * sensitivity)
+    }));
+
+    setDragStart({ x: clientX, y: clientY });
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
   };
 
   const renderModal = () => {
@@ -490,6 +585,10 @@ function JapanMapSimple({ userId }) {
     const prefectureData = mapData.prefecturesById[prefectureId];
     const photos = prefectureData?.photos || [];
     const favoritePhotoId = prefectureData?.favorite_photo?.id || null;
+    const currentPosition = prefectureData?.favorite_photo?.display_position || 'center';
+    const currentX = prefectureData?.favorite_photo?.position_x ?? 50;
+    const currentY = prefectureData?.favorite_photo?.position_y ?? 50;
+    const currentScale = prefectureData?.favorite_photo?.scale ?? 1;
 
     return (
       <div className="map-photo-modal-overlay" onClick={closeModal}>
@@ -523,23 +622,24 @@ function JapanMapSimple({ userId }) {
                   const isSelected = favoritePhotoId === photo.id;
 
                   return (
-                    <button
-                      key={photo.id}
-                      type="button"
-                      className={`map-photo-item ${isSelected ? 'selected' : ''}`}
-                      onClick={() => handleSelectFavorite(photo, prefectureId)}
-                      disabled={saving}
-                    >
-                      {thumbnail ? (
-                        <img src={thumbnail} alt={photo.title || 'photo'} />
-                      ) : (
-                        <div className="map-photo-placeholder">No Image</div>
-                      )}
-                      <span className="map-photo-caption">
-                        {photo.title || `投稿#${photo.post_id}`}
-                      </span>
-                      {isSelected && <span className="map-photo-badge">選択中</span>}
-                    </button>
+                    <div key={photo.id} className="map-photo-item-wrapper">
+                      <button
+                        type="button"
+                        className={`map-photo-item ${isSelected ? 'selected' : ''}`}
+                        onClick={() => openAdjustmentModal(photo, isSelected ? { x: currentX, y: currentY, scale: currentScale } : null)}
+                        disabled={saving}
+                      >
+                        {thumbnail ? (
+                          <img src={thumbnail} alt={photo.title || 'photo'} />
+                        ) : (
+                          <div className="map-photo-placeholder">No Image</div>
+                        )}
+                        <span className="map-photo-caption">
+                          {photo.title || `投稿#${photo.post_id}`}
+                        </span>
+                        {isSelected && <span className="map-photo-badge">選択中</span>}
+                      </button>
+                    </div>
                   );
                 })}
               </div>
@@ -550,18 +650,159 @@ function JapanMapSimple({ userId }) {
     );
   };
 
+  const renderAdjustmentModal = () => {
+    if (!adjustmentPhoto || !selectedBlock) return null;
+
+    // Calculate frame size that fits in the modal (max 280x280)
+    const MAX_FRAME_SIZE = 280;
+    const blockRatio = selectedBlock.rect.width / selectedBlock.rect.height;
+
+    let frameWidth, frameHeight;
+    if (blockRatio > 1) {
+      frameWidth = MAX_FRAME_SIZE;
+      frameHeight = MAX_FRAME_SIZE / blockRatio;
+    } else {
+      frameHeight = MAX_FRAME_SIZE;
+      frameWidth = MAX_FRAME_SIZE * blockRatio;
+    }
+
+    // Calculate base image size to cover the frame (scale = 1)
+    const imgRatio = imageSize.width / imageSize.height;
+    let baseWidth, baseHeight;
+
+    if (imgRatio > blockRatio) {
+      // Image is wider than frame -> fit height, crop width
+      baseHeight = frameHeight;
+      baseWidth = frameHeight * imgRatio;
+    } else {
+      // Image is taller than frame -> fit width, crop height
+      baseWidth = frameWidth;
+      baseHeight = frameWidth / imgRatio;
+    }
+
+    // Calculate translation
+    // adjustmentValues.x/y are percentages (0-100) of the FRAME size
+    // We want to move the image relative to the frame center.
+    // When x=50, y=50, the image center should align with frame center.
+
+    // Calculate max translation allowed (to keep image covering frame)?
+    // No, let user move freely.
+
+    // Translate logic:
+    // Start with image centered on frame.
+    // Then apply offset based on adjustmentValues.
+    // Note: adjustmentValues are "how much the image is shifted".
+    // Let's define: 50% means centered. 
+    // Moving to 100% means moving image RIGHT by 50% of FRAME width? Or IMAGE width?
+    // Let's stick to FRAME width for consistency with map rendering.
+
+    const translateX = (adjustmentValues.x - 50) * (frameWidth / 100);
+    const translateY = (adjustmentValues.y - 50) * (frameHeight / 100);
+
+    return (
+      <div className="map-photo-modal-overlay" onClick={closeAdjustmentModal}>
+        <div className="map-adjustment-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="map-adjustment-header">
+            <h3>写真の表示位置を調整</h3>
+            <button onClick={closeAdjustmentModal} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+          </div>
+          <div className="map-adjustment-body">
+            <div
+              className="crop-container"
+              onMouseDown={handleDragStart}
+              onMouseMove={handleDragMove}
+              onMouseUp={handleDragEnd}
+              onMouseLeave={handleDragEnd}
+              onTouchStart={handleDragStart}
+              onTouchMove={handleDragMove}
+              onTouchEnd={handleDragEnd}
+            >
+              {/* Image Layer */}
+              <div style={{
+                position: 'relative',
+                width: frameWidth,
+                height: frameHeight,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                overflow: 'visible' // Allow image to bleed out
+              }}>
+                <img
+                  src={adjustmentPhoto.url}
+                  className="crop-image"
+                  style={{
+                    width: baseWidth,
+                    height: baseHeight,
+                    maxWidth: 'none', // Override any global styles
+                    transform: `translate(${translateX}px, ${translateY}px) scale(${adjustmentValues.scale})`
+                  }}
+                  alt="adjustment"
+                  draggable={false}
+                />
+
+                {/* Mask Layer (The Frame) */}
+                <div
+                  className="crop-mask"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: frameWidth,
+                    height: frameHeight,
+                    pointerEvents: 'none'
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="adjustment-controls">
+              <div className="zoom-control">
+                <span>－</span>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="3"
+                  step="0.05"
+                  value={adjustmentValues.scale}
+                  onChange={(e) => setAdjustmentValues(prev => ({ ...prev, scale: parseFloat(e.target.value) }))}
+                />
+                <span>＋</span>
+              </div>
+            </div>
+          </div>
+          <div className="map-adjustment-footer">
+            <button className="btn-secondary" onClick={closeAdjustmentModal}>キャンセル</button>
+            <button className="btn-primary" onClick={handleSaveAdjustment} disabled={saving}>
+              {saving ? '保存中...' : '保存'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="japan-map-container">
       <div className="japan-map-header">
-        <h3>訪問した都道府県</h3>
-        <p className="visit-count">
-          {loading
-            ? '読み込み中...'
-            : `訪問済み ${mapData.totalVisited} / ${mapData.totalPrefectures}`}
-        </p>
+        <div className="header-content">
+          <h3>訪問した都道府県</h3>
+          <p className="visit-count">
+            {loading
+              ? '読み込み中...'
+              : `訪問済み ${mapData.totalVisited} / ${mapData.totalPrefectures}`}
+          </p>
+        </div>
+        <button
+          className="save-map-btn"
+          onClick={handleSaveMapImage}
+          disabled={loading}
+          title="地図を画像として保存"
+        >
+          画像保存
+        </button>
         {error && <p className="map-error">{error}</p>}
       </div>
-      <div className="japan-map-svg-container">
+      <div className="japan-map-svg-container" ref={mapRef}>
         {loading ? (
           <div className="japan-map-loading">地図データを取得しています...</div>
         ) : (
@@ -573,8 +814,8 @@ function JapanMapSimple({ userId }) {
               const rectFill = hasFavorite
                 ? 'rgba(255,255,255,0.05)'
                 : isVisited
-                ? '#D8EFC0'
-                : '#ECF4D9';
+                  ? '#D8EFC0'
+                  : '#ECF4D9';
               const clipId = `clip-${block.id}`;
 
               return (
@@ -595,16 +836,22 @@ function JapanMapSimple({ userId }) {
                   )}
 
                   {hasFavorite && (
-                    <image
-                      className="map-prefecture-photo"
-                      x={block.rect.x}
-                      y={block.rect.y}
-                      width={block.rect.width}
-                      height={block.rect.height}
-                      preserveAspectRatio="xMidYMid slice"
-                      href={prefectureData.favorite_photo.thumbnail_url || prefectureData.favorite_photo.url}
-                      clipPath={`url(#${clipId})`}
-                    />
+                    <g clipPath={`url(#${clipId})`}>
+                      <image
+                        className="map-prefecture-photo"
+                        x={block.rect.x}
+                        y={block.rect.y}
+                        width={block.rect.width}
+                        height={block.rect.height}
+                        preserveAspectRatio="xMidYMid slice"
+                        href={prefectureData.favorite_photo.thumbnail_url || prefectureData.favorite_photo.url}
+                        style={{
+                          transformOrigin: 'center',
+                          transformBox: 'fill-box',
+                          transform: `translate(${(prefectureData.favorite_photo.position_x - 50) * (block.rect.width / 100)}px, ${(prefectureData.favorite_photo.position_y - 50) * (block.rect.height / 100)}px) scale(${prefectureData.favorite_photo.scale || 1})`
+                        }}
+                      />
+                    </g>
                   )}
 
                   <rect
@@ -619,16 +866,18 @@ function JapanMapSimple({ userId }) {
                     strokeWidth={hasFavorite ? 2 : 1}
                     className={`prefecture-block ${isVisited ? 'visited' : ''} ${hasFavorite ? 'with-photo' : ''}`}
                   />
-                  <text
-                    className="prefecture-label"
-                    x={block.text.x}
-                    y={block.text.y}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    style={block.text.writingMode ? { writingMode: block.text.writingMode } : undefined}
-                  >
-                    {block.name}
-                  </text>
+                  {!hasFavorite && (
+                    <text
+                      className="prefecture-label"
+                      x={block.text.x}
+                      y={block.text.y}
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      style={block.text.writingMode ? { writingMode: block.text.writingMode } : undefined}
+                    >
+                      {block.name}
+                    </text>
+                  )}
                 </g>
               );
             })}
@@ -636,6 +885,7 @@ function JapanMapSimple({ userId }) {
         )}
       </div>
       {renderModal()}
+      {renderAdjustmentModal()}
     </div>
   );
 }
