@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\PrefectureFavoritePhoto;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -187,5 +188,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function canShowFollowings()
     {
         return $this->privacy_settings['show_followings'] ?? true;
+    }
+
+    public function favoritePrefecturePhotos()
+    {
+        return $this->hasMany(PrefectureFavoritePhoto::class);
     }
 }

@@ -9,32 +9,34 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(2px);
 }
 
 .follow-list-container {
-  background: white;
-  border-radius: 12px;
+  background: var(--surface-color);
+  border-radius: var(--radius-lg);
   width: 90%;
   max-width: 500px;
   max-height: 80vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-color);
 }
 
 .follow-list-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .follow-list-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .close-button {
@@ -42,15 +44,15 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--text-secondary);
   padding: 5px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
 }
 
 .close-button:hover {
-  background-color: #f3f4f6;
-  color: #374151;
+  background-color: var(--surface-hover);
+  color: var(--text-primary);
 }
 
 .follow-list-content {
@@ -62,13 +64,13 @@
 .loading-message,
 .error-message,
 .empty-message {
-  padding: 40px 20px;
+  padding: var(--spacing-2xl) var(--spacing-lg);
   text-align: center;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .error-message {
-  color: #ef4444;
+  color: var(--error-color);
 }
 
 .users-list {
@@ -78,10 +80,10 @@
 .user-item {
   display: flex;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f3f4f6;
-  transition: background-color 0.2s;
-  gap: 12px;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color var(--transition-fast);
+  gap: var(--spacing-md);
   justify-content: flex-start;
 }
 
@@ -89,20 +91,20 @@
   display: flex;
   align-items: center;
   flex: 1;
-  gap: 12px;
+  gap: var(--spacing-md);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 8px;
-  transition: background-color 0.2s;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast);
   min-width: 0;
 }
 
 .user-link:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--surface-hover);
 }
 
 .user-item:hover {
-  background-color: #f9fafb;
+  background-color: var(--bg-color);
 }
 
 .user-item:last-child {
@@ -115,6 +117,8 @@
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  border: 2px solid var(--surface-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .user-text {
@@ -128,7 +132,7 @@
 .user-name {
   font-size: 1rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -137,7 +141,7 @@
 
 .user-username {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -153,29 +157,30 @@
 }
 
 .load-more-container {
-  padding: 20px;
+  padding: var(--spacing-lg);
   text-align: center;
 }
 
 .load-more-button {
-  background: #3b82f6;
+  background: var(--primary-color);
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 500;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast);
 }
 
 .load-more-button:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--primary-hover);
 }
 
 .load-more-button:disabled {
-  background: #9ca3af;
+  background: var(--text-secondary);
   cursor: not-allowed;
+  opacity: 0.7;
 }
 
 /* レスポンシブデザイン */
@@ -184,33 +189,33 @@
     width: 95%;
     max-height: 90vh;
   }
-  
+
   .follow-list-header {
-    padding: 16px;
+    padding: var(--spacing-md);
   }
-  
+
   .follow-list-header h2 {
     font-size: 1.25rem;
   }
-  
+
   .user-item {
-    padding: 12px 16px;
+    padding: var(--spacing-sm) var(--spacing-md);
   }
-  
+
   .user-avatar {
     width: 40px;
     height: 40px;
-    margin-right: 10px;
+    margin-right: var(--spacing-sm);
   }
-  
+
   .user-name {
     font-size: 0.875rem;
   }
-  
+
   .user-username {
     font-size: 0.75rem;
   }
-  
+
   .user-bio {
     font-size: 0.75rem;
   }

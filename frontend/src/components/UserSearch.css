@@ -1,8 +1,8 @@
 .user-search-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: #f5f5f5;
+  padding: var(--spacing-lg);
+  background-color: var(--bg-color);
   min-height: 100vh;
   box-sizing: border-box;
 }
@@ -12,47 +12,51 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  font-size: 18px;
-  color: #666;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
 }
 
 /* ヘッダー */
 .user-search-header {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--surface-color);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .user-search-header h2 {
   margin: 0;
-  font-size: 24px;
-  color: #333;
+  font-size: 1.5rem;
+  color: var(--text-primary);
 }
 
 .back-button {
-  background: #f0f0f0;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 14px;
-  margin-bottom: 12px;
-  transition: background 0.2s;
+  font-size: 0.9rem;
+  margin-bottom: var(--spacing-md);
+  transition: all var(--transition-fast);
+  color: var(--text-secondary);
 }
 
 .back-button:hover {
-  background: #e0e0e0;
+  background: var(--surface-hover);
+  color: var(--text-primary);
 }
 
 /* 検索フィルター */
 .user-search-filters {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--surface-color);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .filter-group-single {
@@ -62,56 +66,60 @@
 }
 
 .filter-group-single label {
-  font-size: 14px;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: #555;
-  margin-bottom: 8px;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
 }
 
 .search-input {
-  padding: 12px 16px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: all 0.2s;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: all var(--transition-fast);
   width: 100%;
+  background: var(--bg-color);
+  color: var(--text-primary);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #4285f4;
-  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: var(--surface-color);
 }
 
 /* 検索結果 */
 .user-search-results {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--surface-color);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .user-search-results h3 {
-  margin: 0 0 8px 0;
-  font-size: 20px;
-  color: #333;
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
 }
 
 .user-count {
-  margin: 0 0 20px 0;
-  font-size: 14px;
-  color: #666;
+  margin: 0 0 var(--spacing-lg) 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
 }
 
 /* ユーザーなしメッセージ */
 .no-users-message {
   text-align: center;
-  padding: 60px 20px;
-  color: #999;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  color: var(--text-secondary);
 }
 
 .no-users-message p {
-  font-size: 16px;
+  font-size: 1rem;
   margin: 0;
 }
 
@@ -119,7 +127,7 @@
 .user-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-md);
 }
 
 /* ユーザーカード */
@@ -127,23 +135,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  background: #fafafa;
-  transition: all 0.2s;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--surface-color);
+  transition: all var(--transition-fast);
 }
 
 .user-card:hover {
-  background: #f5f5f5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--surface-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--spacing-md);
   flex: 1;
+  cursor: pointer;
 }
 
 .user-avatar {
@@ -151,7 +161,8 @@
   height: 60px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--surface-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .user-details {
@@ -160,28 +171,28 @@
 
 .user-details h4 {
   margin: 0 0 4px 0;
-  font-size: 18px;
-  color: #333;
+  font-size: 1.1rem;
+  color: var(--text-primary);
 }
 
 .user-username {
-  margin: 0 0 8px 0;
-  font-size: 13px;
-  color: #888;
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
 }
 
 .user-profile {
-  margin: 0 0 8px 0;
-  font-size: 14px;
-  color: #666;
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 0.9rem;
+  color: var(--text-primary);
   line-height: 1.5;
 }
 
 .user-meta {
   display: flex;
-  gap: 16px;
-  font-size: 13px;
-  color: #888;
+  gap: var(--spacing-md);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
 }
 
 .user-location {
@@ -198,39 +209,41 @@
 
 /* フォローボタン */
 .follow-button {
-  padding: 10px 24px;
+  padding: 0.5rem 1.5rem;
   border: none;
-  border-radius: 20px;
-  font-size: 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   white-space: nowrap;
 }
 
 .follow-button:not(.following) {
-  background: #4285f4;
+  background: var(--primary-color);
   color: white;
+  box-shadow: var(--shadow-sm);
 }
 
 .follow-button:not(.following):hover {
-  background: #3367d6;
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .follow-button.following {
-  background: #e8f0fe;
-  color: #1967d2;
-  border: 1px solid #d2e3fc;
+  background: var(--surface-color);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
 }
 
 .follow-button.following:hover {
-  background: #d2e3fc;
+  background: var(--surface-hover);
 }
 
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
   .user-search-container {
-    padding: 12px;
+    padding: var(--spacing-md);
   }
 
   .user-search-filters {
@@ -240,7 +253,7 @@
   .user-card {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: var(--spacing-md);
   }
 
   .user-info {
@@ -253,7 +266,6 @@
 
   .user-meta {
     flex-direction: column;
-    gap: 8px;
+    gap: var(--spacing-sm);
   }
 }
-

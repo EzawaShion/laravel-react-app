@@ -3,102 +3,115 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  background: var(--primary-gradient);
+  padding: var(--spacing-lg);
 }
 
 .resend-verification-form {
-  background: white;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  background: var(--surface-color);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
   width: 100%;
   max-width: 400px;
 }
 
 .resend-verification-form h2 {
   text-align: center;
-  color: #333;
-  margin-bottom: 10px;
-  font-size: 24px;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .description {
   text-align: center;
-  color: #666;
-  margin-bottom: 30px;
-  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xl);
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
-  color: #333;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-primary);
   font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .form-group input {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e1e5e9;
-  border-radius: 6px;
-  font-size: 16px;
-  transition: border-color 0.3s ease;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: border-color var(--transition-fast);
   box-sizing: border-box;
+  background: var(--bg-color);
+  color: var(--text-primary);
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: var(--surface-color);
 }
 
 .submit-button {
   width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0.75rem;
+  background: var(--primary-gradient);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 16px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease;
-  margin-bottom: 20px;
+  transition: all var(--transition-fast);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .submit-button:hover:not(:disabled) {
   transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  filter: brightness(1.1);
 }
 
 .submit-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
+  background: var(--text-secondary);
 }
 
 .success-message {
-  background: #d4edda;
-  color: #155724;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 20px;
+  background: #dcfce7;
+  color: var(--success-color);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
   text-align: center;
-  border: 1px solid #c3e6cb;
+  border: 1px solid #bbf7d0;
+  font-size: 0.9rem;
 }
 
 .error-message {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 20px;
+  background: #fef2f2;
+  color: var(--error-color);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
   text-align: center;
-  border: 1px solid #f5c6cb;
+  border: 1px solid #fecaca;
+  font-size: 0.9rem;
 }
 
 .back-to-login {
@@ -108,23 +121,24 @@
 .link-button {
   background: none;
   border: none;
-  color: #667eea;
+  color: var(--primary-color);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.9rem;
   text-decoration: underline;
-  transition: color 0.3s ease;
+  transition: color var(--transition-fast);
+  font-weight: 600;
 }
 
 .link-button:hover {
-  color: #764ba2;
+  color: var(--primary-hover);
 }
 
 @media (max-width: 480px) {
   .resend-verification-form {
-    padding: 30px 20px;
+    padding: var(--spacing-xl) var(--spacing-lg);
   }
-  
+
   .resend-verification-form h2 {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
-} 
+}

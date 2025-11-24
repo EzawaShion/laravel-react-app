@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import './UserSearch.css';
 
 // デバウンス用カスタムフック
@@ -39,7 +39,7 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile }) {
     try {
       setLoading(true);
       const response = await fetch('http://localhost:8000/api/users/search');
-      
+
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -69,7 +69,7 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile }) {
         (user.username && user.username.toLowerCase().includes(keyword))
       );
     });
-    
+
     setUsers(filtered);
   };
 
@@ -167,13 +167,12 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile }) {
           <div className="user-list">
             {users.map(user => (
               <div key={user.id} className="user-card">
-                <div 
+                <div
                   className="user-info"
                   onClick={() => onNavigateToUserProfile && onNavigateToUserProfile(user.id)}
-                  style={{ cursor: 'pointer' }}
                 >
-                  <img 
-                    src={user.avatar_url || 'http://localhost:8000/images/default-avatar.svg'} 
+                  <img
+                    src={user.avatar_url || 'http://localhost:8000/images/default-avatar.svg'}
                     alt={user.name}
                     className="user-avatar"
                     onError={(e) => {
@@ -188,8 +187,8 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile }) {
                     )}
                     {user.profile && (
                       <p className="user-profile">
-                        {user.profile.length > 80 
-                          ? `${user.profile.substring(0, 80)}...` 
+                        {user.profile.length > 80
+                          ? `${user.profile.substring(0, 80)}...`
                           : user.profile
                         }
                       </p>

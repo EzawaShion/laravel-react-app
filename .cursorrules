@@ -1,0 +1,37 @@
+# Project Context
+- App Name: 旅行プランナーアプリ (Travel Planner App)
+- Description: 旅行の計画、記録、共有ができるプラットフォーム。
+- Key Features: 投稿（旅行記）、検索（地図・フィルター）、プロフィール、お気に入り。
+- Reference: 詳細は `画面遷移図.md` を常に参照すること。
+
+# Tech Stack
+## Frontend
+- Framework: React (Vite)
+- Language: JavaScript (JSX)
+- State Management: React Hooks
+- Map Library: Leaflet / React Leaflet
+- Styling: Vanilla CSS (CSS Modules推奨) or Tailwind (if configured)
+- HTTP Client: fetch or axios
+
+## Backend
+- Framework: Laravel
+- Language: PHP
+- API Style: RESTful API
+
+## Infrastructure
+- Docker, Nginx, MySQL
+
+# Coding Guidelines
+## General
+- 日本語で応答してください。
+- コードの変更を行う際は、既存のスタイルと整合性を取ること。
+- 「画面遷移図.md」のフェーズ定義（MVP -> 機能拡張）を意識して実装を提案すること。
+
+## Frontend (React)
+- コンポーネントは機能ごとに分割し、再利用性を高めること。
+- モバイルファーストでレスポンシブなデザインを心がけること。
+- ユーザー体験（UX）を重視し、リッチなインタラクションやアニメーションを取り入れること。
+
+## Backend (Laravel)
+- コントローラーは薄く保ち、ビジネスロジックはService層やModelに記述することを検討すること。
+- APIのレスポンスはJSON形式で統一すること。

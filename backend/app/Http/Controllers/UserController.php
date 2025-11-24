@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\PrefectureFavoritePhoto;
+use App\Models\Photo;
+use App\Models\Prefecture;
 
 class UserController extends Controller
 {
@@ -142,6 +145,181 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'フォローの切り替えに失敗しました'
+            ], 500);
+        }
+    }
+
+    public function getMapData($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            $posts = $user->posts()
+                ->with(['city.prefecture', 'photos'])
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            $prefectures = [];
+
+            foreach ($posts as $post) {
+                $prefecture = optional($post->city)->prefecture;
+
+                if (!$prefecture) {
+                    continue;
+                }
+
+                if (!isset($prefectures[$prefecture->id])) {
+                    $prefectures[$prefecture->id] = [
+                        'id' => $prefecture->id,
+                        'name' => $prefecture->name,
+                        'code' => $prefecture->code,
+                        'visit_count' => 0,
+                        'first_visit' => null,
+                        'last_visit' => null,
+                        'photos' => [],
+                        'favorite_photo' => null,
+                        '_photo_index' => [],
+                    ];
+                }
+
+                $prefectureData = &$prefectures[$prefecture->id];
+                $prefectureData['visit_count']++;
+
+                if ($post->created_at) {
+                    $createdAt = $post->created_at->toDateTimeString();
+
+                    if (!$prefectureData['first_visit'] || $createdAt < $prefectureData['first_visit']) {
+                        $prefectureData['first_visit'] = $createdAt;
+                    }
+
+                    if (!$prefectureData['last_visit'] || $createdAt > $prefectureData['last_visit']) {
+                        $prefectureData['last_visit'] = $createdAt;
+                    }
+                }
+
+                foreach ($post->photos as $photo) {
+                    if (isset($prefectureData['_photo_index'][$photo->id])) {
+                        continue;
+                    }
+
+                    $prefectureData['_photo_index'][$photo->id] = true;
+
+                    $prefectureData['photos'][] = [
+                        'id' => $photo->id,
+                        'post_id' => $post->id,
+                        'title' => $photo->title,
+                        'description' => $photo->description,
+                        'url' => $photo->image_url ?? ($photo->file_path ? url('storage/' . $photo->file_path) : null),
+                        'thumbnail_url' => $photo->thumbnail_url ?? ($photo->file_path ? url('storage/' . $photo->file_path) : null),
+                    ];
+                }
+            }
+
+            if (!empty($prefectures)) {
+                $favoritePhotos = PrefectureFavoritePhoto::where('user_id', $user->id)
+                    ->whereIn('prefecture_id', array_keys($prefectures))
+                    ->with('photo')
+                    ->get();
+
+                foreach ($favoritePhotos as $favorite) {
+                    $photo = $favorite->photo;
+
+                    if (!$photo || !isset($prefectures[$favorite->prefecture_id])) {
+                        continue;
+                    }
+
+                    $prefectures[$favorite->prefecture_id]['favorite_photo'] = [
+                        'id' => $photo->id,
+                        'post_id' => $photo->post_id,
+                        'title' => $photo->title,
+                        'url' => $photo->image_url ?? ($photo->file_path ? url('storage/' . $photo->file_path) : null),
+                        'thumbnail_url' => $photo->thumbnail_url ?? ($photo->file_path ? url('storage/' . $photo->file_path) : null),
+                    ];
+                }
+            }
+
+            foreach ($prefectures as &$prefectureData) {
+                unset($prefectureData['_photo_index']);
+            }
+
+            ksort($prefectures);
+
+            return response()->json([
+                'success' => true,
+                'prefectures' => array_values($prefectures),
+                'total_prefectures' => Prefecture::count(),
+                'total_visited' => count($prefectures),
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('ユーザー地図データ取得エラー: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => '地図データの取得に失敗しました'
+            ], 500);
+        }
+    }
+
+    public function setFavoritePhoto(Request $request, $id)
+    {
+        try {
+            $authUser = Auth::user();
+
+            if (!$authUser || (int) $authUser->id !== (int) $id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'お気に入り写真を更新できません'
+                ], 403);
+            }
+
+            $validated = $request->validate([
+                'prefecture_id' => 'required|integer|exists:prefectures,id',
+                'photo_id' => 'required|integer|exists:photos,id',
+            ]);
+
+            $photo = Photo::with(['post.city.prefecture'])->findOrFail($validated['photo_id']);
+
+            if (!$photo->post || (int) $photo->post->user_id !== (int) $authUser->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '指定した写真は自身の投稿ではありません'
+                ], 403);
+            }
+
+            $prefecture = optional(optional($photo->post)->city)->prefecture;
+
+            if (!$prefecture || (int) $prefecture->id !== (int) $validated['prefecture_id']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '写真と都道府県が一致しません'
+                ], 422);
+            }
+
+            $favorite = PrefectureFavoritePhoto::updateOrCreate(
+                [
+                    'user_id' => $authUser->id,
+                    'prefecture_id' => $validated['prefecture_id'],
+                ],
+                [
+                    'photo_id' => $photo->id,
+                ]
+            );
+
+            return response()->json([
+                'success' => true,
+                'favorite_photo' => [
+                    'id' => $photo->id,
+                    'post_id' => $photo->post_id,
+                    'title' => $photo->title,
+                    'url' => $photo->image_url ?? ($photo->file_path ? url('storage/' . $photo->file_path) : null),
+                    'thumbnail_url' => $photo->thumbnail_url ?? ($photo->file_path ? url('storage/' . $photo->file_path) : null),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('お気に入り写真設定エラー: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'お気に入り写真の設定に失敗しました'
             ], 500);
         }
     }

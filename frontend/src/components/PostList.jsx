@@ -14,15 +14,15 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
   const fetchPosts = async () => {
     setLoading(true);
     setError('');
-    
+
     try {
       const token = localStorage.getItem('token');
       const headers = {};
-      
+
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const response = await fetch('http://localhost:8000/api/posts', {
         headers
       });
@@ -47,7 +47,7 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-        const response = await fetch(`http://localhost:8000/api/follow/status/${userId}`, {
+      const response = await fetch(`http://localhost:8000/api/follow/status/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -131,13 +131,13 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
       <div className="post-list-header">
         <h2>投稿一覧</h2>
         <div className="header-buttons">
-          <button 
+          <button
             onClick={() => onMapView && onMapView()}
             className="map-view-button"
           >
             🗺️ マップ表示
           </button>
-          <button 
+          <button
             onClick={() => {
               console.log('PostListの新規投稿ボタンがクリックされました');
               onCreatePost();
@@ -157,8 +157,8 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
       ) : (
         <div className="posts-grid">
           {posts.map(post => (
-            <div 
-              key={post.id} 
+            <div
+              key={post.id}
               className="post-card"
               onClick={() => onPostClick(post)}
             >
@@ -166,12 +166,12 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
                 <h3 className="post-title">{post.title}</h3>
                 <span className="post-date">{formatDate(post.created_at)}</span>
               </div>
-              
+
               <div className="post-content">
                 {post.first_photo_url ? (
                   <div className="post-image">
-                    <img 
-                      src={post.first_photo_url} 
+                    <img
+                      src={post.first_photo_url}
                       alt={post.title}
                       className="post-thumbnail"
                       onError={(e) => {
@@ -182,13 +182,13 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
                     />
                   </div>
                 ) : (
-                  <div style={{fontSize: '12px', color: '#999'}}>
+                  <div className="debug-info">
                     Debug: No first_photo_url for post {post.id}
                   </div>
                 )}
                 <p className="post-description">
-                  {post.description.length > 100 
-                    ? `${post.description.substring(0, 100)}...` 
+                  {post.description.length > 100
+                    ? `${post.description.substring(0, 100)}...`
                     : post.description
                   }
                 </p>
@@ -196,8 +196,8 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
 
               <div className="post-footer">
                 <div className="post-author">
-                  <div 
-                    className="author-info" 
+                  <div
+                    className="author-info"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (post.user && onUserClick) {
@@ -215,14 +215,14 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
                     </div>
                   </div>
                   {post.user && post.user.id !== JSON.parse(localStorage.getItem('user'))?.id && (
-                    <FollowButton 
-                      userId={post.user.id} 
+                    <FollowButton
+                      userId={post.user.id}
                       initialIsFollowing={followStates[post.user.id] || false}
                       onFollowChange={(isFollowing) => handleFollowChange(post.user.id, isFollowing)}
                     />
                   )}
                 </div>
-                
+
                 <div className="post-location">
                   {post.city && (
                     <span className="location-text">
@@ -236,10 +236,10 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
                     </span>
                   )}
                 </div>
-                
+
                 <div className="post-actions" onClick={(e) => e.stopPropagation()}>
-                  <LikeButton 
-                    postId={post.id} 
+                  <LikeButton
+                    postId={post.id}
                     initialIsLiked={(() => {
                       // APIから取得したcurrent_user_idまたはローカルストレージのユーザーIDを使用
                       const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;

@@ -1,14 +1,18 @@
 .like-button {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: var(--spacing-xs);
+  padding: 0.5rem 0.75rem;
   border: none;
   background: transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-radius: 8px;
-  font-size: 14px;
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+}
+
+.like-button:hover {
+  background-color: var(--surface-hover);
 }
 
 .like-button:disabled {
@@ -17,27 +21,32 @@
 }
 
 .like-icon {
-  font-size: 18px;
-  transition: transform 0.2s ease;
+  font-size: 1.2rem;
+  transition: transform var(--transition-fast);
 }
 
 .like-button.liked .like-icon {
   animation: heartBeat 0.3s ease;
+  color: var(--error-color);
 }
 
-/*.like-button.not-liked:hover .like-icon {
+.like-button.not-liked .like-icon {
+  color: var(--text-secondary);
+}
+
+.like-button:hover .like-icon {
   transform: scale(1.1);
-} */
+}
 
 .like-count {
   font-weight: 500;
-  color: #666;
+  color: var(--text-secondary);
   min-width: 16px;
   text-align: center;
 }
 
 .like-button.liked .like-count {
-  color: #e53e3e;
+  color: var(--error-color);
   font-weight: 600;
 }
 
@@ -45,18 +54,23 @@
   0% {
     transform: scale(1);
   }
+
   50% {
-    transform: scale(1.2);
+    transform: scale(1.3);
   }
+
   100% {
     transform: scale(1);
   }
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }

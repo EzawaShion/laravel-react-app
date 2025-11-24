@@ -57,6 +57,7 @@ Route::get('/photo-groups/{id}', [PhotoGroupController::class, 'show']);
 
 // ユーザー検索関連のルート（読み取りは認証不要）
 Route::get('/users/search', [UserController::class, 'search']);
+Route::get('/users/{id}/map', [UserController::class, 'getMapData']);
 Route::get('/users/{id}', [UserController::class, 'show']);
 
 // 認証が必要なルート
@@ -103,6 +104,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // ユーザー関連のルート（フォロー/フォロー解除は認証必要）
     Route::post('/users/{id}/follow', [UserController::class, 'toggleFollow']);
+    Route::post('/users/{id}/favorite-photo', [UserController::class, 'setFavoritePhoto']);
 });
 
 // テスト用のAPIエンドポイント

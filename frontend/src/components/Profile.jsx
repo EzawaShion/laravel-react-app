@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import FollowList from './FollowList';
+import JapanMapSimple from './JapanMapSimple';
 import './Profile.css';
 
 function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout, onNavigateToUserSearch }) {
@@ -27,6 +28,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
   });
   const [myPosts, setMyPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('posts');
 
   useEffect(() => {
     fetchProfile();
@@ -51,12 +53,12 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
 
       if (response.ok) {
         const data = await response.json();
-        
+
         // 画像URLを絶対URLに変換
         if (data.user.profile_image_url && !data.user.profile_image_url.startsWith('http')) {
           data.user.profile_image_url = 'http://localhost:8000' + data.user.profile_image_url;
         }
-        
+
         setUser(data.user);
         setEditForm({
           name: data.user.name || '',
@@ -102,14 +104,14 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
   const fetchMyPosts = async () => {
     try {
       setPostsLoading(true);
-      
+
       // プロフィール情報から現在のユーザーIDを取得
       if (!user || !user.id) {
         console.log('User not loaded yet, skipping posts fetch');
         setPostsLoading(false);
         return;
       }
-      
+
       // 全ての投稿を取得して、現在のユーザーの投稿をフィルタリング
       const response = await fetch('http://localhost:8000/api/posts', {
         headers: {
@@ -124,11 +126,11 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
         const data = await response.json();
         console.log('=== All Posts Response ===');
         console.log('Total posts:', data.posts?.length || 0);
-        
+
         // 現在のユーザーの投稿のみをフィルタリング
         const myPosts = data.posts?.filter(post => post.user_id === user.id) || [];
         console.log('My posts:', myPosts.length);
-        
+
         setMyPosts(myPosts);
       } else {
         console.error('投稿の取得に失敗しました');
@@ -328,7 +330,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
         <h1>プロフィール</h1>
         <div className="header-buttons">
           {onNavigateToUserSearch && (
-            <button 
+            <button
               className="user-search-button"
               onClick={onNavigateToUserSearch}
             >
@@ -336,7 +338,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
             </button>
           )}
           {onLogout && (
-            <button 
+            <button
               className="logout-button"
               onClick={() => {
                 if (window.confirm('ログアウトしますか？')) {
@@ -608,60 +610,83 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
 
       {/* 自分の投稿一覧セクション */}
       <div className="profile-posts-section">
-        <h3 className="posts-section-title">自分の投稿</h3>
+        <div className="tabs">
+          <button
+            onClick={() => setActiveTab('posts')}
+            className={`tab-button ${activeTab === 'posts' ? 'active' : ''}`}
+          >
+            投稿一覧
+          </button>
+          <button
+            onClick={() => setActiveTab('map')}
+            className={`tab-button ${activeTab === 'map' ? 'active' : ''}`}
+          >
+            日本地図
+          </button>
+        </div>
 
-        {postsLoading ? (
-          <div className="posts-loading">
-            <p>投稿を読み込み中...</p>
-          </div>
-        ) : myPosts.length === 0 ? (
-          <div className="no-posts">
-            <p>まだ投稿がありません</p>
-          </div>
-        ) : (
-          <div className="posts-grid">
-            {myPosts.map((post) => (
-              <div key={post.id} className="post-card" onClick={() => onPostClick && onPostClick(post.id)}>
-                <div className="post-header">
-                  <h4 className="post-title">{post.title}</h4>
-                  <span className="post-date">
-                    {new Date(post.created_at).toLocaleDateString('ja-JP')}
-                  </span>
-                </div>
+        {activeTab === 'posts' && (
+          <>
+            <h3 className="posts-section-title">自分の投稿</h3>
 
-                <div className="post-content">
-                  {post.first_photo_url && (
-                    <div className="post-image">
-                      <img 
-                        src={post.first_photo_url} 
-                        alt={post.title}
-                        className="post-thumbnail"
-                      />
-                    </div>
-                  )}
-                  
-                  <p className="post-description">{post.description}</p>
-
-                  {post.city && (
-                    <div className="post-location">
-                      📍 {post.city.prefecture?.name} {post.city.name}
-                    </div>
-                  )}
-
-                  {post.custom_location && (
-                    <div className="post-location">
-                      📍 {post.custom_location}
-                    </div>
-                  )}
-                </div>
-
-                <div className="post-stats">
-                  <span className="likes-count">❤️ {post.likes_count}</span>
-                  <span className="photos-count">📷 {post.total_photos || 0}</span>
-                </div>
+            {postsLoading ? (
+              <div className="posts-loading">
+                <p>投稿を読み込み中...</p>
               </div>
-            ))}
-          </div>
+            ) : myPosts.length === 0 ? (
+              <div className="no-posts">
+                <p>まだ投稿がありません</p>
+              </div>
+            ) : (
+              <div className="posts-grid">
+                {myPosts.map((post) => (
+                  <div key={post.id} className="post-card" onClick={() => onPostClick && onPostClick(post.id)}>
+                    <div className="post-header">
+                      <h4 className="post-title">{post.title}</h4>
+                      <span className="post-date">
+                        {new Date(post.created_at).toLocaleDateString('ja-JP')}
+                      </span>
+                    </div>
+
+                    <div className="post-content">
+                      {post.first_photo_url && (
+                        <div className="post-image">
+                          <img
+                            src={post.first_photo_url}
+                            alt={post.title}
+                            className="post-thumbnail"
+                          />
+                        </div>
+                      )}
+
+                      <p className="post-description">{post.description}</p>
+
+                      {post.city && (
+                        <div className="post-location">
+                          📍 {post.city.prefecture?.name} {post.city.name}
+                        </div>
+                      )}
+
+                      {post.custom_location && (
+                        <div className="post-location">
+                          📍 {post.custom_location}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="post-stats">
+                      <span className="likes-count">❤️ {post.likes_count}</span>
+                      <span className="photos-count">📷 {post.total_photos || 0}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'map' && user && (
+          <JapanMapSimple userId={user.id} />
         )}
       </div>
 

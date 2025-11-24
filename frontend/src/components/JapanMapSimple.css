@@ -1,0 +1,284 @@
+.japan-map-container {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  background: var(--surface-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+.japan-map-header {
+  text-align: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.japan-map-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.visit-count {
+  margin: var(--spacing-xs) 0 0;
+  color: var(--primary-color);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.map-error {
+  margin-top: var(--spacing-sm);
+  color: var(--error-color);
+  font-size: 0.85rem;
+}
+
+.japan-map-svg-container {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-color);
+  padding: var(--spacing-md);
+}
+
+.japan-map-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.japan-map-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 360px;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.prefecture {
+  cursor: pointer;
+}
+
+.prefecture-block {
+  transition: transform var(--transition-fast), opacity var(--transition-fast), stroke-width var(--transition-fast);
+  fill: var(--surface-color);
+  stroke: var(--border-color);
+}
+
+.prefecture-block:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+  fill: var(--surface-hover);
+}
+
+.prefecture-block.visited {
+  fill: var(--success-color);
+  stroke: var(--success-color);
+}
+
+.prefecture-block.with-photo {
+  stroke: rgba(255, 255, 255, 0.9);
+}
+
+.prefecture-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--text-primary);
+  pointer-events: none;
+}
+
+.prefecture-label[style*='vertical-rl'] {
+  writing-mode: vertical-rl;
+  glyph-orientation-vertical: auto;
+}
+
+.map-prefecture-photo {
+  opacity: 0.95;
+  filter: saturate(1.05);
+  transition: transform var(--transition-fast);
+}
+
+.prefecture:hover .map-prefecture-photo {
+  transform: scale(1.02);
+}
+
+.map-photo-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-md);
+  backdrop-filter: blur(2px);
+}
+
+.map-photo-modal {
+  background: var(--surface-color);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 880px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-color);
+}
+
+.map-photo-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.map-photo-modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.map-photo-modal-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.map-photo-modal-header button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast);
+}
+
+.map-photo-modal-header button:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.map-photo-modal-body {
+  flex: 1;
+  padding: var(--spacing-lg);
+  overflow-y: auto;
+  background: var(--bg-color);
+}
+
+.map-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.map-photo-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-color);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.map-photo-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-color);
+}
+
+.map-photo-item.selected {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-lg);
+}
+
+.map-photo-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.map-photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 120px;
+  background: var(--bg-color);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+}
+
+.map-photo-caption {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-photo-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--success-color);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.map-photo-empty {
+  padding: var(--spacing-2xl) 0;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .japan-map-container {
+    padding: var(--spacing-md);
+  }
+
+  .japan-map-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .prefecture-label {
+    font-size: 10px;
+  }
+
+  .map-photo-modal {
+    max-width: 100%;
+  }
+
+  .map-photo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--spacing-sm);
+  }
+
+  .map-photo-item img,
+  .map-photo-placeholder {
+    height: 100px;
+  }
+}

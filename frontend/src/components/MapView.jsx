@@ -35,7 +35,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   // デバッグ用ログ
   console.log('MapView props:', {
     onNavigateToPostList: !!onNavigateToPostList,
@@ -56,10 +56,10 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   });
   const [prefectures, setPrefectures] = useState([]);
   const [cities, setCities] = useState([]);
-  
+
   // debounceされた検索パラメータ（500ms遅延）
   const debouncedSearchParams = useDebounce(searchParams, 500);
-  
+
   // 日本の地理的境界（少し余裕を持たせた範囲）
   const japanBounds = [
     [20.0, 122.5], // 南西端（沖縄県・与那国島）
@@ -86,10 +86,10 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   // リアルタイム検索（debounceされたパラメータが変更された時）
   useEffect(() => {
     // 検索パラメータに何か値がある場合のみ検索実行
-    const hasSearchValue = Object.values(debouncedSearchParams).some(value => 
+    const hasSearchValue = Object.values(debouncedSearchParams).some(value =>
       value && value.toString().trim() !== ''
     );
-    
+
     if (hasSearchValue) {
       performRealtimeSearch(debouncedSearchParams);
     } else if (posts.length > 0) {
@@ -151,11 +151,11 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
       console.log('リアルタイム検索URL:', url);
 
       const response = await fetch(url);
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('リアルタイム検索結果:', data);
-        
+
         // 検索結果が0件の場合
         if (data.posts.length === 0) {
           const searchTitle = getSearchTitle(params);
@@ -164,14 +164,14 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
           setShowSidePanel(true);
           return;
         }
-        
+
         // 検索タイプとデータを決定
         const selectedPrefecture = prefectures.find(p => p.id == params.prefecture_id);
         const selectedCity = cities.find(c => c.id == params.city_id);
-        
+
         let searchType = 'keyword';
         let searchData = {};
-        
+
         if (selectedCity) {
           searchType = 'city';
           searchData = { city: selectedCity };
@@ -179,7 +179,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
           searchType = 'prefecture';
           searchData = { prefecture: selectedPrefecture };
         }
-        
+
         handleSearchResults(data.posts, getSearchTitle(params), searchType, searchData);
       } else {
         console.error('リアルタイム検索に失敗しました:', response.status);
@@ -194,18 +194,18 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
     let title = '検索結果';
     const selectedPrefecture = prefectures.find(p => p.id == params.prefecture_id);
     const selectedCity = cities.find(c => c.id == params.city_id);
-    
+
     if (selectedPrefecture) {
       title += ` - ${selectedPrefecture.name}`;
       if (selectedCity) {
         title += `${selectedCity.name}`;
       }
     }
-    
+
     if (params.keyword) {
       title += ` "${params.keyword}"`;
     }
-    
+
     return title;
   };
 
@@ -231,7 +231,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
       if (response.ok) {
         const data = await response.json();
         // 座標情報がある投稿のみをフィルタリング
-        const postsWithCoordinates = data.posts.filter(post => 
+        const postsWithCoordinates = data.posts.filter(post =>
           post.latitude && post.longitude
         );
         setPosts(postsWithCoordinates);
@@ -254,7 +254,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
         (position) => {
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
-          
+
           // 日本の境界内かチェック
           if (lat >= 20.0 && lat <= 46.0 && lng >= 122.5 && lng <= 154.5) {
             setCenter([lat, lng]);
@@ -280,16 +280,16 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
 
   // 特定の場所の投稿を表示
   const handleLocationClick = (latitude, longitude) => {
-    const locationPosts = posts.filter(post => 
-      Math.abs(parseFloat(post.latitude) - latitude) < 0.001 && 
+    const locationPosts = posts.filter(post =>
+      Math.abs(parseFloat(post.latitude) - latitude) < 0.001 &&
       Math.abs(parseFloat(post.longitude) - longitude) < 0.001
     );
-    
+
     // 重複を排除
-    const uniquePosts = locationPosts.filter((post, index, self) => 
+    const uniquePosts = locationPosts.filter((post, index, self) =>
       index === self.findIndex(p => p.id === post.id)
     );
-    
+
     if (uniquePosts.length > 0) {
       console.log('ピンクリック - 投稿数:', uniquePosts.length);
       setSelectedLocationPosts(uniquePosts);
@@ -304,7 +304,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
     setSelectedLocationPosts(searchResults);
     setSelectedLocationName(searchTitle);
     setShowSidePanel(true);
-    
+
     // 都道府県または市町村検索の場合、地図をフォーカス
     if (searchType === 'prefecture' && searchData.prefecture) {
       const { latitude, longitude } = searchData.prefecture;
@@ -331,7 +331,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
 
   // サイドパネルを閉じる（折りたたむ）
   const closeSidePanel = () => {
-    console.log('サイドバーを折りたたみ中...', { 
+    console.log('サイドバーを折りたたみ中...', {
       before: { isSidebarCollapsed, showSidePanel },
       after: { isSidebarCollapsed: true, showSidePanel: false }
     });
@@ -343,7 +343,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
 
   // サイドパネルを開く
   const openSidePanel = () => {
-    console.log('サイドバーを表示中...', { 
+    console.log('サイドバーを表示中...', {
       before: { isSidebarCollapsed, showSidePanel, selectedLocationPosts: selectedLocationPosts.length },
       after: { isSidebarCollapsed: false, showSidePanel: true }
     });
@@ -375,97 +375,47 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
 
   return (
     <div className="map-view-container">
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '15px 20px',
-        background: 'white',
-        borderBottom: '1px solid #e5e7eb',
-        position: 'relative',
-        zIndex: 1000
-      }}>
-        <div style={{
-          display: 'flex',
-          gap: '10px',
-          alignItems: 'center'
-        }}>
-          <button 
+      <div className="map-header-container">
+        <div className="header-buttons-group">
+          <button
             onClick={() => {
               console.log('投稿一覧ボタンクリック');
               if (onNavigateToPostList) {
                 onNavigateToPostList();
               }
             }}
-            style={{
-              padding: '8px 12px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '12px'
-            }}
+            className="header-action-button"
           >
             📋 投稿一覧
           </button>
-          <button 
+          <button
             onClick={() => {
               console.log('新規投稿ボタンクリック');
               if (onNavigateToCreatePost) {
                 onNavigateToCreatePost();
               }
             }}
-            style={{
-              padding: '8px 12px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '12px'
-            }}
+            className="header-action-button"
           >
             ✏️ 新規投稿
           </button>
-          <button 
+          <button
             onClick={() => {
               console.log('プロフィールボタンクリック');
               if (onNavigateToProfile) {
                 onNavigateToProfile();
               }
             }}
-            style={{
-              padding: '8px 12px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '12px'
-            }}
+            className="header-action-button"
           >
             👤 プロフィール
           </button>
         </div>
-        
+
         {/* 検索欄 */}
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          alignItems: 'center',
-          flex: 1,
-          maxWidth: '600px',
-          margin: '0 20px'
-        }}>
+        <div className="search-bar-container">
           <select
-            style={{
-              padding: '6px 8px',
-              border: '1px solid #d1d5db',
-              borderRadius: '4px',
-              fontSize: '12px',
-              minWidth: '120px'
-            }}
+            className="search-select"
             value={searchParams.prefecture_id || ''}
             onChange={(e) => {
               const prefectureId = e.target.value;
@@ -474,7 +424,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                 prefecture_id: prefectureId,
                 city_id: '' // 都道府県変更時は市町村をリセット
               }));
-              
+
               // 都道府県が選択された場合、市町村を取得
               if (prefectureId) {
                 fetchCities(prefectureId);
@@ -490,15 +440,9 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
               </option>
             ))}
           </select>
-          
+
           <select
-            style={{
-              padding: '6px 8px',
-              border: '1px solid #d1d5db',
-              borderRadius: '4px',
-              fontSize: '12px',
-              minWidth: '120px'
-            }}
+            className="search-select"
             value={searchParams.city_id || ''}
             onChange={(e) => {
               setSearchParams(prev => ({
@@ -515,18 +459,11 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
               </option>
             ))}
           </select>
-          
+
           <input
             type="text"
             placeholder="キーワード検索"
-            style={{
-              padding: '6px 8px',
-              border: '1px solid #d1d5db',
-              borderRadius: '4px',
-              fontSize: '12px',
-              flex: 1,
-              minWidth: '150px'
-            }}
+            className="search-input"
             value={searchParams.keyword || ''}
             onChange={(e) => {
               setSearchParams(prev => ({
@@ -536,22 +473,16 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
             }}
           />
         </div>
-        <h1 style={{margin: 0, fontSize: '20px'}}>📍 投稿マップ</h1>
-        <div style={{
-          fontSize: '14px',
-          color: '#6b7280',
-          padding: '6px 12px',
-          borderRadius: '20px',
-          border: '1px solid #e5e7eb'
-        }}>
+        <h1 className="map-title">📍 投稿マップ</h1>
+        <div className="post-count-badge">
           {posts.length}件の投稿
         </div>
       </div>
 
       <div className={`map-main-content ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-        {console.log('現在の状態:', { 
-          isSidebarCollapsed, 
-          showSidePanel, 
+        {console.log('現在の状態:', {
+          isSidebarCollapsed,
+          showSidePanel,
           '投稿リスト表示中': showSidePanel && !isSidebarCollapsed,
           'selectedLocationPosts数': selectedLocationPosts.length,
           'selectedLocationName': selectedLocationName
@@ -565,8 +496,8 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
             maxZoom={18}
             maxBounds={japanBounds}
             maxBoundsViscosity={1.0}
-            style={{ 
-              height: '100%', 
+            style={{
+              height: '100%',
               width: '100%',
               minWidth: '100%',
               maxWidth: '100%'
@@ -576,7 +507,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            
+
             <MarkerClusterGroup
               chunkedLoading
               maxClusterRadius={50}
@@ -588,13 +519,13 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
               iconCreateFunction={(cluster) => {
                 const count = cluster.getChildCount();
                 let className = 'marker-cluster-small';
-                
+
                 if (count >= 10) {
                   className = 'marker-cluster-large';
                 } else if (count >= 5) {
                   className = 'marker-cluster-medium';
                 }
-                
+
                 return L.divIcon({
                   html: `<div><span>${count}</span></div>`,
                   className: `marker-cluster ${className}`,
@@ -605,18 +536,18 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                 clusterclick: (event) => {
                   const cluster = event.layer;
                   const markers = cluster.getAllChildMarkers();
-                  
+
                   const postIds = new Set();
                   const clusterPosts = [];
-                  
+
                   markers.forEach(marker => {
                     const lat = marker.getLatLng().lat;
                     const lng = marker.getLatLng().lng;
-                    const matchingPosts = posts.filter(post => 
-                      Math.abs(parseFloat(post.latitude) - lat) < 0.001 && 
+                    const matchingPosts = posts.filter(post =>
+                      Math.abs(parseFloat(post.latitude) - lat) < 0.001 &&
                       Math.abs(parseFloat(post.longitude) - lng) < 0.001
                     );
-                    
+
                     matchingPosts.forEach(post => {
                       if (!postIds.has(post.id)) {
                         postIds.add(post.id);
@@ -624,7 +555,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                       }
                     });
                   });
-                  
+
                   setSelectedLocationPosts(clusterPosts);
                   setSelectedLocationName(clusterPosts[0]?.location_name || '選択された場所');
                   setShowSidePanel(true);
@@ -652,12 +583,12 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
           <div className="map-sidebar">
             <div className="sidebar-content">
               <div className="sidebar-header">
-                <button 
-                  className="hide-sidebar-btn" 
+                <button
+                  className="hide-sidebar-btn"
                   onClick={() => {
                     console.log('非表示ボタンがクリックされました');
                     closeSidePanel();
-                  }} 
+                  }}
                   title="投稿リストを非表示"
                 >
                   <span className="hide-icon">−</span>
@@ -667,7 +598,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
               <div className="location-posts-count">
                 {selectedLocationPosts.length > 0 ? `${selectedLocationPosts.length}件の投稿` : ''}
               </div>
-              
+
               <div className="location-posts-list">
                 {selectedLocationPosts.length === 0 ? (
                   <div className="no-posts-message">
@@ -675,41 +606,41 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                   </div>
                 ) : (
                   selectedLocationPosts.map((post) => (
-                  <div 
-                    key={post.id} 
-                    className="sidebar-post-card"
-                    onClick={() => handlePostClick(post.id)}
-                  >
-                    {post.first_photo_url && (
-                      <div className="sidebar-post-image">
-                        <img 
-                          src={post.first_photo_url} 
-                          alt={post.title}
-                          className="sidebar-post-thumbnail"
-                        />
-                      </div>
-                    )}
-                    
-                    <div className="sidebar-post-content">
-                      <h4 className="sidebar-post-title">{post.title}</h4>
-                      <p className="sidebar-post-description">
-                        {post.description.length > 60 
-                          ? `${post.description.substring(0, 60)}...` 
-                          : post.description
-                        }
-                      </p>
-                      
-                      <div className="sidebar-post-meta">
-                        <span className="sidebar-post-date">
-                          {new Date(post.created_at).toLocaleDateString('ja-JP')}
-                        </span>
-                        <div className="sidebar-post-stats">
-                          <span>❤️ {post.likes_count}</span>
-                          <span>📷 {post.total_photos || 0}</span>
+                    <div
+                      key={post.id}
+                      className="sidebar-post-card"
+                      onClick={() => handlePostClick(post.id)}
+                    >
+                      {post.first_photo_url && (
+                        <div className="sidebar-post-image">
+                          <img
+                            src={post.first_photo_url}
+                            alt={post.title}
+                            className="sidebar-post-thumbnail"
+                          />
+                        </div>
+                      )}
+
+                      <div className="sidebar-post-content">
+                        <h4 className="sidebar-post-title">{post.title}</h4>
+                        <p className="sidebar-post-description">
+                          {post.description.length > 60
+                            ? `${post.description.substring(0, 60)}...`
+                            : post.description
+                          }
+                        </p>
+
+                        <div className="sidebar-post-meta">
+                          <span className="sidebar-post-date">
+                            {new Date(post.created_at).toLocaleDateString('ja-JP')}
+                          </span>
+                          <div className="sidebar-post-stats">
+                            <span>❤️ {post.likes_count}</span>
+                            <span>📷 {post.total_photos || 0}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
                   ))
                 )}
               </div>
@@ -717,13 +648,13 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
           </div>
         )}
       </div>
-      
+
       {posts.length === 0 && !showSidePanel && (
         <div className="no-coordinates-message">
           <p>位置情報付きの投稿がまだありません</p>
           <p>投稿作成時に位置情報を追加すると、地図上に表示されます</p>
         </div>
-        )}
+      )}
 
     </div>
   );

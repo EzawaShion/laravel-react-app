@@ -1,122 +1,124 @@
 .photo-upload-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: var(--spacing-lg);
+  background: var(--surface-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
 }
 
 .photo-upload-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .photo-upload-header h2 {
   margin: 0;
-  color: #333;
-  font-size: 24px;
+  color: var(--text-primary);
+  font-size: 1.5rem;
   font-weight: 600;
 }
 
 .cancel-button {
-  background: #e74c3c;
+  background: var(--error-color);
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
 }
 
 .cancel-button:hover {
-  background: #c0392b;
+  filter: brightness(0.9);
 }
 
 .upload-methods {
   display: flex;
-  gap: 15px;
-  margin-bottom: 30px;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
 }
 
 .upload-button,
 .camera-button {
   flex: 1;
-  padding: 15px 20px;
-  border: 2px dashed #667eea;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: var(--spacing-md);
+  border: 2px dashed var(--primary-color);
+  background: var(--primary-gradient);
   color: white;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-fast);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .upload-button:hover,
 .camera-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-md);
+  filter: brightness(1.1);
 }
 
 .camera-button {
-  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-  border-color: #27ae60;
+  background: var(--secondary-gradient);
+  border-color: var(--secondary-color);
 }
 
 .camera-button:hover {
-  box-shadow: 0 6px 12px rgba(39, 174, 96, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .error-message {
-  background: #fee;
-  color: #c53030;
-  padding: 12px 16px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-  border-left: 4px solid #c53030;
-  font-size: 14px;
+  background: #fef2f2;
+  color: var(--error-color);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+  border-left: 4px solid var(--error-color);
+  font-size: 0.9rem;
 }
 
 .photo-previews {
-  margin-top: 20px;
+  margin-top: var(--spacing-lg);
 }
 
 .photo-previews h3 {
-  margin-bottom: 15px;
-  color: #333;
-  font-size: 18px;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
 .preview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 25px;
-  margin-bottom: 30px;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
 }
 
 .photo-preview-item {
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  background: #f8fafc;
-  transition: all 0.3s ease;
+  background: var(--bg-color);
+  transition: all var(--transition-fast);
 }
 
 .photo-preview-item:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-md);
 }
 
 .preview-image-container {
@@ -126,7 +128,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8f9fa;
+  background: var(--bg-color);
 }
 
 .preview-image-container img {
@@ -141,29 +143,29 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(231, 76, 60, 0.9);
+  background: rgba(239, 68, 68, 0.9);
   color: white;
   border: none;
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  font-size: 18px;
+  font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
 }
 
 .remove-photo-button:hover {
-  background: rgba(231, 76, 60, 1);
+  background: var(--error-color);
 }
 
 .photo-details {
-  padding: 15px;
-  background: white;
-  border-top: 1px solid #e2e8f0;
+  padding: var(--spacing-md);
+  background: var(--surface-color);
+  border-top: 1px solid var(--border-color);
   min-height: 180px;
   height: 180px;
 }
@@ -172,20 +174,23 @@
 .photo-description-input,
 .photo-tags-input {
   width: 100%;
-  margin-bottom: 10px;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.2s ease;
+  margin-bottom: var(--spacing-sm);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  transition: border-color var(--transition-fast);
+  background: var(--bg-color);
+  color: var(--text-primary);
 }
 
 .photo-title-input:focus,
 .photo-description-input:focus,
 .photo-tags-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: var(--surface-color);
 }
 
 .photo-description-input {
@@ -196,45 +201,48 @@
 }
 
 .photo-tags-input {
-  font-size: 13px;
-  color: #666;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
 }
 
 .upload-actions {
   display: flex;
   justify-content: center;
-  padding-top: 15px;
-  border-top: 2px solid #f0f0f0;
+  padding-top: var(--spacing-md);
+  border-top: 2px solid var(--border-color);
 }
 
 .submit-upload-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary-gradient);
   color: white;
   border: none;
-  padding: 15px 40px;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 0.75rem 2.5rem;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
 .submit-upload-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-md);
+  filter: brightness(1.1);
 }
 
 .submit-upload-button:disabled {
-  background: #ccc;
+  background: var(--text-secondary);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  opacity: 0.7;
 }
 
 /* カルーセル用スタイル */
 .photo-carousel {
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .carousel-main-photo {
@@ -242,7 +250,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-lg);
   width: 100%;
   height: 400px;
   box-sizing: border-box;
@@ -256,7 +264,7 @@
   bottom: 0;
   width: 15%;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   z-index: 1;
 }
 
@@ -287,63 +295,63 @@
 .carousel-indicators {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin: 15px 0;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-md) 0;
 }
 
 .carousel-indicator {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: rgba(102, 126, 234, 0.3);
+  background: rgba(99, 102, 241, 0.3);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .carousel-indicator.active {
-  background: #667eea;
+  background: var(--primary-color);
   transform: scale(1.2);
 }
 
 .carousel-indicator:hover {
-  background: rgba(102, 126, 234, 0.6);
+  background: rgba(99, 102, 241, 0.6);
 }
 
 .carousel-nav-button {
   position: absolute;
   top: 200px;
-  background: rgba(102, 126, 234, 0.6);
+  background: rgba(99, 102, 241, 0.6);
   color: white;
   border: none;
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  font-size: 24px;
+  font-size: 1.5rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   z-index: 10;
 }
 
 .carousel-nav-button:hover {
-  background: rgba(102, 126, 234, 0.8);
+  background: rgba(99, 102, 241, 0.8);
 }
 
 .carousel-nav-button.prev {
-  left: 20px;
+  left: var(--spacing-lg);
 }
 
 .carousel-nav-button.next {
-  right: 20px;
+  right: var(--spacing-lg);
 }
 
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
   .photo-upload-container {
-    padding: 15px;
-    margin: 10px;
+    padding: var(--spacing-md);
+    margin: var(--spacing-sm);
   }
 
   .upload-methods {
@@ -357,23 +365,21 @@
   .carousel-nav-button {
     width: 40px;
     height: 40px;
-    font-size: 20px;
+    font-size: 1.2rem;
     top: 150px;
   }
 
   .carousel-nav-button.prev {
-    left: 10px;
+    left: var(--spacing-sm);
   }
 
   .carousel-nav-button.next {
-    right: 10px;
+    right: var(--spacing-sm);
   }
 
   .photo-upload-header {
     flex-direction: column;
-    gap: 15px;
+    gap: var(--spacing-md);
     text-align: center;
   }
 }
-
- 

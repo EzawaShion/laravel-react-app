@@ -1,7 +1,7 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--spacing-xl);
   text-align: center;
 }
 
@@ -11,17 +11,20 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em rgba(99, 102, 241, 0.5));
 }
+
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em rgba(97, 218, 251, 0.5));
 }
 
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -34,126 +37,125 @@
 }
 
 .card {
-  padding: 2em;
+  padding: var(--spacing-xl);
+  background: var(--surface-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .read-the-docs {
-  color: #888;
+  color: var(--text-secondary);
 }
 
 /* 認証関連のスタイル */
 .auth-section {
-  margin: 20px 0;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  margin: var(--spacing-xl) 0;
+  padding: var(--spacing-xl);
+  background: var(--surface-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
-}
-
-.user-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-
-.post-list-button {
-  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.post-list-button:hover {
-  transform: translateY(-2px);
-}
-
-.create-post-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.create-post-button:hover {
-  transform: translateY(-2px);
-}
-
-.profile-button {
-  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.profile-button:hover {
-  transform: translateY(-2px);
+  gap: var(--spacing-md);
 }
 
 .user-info p {
   margin: 0;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.user-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.post-list-button,
+.create-post-button,
+.profile-button,
+.signup-button,
+.login-button,
+.logout-button {
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.post-list-button {
+  background: var(--secondary-gradient);
+}
+
+.create-post-button {
+  background: var(--primary-gradient);
+}
+
+.profile-button {
+  background: var(--accent-gradient);
+}
+
+.signup-button,
+.login-button {
+  background: var(--primary-gradient);
+}
+
+.logout-button {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.post-list-button:hover,
+.create-post-button:hover,
+.profile-button:hover,
+.signup-button:hover,
+.login-button:hover,
+.logout-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  filter: brightness(1.1);
 }
 
 .auth-buttons {
   display: flex;
-  gap: 12px;
+  gap: var(--spacing-md);
   justify-content: center;
-}
-
-.signup-button, .login-button, .logout-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.signup-button:hover, .login-button:hover, .logout-button:hover {
-  transform: translateY(-2px);
-}
-
-.login-button {
-  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-}
-
-.logout-button {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
 }
 
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
   .user-info {
     flex-direction: column;
-    gap: 10px;
+    gap: var(--spacing-sm);
   }
-  
-  .signup-button, .logout-button {
+
+  .user-actions,
+  .auth-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .post-list-button,
+  .create-post-button,
+  .profile-button,
+  .signup-button,
+  .login-button,
+  .logout-button {
     width: 100%;
   }
 }
