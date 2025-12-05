@@ -154,10 +154,30 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
 
-            $posts = $user->posts()
+            $postsQuery = $user->posts()
                 ->with(['city.prefecture', 'photos'])
-                ->orderBy('created_at', 'asc')
-                ->get();
+                ->orderBy('created_at', 'asc');
+
+            // 自分以外の地図を見る場合は公開範囲を考慮
+            $currentUserId = auth('sanctum')->id();
+            if ($currentUserId !== $user->id) {
+                $postsQuery->where(function($q) use ($user, $currentUserId) {
+                    $q->where('visibility', 'public');
+                    
+                    if ($currentUserId) {
+                        // フォローしているかチェック
+                        $isFollowing = \Illuminate\Support\Facades\DB::table('follows')
+                            ->where('follower_id', $currentUserId)
+                            ->where('following_id', $user->id)
+                            ->exists();
+                        if ($isFollowing) {
+                            $q->orWhere('visibility', 'followers');
+                        }
+                    }
+                });
+            }
+
+            $posts = $postsQuery->get();
 
             $prefectures = [];
 
@@ -336,6 +356,43 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'お気に入り写真の設定に失敗しました'
+            ], 500);
+        }
+    }
+
+    public function removeFavoritePhoto(Request $request, $id, $prefectureId)
+    {
+        try {
+            $authUser = Auth::user();
+
+            if (!$authUser || (int) $authUser->id !== (int) $id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'お気に入り写真を削除できません'
+                ], 403);
+            }
+
+            $deleted = PrefectureFavoritePhoto::where('user_id', $authUser->id)
+                ->where('prefecture_id', $prefectureId)
+                ->delete();
+
+            if ($deleted) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'お気に入り写真を解除しました'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => '設定されたお気に入り写真が見つかりませんでした'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            \Log::error('お気に入り写真解除エラー: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'お気に入り写真の解除に失敗しました'
             ], 500);
         }
     }

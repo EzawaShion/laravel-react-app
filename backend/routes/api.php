@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,7 +48,7 @@ Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/search', [PostController::class, 'search']);
 Route::get('/posts/prefectures', [PostController::class, 'getPrefectures']);
 Route::get('/posts/cities', [PostController::class, 'getCities']);
-Route::get('/posts/{id}', [PostController::class, 'show']);
+Route::get('/posts/{id}', [PostController::class, 'show'])->where('id', '[0-9]+');
 
 // 写真関連のルート（読み取りは認証不要）
 Route::get('/photos/post/{postId}', [PhotoController::class, 'getByPost']);
@@ -105,7 +106,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // ユーザー関連のルート（フォロー/フォロー解除は認証必要）
     Route::post('/users/{id}/follow', [UserController::class, 'toggleFollow']);
     Route::post('/users/{id}/favorite-photo', [UserController::class, 'setFavoritePhoto']);
+    Route::delete('/users/{id}/favorite-photo/{prefectureId}', [UserController::class, 'removeFavoritePhoto']);
+
+    // コメント関連のルート
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store']);
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 });
+
+// コメント関連のルート（読み取りは認証不要）
+Route::get('/posts/{post}/comments', [CommentController::class, 'index']);
 
 // テスト用のAPIエンドポイント
 Route::get("/hello", function () {

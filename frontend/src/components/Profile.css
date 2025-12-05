@@ -737,3 +737,28 @@
   color: var(--text-primary);
   background-color: var(--surface-hover);
 }
+
+/* 投稿ヘッダーの調整 */
+.post-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+}
+
+.post-visibility-icon {
+  font-size: 1rem;
+  margin-left: var(--spacing-sm);
+  cursor: help;
+}
+
+.post-meta-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.post-visibility-badge {
+  font-size: 0.9rem;
+  cursor: help;
+}

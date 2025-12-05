@@ -16,7 +16,8 @@ class Post extends Model
         'description',
         'city_id',
         'custom_location',
-        'total_photos'
+        'total_photos',
+        'visibility'
     ];
 
     /**
@@ -57,6 +58,14 @@ class Post extends Model
     public function likes()
     {
         return $this->hasMany(Like::class);
+    }
+
+    /**
+     * コメントとのリレーションシップ
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 
     /**

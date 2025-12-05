@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import LikeButton from './LikeButton';
 import FollowButton from './FollowButton';
+import CommentSection from './CommentSection';
 import './PostDetail.css';
 
 function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpload, onUserClick }) {
@@ -41,7 +42,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
   // タッチ終了
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
@@ -69,7 +70,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
 
   const onMouseUp = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
@@ -81,7 +82,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
       // 右スワイプ（前の写真）
       setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1);
     }
-    
+
     setTouchStart(null);
     setTouchEnd(null);
   };
@@ -91,15 +92,15 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
   const fetchPostDetail = async () => {
     setLoading(true);
     setError('');
-    
+
     try {
       const token = localStorage.getItem('token');
       const headers = {};
-      
+
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const response = await fetch(`http://localhost:8000/api/posts/${postId}`, {
         headers
       });
@@ -107,16 +108,16 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
 
       if (response.ok) {
         setPost(data.post);
-        
+
         // 現在のユーザーが投稿者かどうかをチェック
         const currentUser = JSON.parse(localStorage.getItem('user'));
         setIsOwner(currentUser && currentUser.id === data.post.user_id);
-        
+
         // 投稿者が自分でない場合、フォロー状態を取得
         if (data.post.user && data.post.user.id !== currentUser?.id) {
           fetchFollowStatus(data.post.user.id);
         }
-        
+
       } else {
         setError(data.message || '投稿の取得に失敗しました');
       }
@@ -289,28 +290,28 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
   return (
     <div className="post-detail-container">
       <div className="post-detail-header">
-        <button 
+        <button
           onClick={onBackToList}
           className="back-button"
         >
           ← 投稿一覧に戻る
         </button>
-        
+
         {isOwner && (
           <div className="post-actions">
-            <button 
+            <button
               onClick={onPhotoUpload}
               className="photo-upload-button"
             >
               📷 写真を追加
             </button>
-            <button 
+            <button
               onClick={() => onEditPost(post)}
               className="edit-button"
             >
               編集
             </button>
-            <button 
+            <button
               onClick={handleDelete}
               className="delete-button"
             >
@@ -328,8 +329,8 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         <div className="post-detail-meta">
           <div className="post-author">
             <span className="author-label">投稿者:</span>
-            <div 
-              className="author-info" 
+            <div
+              className="author-info"
               onClick={() => {
                 console.log('PostDetail author-info clicked', {
                   postUser: post.user,
@@ -354,23 +355,32 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
               </div>
             </div>
             {post.user && post.user.id !== JSON.parse(localStorage.getItem('user'))?.id && (
-              <FollowButton 
-                userId={post.user.id} 
+              <FollowButton
+                userId={post.user.id}
                 initialIsFollowing={isFollowing}
                 onFollowChange={handleFollowChange}
               />
             )}
           </div>
-          
+
           <div className="post-date">
             <span className="date-label">投稿日時:</span>
             <span className="date-value">{formatDate(post.created_at)}</span>
           </div>
 
+          <div className="post-visibility">
+            <span className="visibility-label">公開範囲:</span>
+            <span className="visibility-value">
+              {post.visibility === 'public' && '全員に公開'}
+              {post.visibility === 'followers' && 'フォロワーのみ公開'}
+              {post.visibility === 'private' && '自分のみ公開'}
+            </span>
+          </div>
+
           <div className="post-likes">
             <span className="likes-label">いいね:</span>
-            <LikeButton 
-              postId={post.id} 
+            <LikeButton
+              postId={post.id}
               initialIsLiked={(() => {
                 // APIから取得したcurrent_user_idまたはローカルストレージのユーザーIDを使用
                 const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;
@@ -419,9 +429,9 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         {photos && photos.length > 0 && (
           <div className="post-photos-section">
             <h3>📸 写真 ({photos.length}枚)</h3>
-            
+
             {/* カルーセル表示 */}
-            <div 
+            <div
               className="post-carousel"
               ref={carouselRef}
               onTouchStart={onTouchStart}
@@ -436,39 +446,39 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 {/* 前の写真の端 */}
                 {photos.length > 1 && (
                   <div className="carousel-prev-photo">
-                    <img 
-                      src={getPhotoUrl(photos[currentIndex === 0 ? photos.length - 1 : currentIndex - 1]?.file_path)} 
+                    <img
+                      src={getPhotoUrl(photos[currentIndex === 0 ? photos.length - 1 : currentIndex - 1]?.file_path)}
                       alt="前の写真"
                       className="carousel-edge-photo"
                     />
                   </div>
                 )}
-                
+
                 {/* メイン写真 */}
-                <img 
-                  src={getPhotoUrl(photos[currentIndex]?.file_path)} 
+                <img
+                  src={getPhotoUrl(photos[currentIndex]?.file_path)}
                   alt={photos[currentIndex]?.title || `写真 ${currentIndex + 1}`}
                   className="main-carousel-photo clickable"
                   onClick={() => openPhotoCarousel(currentIndex)}
                 />
-                
+
                 {/* 次の写真の端 */}
                 {photos.length > 1 && (
                   <div className="carousel-next-photo">
-                    <img 
-                      src={getPhotoUrl(photos[currentIndex === photos.length - 1 ? 0 : currentIndex + 1]?.file_path)} 
+                    <img
+                      src={getPhotoUrl(photos[currentIndex === photos.length - 1 ? 0 : currentIndex + 1]?.file_path)}
                       alt="次の写真"
                       className="carousel-edge-photo"
                     />
                   </div>
                 )}
               </div>
-              
+
               {/* 写真枚数インジケーター（点のみ）- 写真と説明の間に配置 */}
               {photos.length > 1 && (
                 <div className="carousel-indicators">
                   {photos.map((_, index) => (
-                    <div 
+                    <div
                       key={index}
                       className={`carousel-indicator ${index === currentIndex ? 'active' : ''}`}
                       onClick={() => setCurrentIndex(index)}
@@ -476,7 +486,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                   ))}
                 </div>
               )}
-              
+
               {/* 写真情報 */}
               {(photos[currentIndex]?.title || photos[currentIndex]?.description) && (
                 <div className="carousel-photo-info">
@@ -488,17 +498,17 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                   )}
                 </div>
               )}
-              
+
               {/* ナビゲーションボタン */}
               {photos.length > 1 && (
                 <>
-                  <button 
+                  <button
                     onClick={() => setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1)}
                     className="carousel-nav-button prev"
                   >
                     ‹
                   </button>
-                  <button 
+                  <button
                     onClick={() => setCurrentIndex(prev => prev === photos.length - 1 ? 0 : prev + 1)}
                     className="carousel-nav-button next"
                   >
@@ -541,15 +551,15 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
 
               {/* メイン写真 */}
               <div className="carousel-main">
-                <button 
+                <button
                   onClick={() => setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1)}
                   className="nav-button prev-button"
                 >
                   ‹
                 </button>
-                
+
                 <div className="main-photo-container">
-                  <img 
+                  <img
                     src={getPhotoUrl(photos[currentIndex]?.file_path)}
                     alt={photos[currentIndex]?.title || `写真 ${currentIndex + 1}`}
                     className="main-photo"
@@ -560,8 +570,8 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                     </div>
                   )}
                 </div>
-                
-                <button 
+
+                <button
                   onClick={() => setCurrentIndex(prev => prev === photos.length - 1 ? 0 : prev + 1)}
                   className="nav-button next-button"
                 >
@@ -584,6 +594,12 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
             </div>
           </div>
         )}
+        {/* コメントセクション */}
+        <CommentSection
+          postId={post.id}
+          userId={JSON.parse(localStorage.getItem('user'))?.id}
+          token={localStorage.getItem('token')}
+        />
       </div>
     </div>
   );

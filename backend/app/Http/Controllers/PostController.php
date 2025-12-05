@@ -20,6 +20,25 @@ class PostController extends Controller
             $query->orderBy('order_num')->limit(1); // 最初の写真のみを取得
         }]);
 
+        // 公開範囲のフィルタリング
+        $query->where(function($q) {
+            $q->where('visibility', 'public');
+            if (auth('sanctum')->check()) {
+                $userId = auth('sanctum')->id();
+                // 自分の投稿は常に見える
+                $q->orWhere('user_id', $userId);
+                // フォロワー限定の投稿はフォローしていれば見える
+                $q->orWhere(function($subQ) use ($userId) {
+                    $subQ->where('visibility', 'followers')
+                         ->whereIn('user_id', function($fQ) use ($userId) {
+                             $fQ->select('following_id')
+                                ->from('follows')
+                                ->where('follower_id', $userId);
+                         });
+                });
+            }
+        });
+
         // 都道府県で絞り込み
         if ($request->filled('prefecture_id')) {
             $query->whereHas('city.prefecture', function($q) use ($request) {
@@ -134,9 +153,30 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with(['user', 'city.prefecture.capitalCity', 'photos' => function($query) {
+        $query = Post::with(['user', 'city.prefecture.capitalCity', 'photos' => function($query) {
             $query->orderBy('order_num')->limit(1); // 最初の写真のみを取得
-        }])->latest()->get();
+        }]);
+
+        // 公開範囲のフィルタリング
+        $query->where(function($q) {
+            $q->where('visibility', 'public');
+            if (auth('sanctum')->check()) {
+                $userId = auth('sanctum')->id();
+                // 自分の投稿は常に見える
+                $q->orWhere('user_id', $userId);
+                // フォロワー限定の投稿はフォローしていれば見える
+                $q->orWhere(function($subQ) use ($userId) {
+                    $subQ->where('visibility', 'followers')
+                         ->whereIn('user_id', function($fQ) use ($userId) {
+                             $fQ->select('following_id')
+                                ->from('follows')
+                                ->where('follower_id', $userId);
+                         });
+                });
+            }
+        });
+
+        $posts = $query->latest()->get();
         
         // 各投稿にいいね状態とカウントを追加
         $posts->each(function ($post) {
@@ -210,7 +250,9 @@ class PostController extends Controller
             }
             
             // ユーザーの投稿を取得（city.prefectureリレーションを含める）
-            $posts = Post::with(['user', 'city.prefecture'])
+            $posts = Post::with(['user', 'city.prefecture', 'photos' => function($query) {
+                $query->orderBy('order_num')->limit(1);
+            }])
                 ->where('user_id', $userId)
                 ->latest()
                 ->get();
@@ -226,6 +268,9 @@ class PostController extends Controller
                 if ($post->user) {
                     $post->user->profile_image_url = $post->user->profile_image_url;
                 }
+                
+                // 最初の写真のURLを設定
+                $post->first_photo_url = $post->photos->first() ? $post->photos->first()->image_url : null;
                 
                 // ログインユーザーのいいね状態を確認
                 $post->is_liked = $post->isLikedBy(auth()->user());
@@ -269,6 +314,7 @@ class PostController extends Controller
             'city_id' => 'nullable|integer|exists:cities,id',
             'prefecture_id' => 'nullable|integer|exists:prefectures,id',
             'custom_location' => 'nullable|string|max:255',
+            'visibility' => 'nullable|string|in:public,followers,private',
         ]);
 
         if ($validator->fails()) {
@@ -296,7 +342,8 @@ class PostController extends Controller
             'description' => $request->description,
             'city_id' => $cityId,
             'custom_location' => $request->custom_location,
-            'total_photos' => 0
+            'total_photos' => 0,
+            'visibility' => $request->visibility ?? 'public',
         ]);
 
         return response()->json([
@@ -319,6 +366,32 @@ class PostController extends Controller
                     'success' => false,
                     'message' => '投稿が見つかりません'
                 ], 404);
+            }
+
+            // 公開範囲のチェック
+            $canView = false;
+            if ($post->visibility === 'public') {
+                $canView = true;
+            } elseif (auth('sanctum')->check()) {
+                if ($post->user_id === auth('sanctum')->id()) {
+                    $canView = true;
+                } elseif ($post->visibility === 'followers') {
+                    // フォローしているかチェック
+                    $isFollowing = \Illuminate\Support\Facades\DB::table('follows')
+                        ->where('follower_id', auth('sanctum')->id())
+                        ->where('following_id', $post->user_id)
+                        ->exists();
+                    if ($isFollowing) {
+                        $canView = true;
+                    }
+                }
+            }
+
+            if (!$canView) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'この投稿を表示する権限がありません'
+                ], 403);
             }
 
             // いいね状態とカウントを追加
@@ -409,6 +482,7 @@ class PostController extends Controller
             'description' => 'required|string',
             'city_id' => 'nullable|integer|exists:cities,id',
             'custom_location' => 'nullable|string|max:255',
+            'visibility' => 'nullable|string|in:public,followers,private',
         ]);
 
         if ($validator->fails()) {
@@ -424,6 +498,7 @@ class PostController extends Controller
             'description' => $request->description,
             'city_id' => $request->city_id,
             'custom_location' => $request->custom_location,
+            'visibility' => $request->visibility ?? $post->visibility,
         ]);
 
         return response()->json([

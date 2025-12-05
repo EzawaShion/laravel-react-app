@@ -6,7 +6,8 @@ function EditPost({ post, onBack, onUpdateSuccess }) {
     title: '',
     description: '',
     city_id: '',
-    custom_location: ''
+    custom_location: '',
+    visibility: 'public'
   });
   const [cities, setCities] = useState([]);
   const [prefectures, setPrefectures] = useState([]);
@@ -20,7 +21,8 @@ function EditPost({ post, onBack, onUpdateSuccess }) {
         title: post.title || '',
         description: post.description || '',
         city_id: post.city_id || '',
-        custom_location: post.custom_location || ''
+        custom_location: post.custom_location || '',
+        visibility: post.visibility || 'public'
       });
     }
     fetchPrefectures();
@@ -188,6 +190,21 @@ function EditPost({ post, onBack, onUpdateSuccess }) {
             className="form-input"
             placeholder="具体的な場所を入力してください"
           />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="visibility">公開範囲</label>
+          <select
+            id="visibility"
+            name="visibility"
+            value={formData.visibility}
+            onChange={handleInputChange}
+            className="form-select"
+          >
+            <option value="public">全員に公開</option>
+            <option value="followers">フォロワーのみ公開</option>
+            <option value="private">自分のみ公開</option>
+          </select>
         </div>
 
         {error && (

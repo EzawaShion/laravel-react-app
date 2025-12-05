@@ -4,6 +4,8 @@ import './JapanMapSimple.css';
 
 const API_BASE_URL = 'http://localhost:8000';
 
+
+
 const prefectureBlocks = [
   {
     id: 'pref01',
@@ -371,6 +373,9 @@ function JapanMapSimple({ userId }) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
+  // Post Detail Modal State
+  const [detailPost, setDetailPost] = useState(null);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -467,6 +472,14 @@ function JapanMapSimple({ userId }) {
     };
   };
 
+  const openPostDetailModal = (photo) => {
+    setDetailPost(photo);
+  };
+
+  const closePostDetailModal = () => {
+    setDetailPost(null);
+  };
+
   const handleSaveMapImage = useCallback(async () => {
     if (mapRef.current === null) {
       return;
@@ -535,6 +548,47 @@ function JapanMapSimple({ userId }) {
       });
 
       closeAdjustmentModal();
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemoveFavorite = async (prefectureId) => {
+    if (!userId || !prefectureId) return;
+    if (!confirm('この都道府県のお気に入り写真を解除しますか？')) return;
+
+    try {
+      setSaving(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/users/${userId}/favorite-photo/${prefectureId}`, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!response.ok) throw new Error('解除に失敗しました');
+
+      const result = await response.json();
+      if (!result.success) throw new Error(result.message);
+
+      setMapData((prev) => {
+        const updated = { ...prev.prefecturesById };
+        const target = updated[prefectureId];
+        if (target) {
+          updated[prefectureId] = {
+            ...target,
+            favorite_photo: null,
+          };
+        }
+        return { ...prev, prefecturesById: updated };
+      });
+
+      closePostDetailModal();
     } catch (err) {
       console.error(err);
       alert(err.message);
@@ -626,7 +680,7 @@ function JapanMapSimple({ userId }) {
                       <button
                         type="button"
                         className={`map-photo-item ${isSelected ? 'selected' : ''}`}
-                        onClick={() => openAdjustmentModal(photo, isSelected ? { x: currentX, y: currentY, scale: currentScale } : null)}
+                        onClick={() => openPostDetailModal(photo)}
                         disabled={saving}
                       >
                         {thumbnail ? (
@@ -644,6 +698,80 @@ function JapanMapSimple({ userId }) {
                 })}
               </div>
             )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+
+
+  const renderPostDetailModal = () => {
+    if (!detailPost) return null;
+
+    const isMyPost = detailPost.user_id === userId; // Assuming photo object has user_id
+    // If photo object doesn't have user_id, we might need to check mapData or assume it's my map if userId prop matches.
+    // Actually, JapanMapSimple is usually used for "my map", so userId prop is the map owner.
+    // But detailPost might be from another user if we reuse this component?
+    // For now, let's assume we are viewing our own map or someone else's map.
+    // If we are viewing someone else's map, userId prop is that person's ID.
+    // The logged in user ID is stored in localStorage or context, but here we only have userId prop which is "Map Owner ID".
+    // We need "Logged In User ID" to enable/disable edit buttons.
+    // Let's parse token to get logged in user ID or pass it as prop.
+    // For simplicity, let's just check if we have a token for commenting.
+    // For "Adjustment", only the map owner (userId prop) should be able to do it, AND the logged in user must match.
+    // Since we don't have "loggedInUserId" prop, we'll assume if token exists and we are on "my page" (which this component usually is), we can edit.
+    // But wait, JapanMapSimple is used in Profile page.
+    // Let's just show "Adjustment" button if we are allowed to edit (which logic is handled by parent or assumed here).
+    // Actually, handleSelectFavorite checks for userId.
+
+    // Let's pass the token to CommentSection.
+    const token = localStorage.getItem('token');
+
+    // Find current adjustment values if this is the favorite photo
+    const prefectureId = selectedBlock?.prefectureId;
+    const prefectureData = mapData.prefecturesById[prefectureId];
+    const isFavorite = prefectureData?.favorite_photo?.id === detailPost.id;
+    const currentX = prefectureData?.favorite_photo?.position_x ?? 50;
+    const currentY = prefectureData?.favorite_photo?.position_y ?? 50;
+    const currentScale = prefectureData?.favorite_photo?.scale ?? 1;
+
+    return (
+      <div className="map-photo-modal-overlay" onClick={closePostDetailModal}>
+        <div className="post-detail-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="post-detail-image-container">
+            <img src={detailPost.url} className="post-detail-image" alt="detail" />
+          </div>
+          <div className="post-detail-sidebar">
+            <div className="post-detail-header">
+              <h3>投稿詳細</h3>
+              <button onClick={closePostDetailModal} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+            </div>
+            <div className="post-detail-content">
+              <div className="post-description">{detailPost.description || detailPost.title || 'No description'}</div>
+              <div className="post-actions">
+                {isFavorite && (
+                  <button
+                    className="action-btn"
+                    onClick={() => handleRemoveFavorite(prefectureId)}
+                    style={{ marginRight: '10px', backgroundColor: '#ef4444' }}
+                    disabled={saving}
+                  >
+                    解除
+                  </button>
+                )}
+                <button
+                  className="action-btn"
+                  onClick={() => {
+                    closePostDetailModal();
+                    openAdjustmentModal(detailPost, isFavorite ? { x: currentX, y: currentY, scale: currentScale } : null);
+                  }}
+                  disabled={saving}
+                >
+                  {isFavorite ? '表示位置を調整' : '地図に設定'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -886,6 +1014,7 @@ function JapanMapSimple({ userId }) {
       </div>
       {renderModal()}
       {renderAdjustmentModal()}
+      {renderPostDetailModal()}
     </div>
   );
 }

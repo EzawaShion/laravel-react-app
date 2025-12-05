@@ -104,34 +104,28 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
   const fetchMyPosts = async () => {
     try {
       setPostsLoading(true);
+      const token = localStorage.getItem('token');
 
-      // プロフィール情報から現在のユーザーIDを取得
-      if (!user || !user.id) {
-        console.log('User not loaded yet, skipping posts fetch');
+      if (!token) {
         setPostsLoading(false);
         return;
       }
 
-      // 全ての投稿を取得して、現在のユーザーの投稿をフィルタリング
-      const response = await fetch('http://localhost:8000/api/posts', {
+      // 自分の投稿を取得する専用エンドポイントを使用
+      const response = await fetch('http://localhost:8000/api/posts/my', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
       });
 
-      console.log('Posts response status:', response.status);
+      console.log('My Posts response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
-        console.log('=== All Posts Response ===');
-        console.log('Total posts:', data.posts?.length || 0);
-
-        // 現在のユーザーの投稿のみをフィルタリング
-        const myPosts = data.posts?.filter(post => post.user_id === user.id) || [];
-        console.log('My posts:', myPosts.length);
-
-        setMyPosts(myPosts);
+        console.log('My posts count:', data.posts?.length || 0);
+        setMyPosts(data.posts || []);
       } else {
         console.error('投稿の取得に失敗しました');
         setMyPosts([]);
@@ -642,7 +636,18 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
                 {myPosts.map((post) => (
                   <div key={post.id} className="post-card" onClick={() => onPostClick && onPostClick(post.id)}>
                     <div className="post-header">
-                      <h4 className="post-title">{post.title}</h4>
+                      <div className="post-header-top">
+                        <h4 className="post-title">{post.title}</h4>
+                        <span className="post-visibility-icon" title={
+                          post.visibility === 'public' ? '全員に公開' :
+                            post.visibility === 'followers' ? 'フォロワーのみ公開' :
+                              '自分のみ公開'
+                        }>
+                          {post.visibility === 'public' && '🌐'}
+                          {post.visibility === 'followers' && '👥'}
+                          {post.visibility === 'private' && '🔒'}
+                        </span>
+                      </div>
                       <span className="post-date">
                         {new Date(post.created_at).toLocaleDateString('ja-JP')}
                       </span>

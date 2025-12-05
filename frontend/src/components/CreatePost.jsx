@@ -7,7 +7,8 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
     description: '',
     prefecture_id: '',
     city_id: '',
-    custom_location: ''
+    custom_location: '',
+    visibility: 'public'
   });
   const [createdPostId, setCreatedPostId] = useState(null);
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
@@ -31,7 +32,7 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
         city_id: ''
       }));
       setCities([]);
-      
+
       // 都道府県が選択された場合、市町村を取得
       if (value) {
         fetchCities(value);
@@ -44,7 +45,7 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
     try {
       const response = await fetch('http://localhost:8000/api/prefectures');
       const data = await response.json();
-      
+
       if (data.success) {
         setPrefectures(data.prefectures);
       }
@@ -59,7 +60,7 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
     try {
       const response = await fetch(`http://localhost:8000/api/cities/${prefectureId}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setCities(data.cities);
       }
@@ -84,7 +85,7 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
 
     try {
       const token = localStorage.getItem('token');
-      
+
       // 1. 投稿を作成
       const postResponse = await fetch('http://localhost:8000/api/posts', {
         method: 'POST',
@@ -131,22 +132,22 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
             文字の投稿が作成されました！<br />
             写真を追加して投稿を完成させましょう。
           </p>
-          
+
           <div className="photo-upload-actions">
-            <button 
+            <button
               onClick={() => onPhotoUpload(createdPostId)}
               className="photo-upload-button"
             >
               📷 写真を追加
             </button>
-            <button 
+            <button
               onClick={() => onPostCreated({ id: createdPostId })}
               className="skip-button"
             >
               このまま投稿を完了
             </button>
           </div>
-          
+
           <div className="post-preview">
             <h4>📝 作成された投稿</h4>
             <div className="post-preview-content">
@@ -169,7 +170,7 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
     <div className="create-post-container">
       <div className="create-post-card">
         <h2>新しい投稿を作成</h2>
-        
+
         {errors.general && (
           <div className="error-message">
             {errors.general}
@@ -262,17 +263,32 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
             {errors.custom_location && <span className="error-text">{errors.custom_location[0]}</span>}
           </div>
 
+          <div className="form-group">
+            <label htmlFor="visibility">公開範囲</label>
+            <select
+              id="visibility"
+              name="visibility"
+              value={formData.visibility}
+              onChange={handleChange}
+              className="form-control"
+            >
+              <option value="public">全員に公開</option>
+              <option value="followers">フォロワーのみ公開</option>
+              <option value="private">自分のみ公開</option>
+            </select>
+          </div>
+
           <div className="form-actions">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={onCancel}
               className="cancel-button"
               disabled={loading}
             >
               キャンセル
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-button"
               disabled={loading}
             >
