@@ -27,7 +27,7 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
     keyword: ''
   });
   const [loading, setLoading] = useState(false);
-  
+
   // debounceされた検索パラメータ（500ms遅延）
   const debouncedSearchParams = useDebounce(searchParams, 500);
 
@@ -39,10 +39,10 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
   // リアルタイム検索（debounceされたパラメータが変更された時）
   useEffect(() => {
     // 検索パラメータに何か値がある場合のみ検索実行
-    const hasSearchValue = Object.values(debouncedSearchParams).some(value => 
+    const hasSearchValue = Object.values(debouncedSearchParams).some(value =>
       value && value.toString().trim() !== ''
     );
-    
+
     if (hasSearchValue) {
       performRealtimeSearch(debouncedSearchParams);
     }
@@ -65,19 +65,26 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
       const url = `http://localhost:8000/api/posts/search?${queryParams.toString()}`;
       console.log('リアルタイム検索URL:', url);
 
-      const response = await fetch(url);
-      
+      const token = localStorage.getItem('token');
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
       if (response.ok) {
         const data = await response.json();
         console.log('リアルタイム検索結果:', data);
-        
+
         // 検索タイプとデータを決定
         const selectedPrefecture = prefectures.find(p => p.id == params.prefecture_id);
         const selectedCity = cities.find(c => c.id == params.city_id);
-        
+
         let searchType = 'keyword';
         let searchData = {};
-        
+
         if (selectedCity) {
           searchType = 'city';
           searchData = { city: selectedCity };
@@ -85,7 +92,7 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
           searchType = 'prefecture';
           searchData = { prefecture: selectedPrefecture };
         }
-        
+
         onSearch(data.posts, getSearchTitle(params), searchType, searchData);
       } else {
         console.error('リアルタイム検索に失敗しました:', response.status);
@@ -134,7 +141,7 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
         city_id: '' // 市町村をリセット
       }));
       setCities([]);
-      
+
       // 都道府県が選択された場合、市町村を取得
       if (value) {
         fetchCities(value);
@@ -163,20 +170,27 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
       console.log('検索URL:', url);
       console.log('検索パラメータ:', searchParams);
 
-      const response = await fetch(url);
+      const token = localStorage.getItem('token');
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
       console.log('レスポンスステータス:', response.status);
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('検索結果:', data);
-        
+
         // 検索タイプとデータを決定
         const selectedPrefecture = prefectures.find(p => p.id == searchParams.prefecture_id);
         const selectedCity = cities.find(c => c.id == searchParams.city_id);
-        
+
         let searchType = 'keyword';
         let searchData = {};
-        
+
         if (selectedCity) {
           searchType = 'city';
           searchData = { city: selectedCity };
@@ -184,7 +198,7 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
           searchType = 'prefecture';
           searchData = { prefecture: selectedPrefecture };
         }
-        
+
         onSearch(data.posts, getSearchTitle(), searchType, searchData);
       } else {
         const errorText = await response.text();
@@ -201,18 +215,18 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
     let title = '検索結果';
     const selectedPrefecture = prefectures.find(p => p.id == params.prefecture_id);
     const selectedCity = cities.find(c => c.id == params.city_id);
-    
+
     if (selectedPrefecture) {
       title += ` - ${selectedPrefecture.name}`;
       if (selectedCity) {
         title += `${selectedCity.name}`;
       }
     }
-    
+
     if (params.keyword) {
       title += ` "${params.keyword}"`;
     }
-    
+
     return title;
   };
 
@@ -235,68 +249,68 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
 
   return (
     <div className="search-panel">
-        <div className="search-header">
-          <h3>投稿を検索</h3>
+      <div className="search-header">
+        <h3>投稿を検索</h3>
+      </div>
+
+      <div className="search-content">
+        <div className="search-field">
+          <label>都道府県</label>
+          <select
+            value={searchParams.prefecture_id || ''}
+            onChange={(e) => handleInputChange('prefecture_id', e.target.value)}
+          >
+            <option value="">すべての都道府県</option>
+            {prefectures.length > 0 ? prefectures.map(prefecture => (
+              <option key={prefecture.id} value={prefecture.id}>
+                {prefecture.name}
+              </option>
+            )) : <option disabled>読み込み中...</option>}
+          </select>
         </div>
 
-        <div className="search-content">
-          <div className="search-field">
-            <label>都道府県</label>
-            <select
-              value={searchParams.prefecture_id || ''}
-              onChange={(e) => handleInputChange('prefecture_id', e.target.value)}
-            >
-              <option value="">すべての都道府県</option>
-              {prefectures.length > 0 ? prefectures.map(prefecture => (
-                <option key={prefecture.id} value={prefecture.id}>
-                  {prefecture.name}
-                </option>
-              )) : <option disabled>読み込み中...</option>}
-            </select>
-          </div>
-
-          <div className="search-field">
-            <label>市町村</label>
-            <select
-              value={searchParams.city_id || ''}
-              onChange={(e) => handleInputChange('city_id', e.target.value)}
-              disabled={!searchParams.prefecture_id}
-            >
-              <option value="">すべての市町村</option>
-              {cities.map(city => (
-                <option key={city.id} value={city.id}>
-                  {city.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="search-field">
-            <label>キーワード</label>
-            <input
-              type="text"
-              placeholder="タイトルや内容で検索..."
-              value={searchParams.keyword}
-              onChange={(e) => handleInputChange('keyword', e.target.value)}
-              onKeyPress={handleKeyPress}
-            />
-          </div>
-
-          <div className="search-actions">
-            <button 
-              className="clear-button" 
-              onClick={handleClear}
-              disabled={loading}
-            >
-              クリア
-            </button>
-            {loading && (
-              <div className="search-loading">
-                検索中...
-              </div>
-            )}
-          </div>
+        <div className="search-field">
+          <label>市町村</label>
+          <select
+            value={searchParams.city_id || ''}
+            onChange={(e) => handleInputChange('city_id', e.target.value)}
+            disabled={!searchParams.prefecture_id}
+          >
+            <option value="">すべての市町村</option>
+            {cities.map(city => (
+              <option key={city.id} value={city.id}>
+                {city.name}
+              </option>
+            ))}
+          </select>
         </div>
+
+        <div className="search-field">
+          <label>キーワード</label>
+          <input
+            type="text"
+            placeholder="タイトルや内容で検索..."
+            value={searchParams.keyword}
+            onChange={(e) => handleInputChange('keyword', e.target.value)}
+            onKeyPress={handleKeyPress}
+          />
+        </div>
+
+        <div className="search-actions">
+          <button
+            className="clear-button"
+            onClick={handleClear}
+            disabled={loading}
+          >
+            クリア
+          </button>
+          {loading && (
+            <div className="search-loading">
+              検索中...
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

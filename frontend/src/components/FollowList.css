@@ -73,65 +73,62 @@
   color: var(--error-color);
 }
 
+/* ユーザーリスト */
 .users-list {
+  display: flex;
+  flex-direction: column;
   padding: 0;
 }
 
-.user-item {
+.follow-user-card {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  padding: var(--spacing-md) var(--spacing-lg);
+  justify-content: space-between;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border-color);
+  background: var(--surface-color);
   transition: background-color var(--transition-fast);
-  gap: var(--spacing-md);
-  justify-content: flex-start;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.user-link {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  gap: var(--spacing-md);
-  cursor: pointer;
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-md);
-  transition: background-color var(--transition-fast);
-  min-width: 0;
-}
-
-.user-link:hover {
+.follow-user-card:hover {
   background-color: var(--surface-hover);
 }
 
-.user-item:hover {
-  background-color: var(--bg-color);
-}
-
-.user-item:last-child {
+.follow-user-card:last-child {
   border-bottom: none;
 }
 
-.user-image {
+.follow-user-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.follow-user-avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  border: 2px solid var(--surface-color);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
-.user-text {
-  flex: 0 1 auto;
-  min-width: 0;
+.follow-user-details {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  justify-content: center;
+  min-width: 0;
 }
 
-.user-name {
+.follow-user-name {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -139,21 +136,19 @@
   line-height: 1.2;
 }
 
-.user-username {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+.follow-user-username {
+  font-size: 0.85rem;
+  color: #8e9aaf;
+  font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
 }
 
-
-.user-actions {
+.follow-user-actions {
   flex-shrink: 0;
-  margin-left: auto;
-  z-index: 10;
-  position: relative;
+  margin-left: 16px;
 }
 
 .load-more-container {
@@ -198,25 +193,21 @@
     font-size: 1.25rem;
   }
 
-  .user-item {
-    padding: var(--spacing-sm) var(--spacing-md);
+  .follow-user-card {
+    padding: 10px 12px;
   }
 
-  .user-avatar {
+  .follow-user-avatar {
     width: 40px;
     height: 40px;
-    margin-right: var(--spacing-sm);
   }
 
-  .user-name {
-    font-size: 0.875rem;
+  .follow-user-name {
+    font-size: 0.95rem;
   }
 
-  .user-username {
-    font-size: 0.75rem;
+  .follow-user-username {
+    font-size: 0.8rem;
   }
 
-  .user-bio {
-    font-size: 0.75rem;
-  }
 }

@@ -1,0 +1,153 @@
+.global-sidebar {
+  position: fixed;
+  left: 10px;
+  top: 170px;
+  /* Below Leaflet zoom controls and header */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100000;
+  pointer-events: auto;
+  background: transparent;
+  width: auto;
+  box-sizing: border-box;
+}
+
+.sidebar-action-button {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: visible;
+  /* Changed to visible for tooltip */
+}
+
+.sidebar-action-button:hover {
+  background: var(--surface-hover);
+  transform: translateX(4px);
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-lg);
+}
+
+.sidebar-icon {
+  font-size: 1.4rem;
+}
+
+.sidebar-text {
+  position: absolute;
+  left: 60px;
+  background: var(--text-primary);
+  color: var(--text-light);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-10px);
+  transition: all var(--transition-bounce);
+  pointer-events: none;
+  box-shadow: var(--shadow-lg);
+}
+
+.sidebar-action-button:hover .sidebar-text {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+/* Tooltip arrow */
+.sidebar-text::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px 6px 6px 0;
+  border-style: solid;
+  border-color: transparent var(--text-primary) transparent transparent;
+}
+
+@media (max-width: 768px) {
+  .global-sidebar {
+    top: auto;
+    bottom: 0px !important;
+    /* Force to bottom of viewport */
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    gap: 0;
+    background: var(--surface-color);
+    padding: 6px 0;
+    padding-bottom: env(safe-area-inset-bottom, 12px);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+    margin: 0;
+    justify-content: center;
+    z-index: 100000;
+  }
+
+  .sidebar-action-button {
+    flex: 1;
+    min-width: 0;
+    height: 52px;
+    border-radius: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar-action-button:hover,
+  .sidebar-action-button:active {
+    transform: none;
+    background: var(--surface-hover);
+  }
+
+  .sidebar-icon {
+    font-size: 1.2rem;
+  }
+
+  .sidebar-text {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 0;
+    font-size: 0.6rem;
+    font-weight: 600;
+    box-shadow: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    letter-spacing: -0.01em;
+  }
+
+  .sidebar-text::before {
+    display: none;
+  }
+
+  .sidebar-action-button:hover .sidebar-text,
+  .sidebar-action-button:active .sidebar-text {
+    color: var(--primary-color);
+  }
+}

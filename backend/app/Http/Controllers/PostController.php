@@ -481,6 +481,7 @@ class PostController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'city_id' => 'nullable|integer|exists:cities,id',
+            'prefecture_id' => 'nullable|integer|exists:prefectures,id',
             'custom_location' => 'nullable|string|max:255',
             'visibility' => 'nullable|string|in:public,followers,private',
         ]);
@@ -492,11 +493,22 @@ class PostController extends Controller
             ], 422);
         }
 
+        // city_idの決定ロジック
+        $cityId = $request->city_id;
+        
+        // 県のみ選択された場合は県庁所在地を設定
+        if (!$cityId && $request->prefecture_id) {
+            $prefecture = \App\Models\Prefecture::find($request->prefecture_id);
+            if ($prefecture && $prefecture->capital_city_id) {
+                $cityId = $prefecture->capital_city_id;
+            }
+        }
+
         // 投稿を更新
         $post->update([
             'title' => $request->title,
             'description' => $request->description,
-            'city_id' => $request->city_id,
+            'city_id' => $cityId,
             'custom_location' => $request->custom_location,
             'visibility' => $request->visibility ?? $post->visibility,
         ]);

@@ -18,7 +18,7 @@ function useDebounce(value, delay) {
   return debouncedValue;
 }
 
-function UserSearch({ onNavigateToProfile, onNavigateToUserProfile }) {
+function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
   const [allUsers, setAllUsers] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,14 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile }) {
   const fetchAllUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8000/api/users/search');
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8000/api/users/search', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        }
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -134,10 +141,14 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile }) {
   return (
     <div className="user-search-container">
       <div className="user-search-header">
-        <button onClick={onNavigateToProfile} className="back-button">
-          ← プロフィールに戻る
-        </button>
-        <h2>ユーザー検索</h2>
+        <div className="header-left">
+          <h2>ユーザー検索</h2>
+        </div>
+        {onClose && (
+          <button onClick={onClose} className="close-search-btn" title="閉じる">
+            ✕
+          </button>
+        )}
       </div>
 
       <div className="user-search-filters">
@@ -149,6 +160,7 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile }) {
             onChange={handleKeywordChange}
             placeholder="名前またはユーザー名で検索"
             className="search-input"
+            autoFocus
           />
         </div>
       </div>
@@ -166,47 +178,29 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile }) {
         ) : users.length > 0 ? (
           <div className="user-list">
             {users.map(user => (
-              <div key={user.id} className="user-card">
+              <div key={user.id} className="us-user-card">
                 <div
-                  className="user-info"
+                  className="us-user-info"
                   onClick={() => onNavigateToUserProfile && onNavigateToUserProfile(user.id)}
                 >
                   <img
                     src={user.avatar_url || 'http://localhost:8000/images/default-avatar.svg'}
                     alt={user.name}
-                    className="user-avatar"
+                    className="us-user-avatar"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = 'http://localhost:8000/images/default-avatar.svg';
                     }}
                   />
-                  <div className="user-details">
-                    <h4>{user.name}</h4>
+                  <div className="us-user-details">
+                    <h4 className="us-user-name-text">{user.name}</h4>
                     {user.username && (
-                      <p className="user-username">@{user.username}</p>
+                      <p className="us-user-username-text">@{user.username}</p>
                     )}
-                    {user.profile && (
-                      <p className="user-profile">
-                        {user.profile.length > 80
-                          ? `${user.profile.substring(0, 80)}...`
-                          : user.profile
-                        }
-                      </p>
-                    )}
-                    <div className="user-meta">
-                      {user.location && (
-                        <span className="user-location">
-                          📍 {user.location}
-                        </span>
-                      )}
-                      <span className="user-followers">
-                        フォロワー: {user.followers_count}人
-                      </span>
-                    </div>
                   </div>
                 </div>
                 <button
-                  className={`follow-button ${user.is_following ? 'following' : ''}`}
+                  className={`us-follow-button ${user.is_following ? 'following' : ''}`}
                   onClick={() => handleFollowToggle(user.id, user.is_following)}
                 >
                   {user.is_following ? 'フォロー中' : 'フォロー'}

@@ -3,6 +3,7 @@ import LikeButton from './LikeButton';
 import FollowButton from './FollowButton';
 import CommentSection from './CommentSection';
 import './PostDetail.css';
+import './PostDetailMenu.css';
 
 function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpload, onUserClick }) {
   console.log('PostDetail rendered with onUserClick:', onUserClick);
@@ -17,6 +18,22 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
   const [touchEnd, setTouchEnd] = useState(null);
   const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
   const carouselRef = useRef(null);
+
+  // メニュー用State
+  const [showMenu, setShowMenu] = useState(false);
+  const [showVisibilityModal, setShowVisibilityModal] = useState(false);
+  const menuRef = useRef(null);
+
+  // メニュー外クリック監視
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // photos配列が変更された時にcurrentIndexを安全に設定
   useEffect(() => {
@@ -132,7 +149,12 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
   // 写真を取得
   const fetchPhotos = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/photos/post/${postId}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:8000/api/photos/post/${postId}`, {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
       const data = await response.json();
 
       if (response.ok) {
@@ -193,6 +215,39 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         alert(data.message || '投稿の削除に失敗しました');
       }
     } catch (error) {
+      alert('ネットワークエラーが発生しました');
+    }
+  };
+
+  // 公開範囲を更新
+  const handleUpdateVisibility = async (newVisibility) => {
+    try {
+      const token = localStorage.getItem('token');
+      // 既存の値を保持しながらvisibilityのみ更新
+      const response = await fetch(`http://localhost:8000/api/posts/${postId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: post.title,
+          description: post.description,
+          visibility: newVisibility,
+          city_id: post.city_id,
+          custom_location: post.custom_location
+        })
+      });
+
+      if (response.ok) {
+        setPost(prev => ({ ...prev, visibility: newVisibility }));
+        setShowVisibilityModal(false);
+      } else {
+        const data = await response.json();
+        alert(data.message || '公開範囲の更新に失敗しました');
+      }
+    } catch (error) {
+      console.error('Error updating visibility:', error);
       alert('ネットワークエラーが発生しました');
     }
   };
@@ -293,55 +348,23 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         <button
           onClick={onBackToList}
           className="back-button"
+          aria-label="戻る"
         >
-          ← 投稿一覧に戻る
+          ←
         </button>
-
-        {isOwner && (
-          <div className="post-actions">
-            <button
-              onClick={onPhotoUpload}
-              className="photo-upload-button"
-            >
-              📷 写真を追加
-            </button>
-            <button
-              onClick={() => onEditPost(post)}
-              className="edit-button"
-            >
-              編集
-            </button>
-            <button
-              onClick={handleDelete}
-              className="delete-button"
-            >
-              削除
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="post-detail-card">
-        <div className="post-detail-title">
-          <h1>{post.title}</h1>
-        </div>
+
+
 
         <div className="post-detail-meta">
           <div className="post-author">
-            <span className="author-label">投稿者:</span>
             <div
               className="author-info"
               onClick={() => {
-                console.log('PostDetail author-info clicked', {
-                  postUser: post.user,
-                  onUserClick: onUserClick,
-                  userId: post.user?.id
-                });
                 if (post.user && onUserClick) {
-                  console.log('Calling onUserClick with userId:', post.user.id);
                   onUserClick(post.user.id);
-                } else {
-                  console.log('Not calling onUserClick - missing user or callback');
                 }
               }}
             >
@@ -363,36 +386,34 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
             )}
           </div>
 
-          <div className="post-date">
-            <span className="date-label">投稿日時:</span>
-            <span className="date-value">{formatDate(post.created_at)}</span>
-          </div>
+          {!isOwner && (
+            <div className="post-date">
+              <span className="date-value">{formatDate(post.created_at)}</span>
+            </div>
+          )}
 
-          <div className="post-visibility">
-            <span className="visibility-label">公開範囲:</span>
-            <span className="visibility-value">
-              {post.visibility === 'public' && '全員に公開'}
-              {post.visibility === 'followers' && 'フォロワーのみ公開'}
-              {post.visibility === 'private' && '自分のみ公開'}
-            </span>
-          </div>
+          {isOwner && (
+            <div className="post-visibility">
+              <span className="visibility-value">
+                {post.visibility === 'public' && '🌐 全員に公開'}
+                {post.visibility === 'followers' && '👥 フォロワーのみ公開'}
+                {post.visibility === 'private' && '🔒 自分のみ公開'}
+              </span>
+            </div>
+          )}
 
           <div className="post-likes">
-            <span className="likes-label">いいね:</span>
             <LikeButton
               postId={post.id}
               initialIsLiked={(() => {
-                // APIから取得したcurrent_user_idまたはローカルストレージのユーザーIDを使用
                 const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;
                 return post.liked_user_ids?.includes(currentUserId) ?? false;
               })()}
               initialLikesCount={post.likes_count ?? 0}
             />
           </div>
-
           {(post.city || post.custom_location) && (
             <div className="post-location">
-              <span className="location-label">場所:</span>
               {post.city && (
                 <span className="location-value">
                   📍 {post.city.name}
@@ -407,32 +428,53 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
             </div>
           )}
 
-          {photos.length > 0 && (
-            <div className="post-photos-count">
-              <span className="photos-label">写真:</span>
-              <span className="photos-count">{photos.length}枚</span>
+          {isOwner && (
+            <div className="post-actions" style={{ marginLeft: 'auto' }}>
+              <div className="menu-container" ref={menuRef}>
+                <button
+                  className="menu-trigger"
+                  onClick={(e) => {
+                    e.stopPropagation(); // 親要素へのバブルアップ防止
+                    setShowMenu(!showMenu);
+                  }}
+                  aria-label="メニュー"
+                >
+                  ⋮
+                </button>
+                {showMenu && (
+                  <div className="dropdown-menu">
+                    <div className="menu-info-item">
+                      📅 {formatDate(post.created_at)}
+                    </div>
+                    <button onClick={() => { onPhotoUpload(); setShowMenu(false); }}>
+                      📷 写真を追加
+                    </button>
+                    <button onClick={() => { onEditPost(post); setShowMenu(false); }}>
+                      ✏️ 編集
+                    </button>
+                    <button onClick={() => { setShowVisibilityModal(true); setShowMenu(false); }}>
+                      🌍 公開範囲を変更
+                    </button>
+                    <button onClick={() => { handleDelete(); setShowMenu(false); }} className="delete-item">
+                      🗑️ 削除
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
 
-        {/* 投稿内容 */}
-        <div className="post-detail-content">
-          <h3>投稿内容</h3>
-          <div className="post-description">
-            {post.description.split('\n').map((line, index) => (
-              <p key={index}>{line}</p>
-            ))}
-          </div>
+        <div className="post-detail-title">
+          <h1>{post.title}</h1>
         </div>
 
-        {/* 写真ギャラリー */}
-        {photos && photos.length > 0 && (
-          <div className="post-photos-section">
-            <h3>📸 写真 ({photos.length}枚)</h3>
-
-            {/* カルーセル表示 */}
+        {/* 写真ギャラリー (上に移動) */}
+        {
+          photos && photos.length > 0 && (
             <div
               className="post-carousel"
+              style={{ marginTop: 0, marginBottom: '1.5rem' }}
               ref={carouselRef}
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
@@ -517,91 +559,146 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 </>
               )}
             </div>
-          </div>
-        )}
 
-        {post.updated_at !== post.created_at && (
-          <div className="post-updated">
-            <p>最終更新: {formatDate(post.updated_at)}</p>
+          )
+        }
+
+
+
+
+
+        {/* 投稿内容 */}
+        <div className="post-detail-content">
+          <div className="post-description">
+            {post.description.split('\n').map((line, index) => (
+              <p key={index}>{line}</p>
+            ))}
           </div>
-        )}
+        </div>
+
+
+
+        {
+          post.updated_at !== post.created_at && (
+            <div className="post-updated">
+              <p>最終更新: {formatDate(post.updated_at)}</p>
+            </div>
+          )
+        }
 
         {/* PhotoCarousel */}
-        {showPhotoCarousel && photos && photos.length > 0 && (
-          <div className="photo-carousel-overlay">
-            <div className="photo-carousel-container">
-              {/* ヘッダー */}
-              <div className="carousel-header">
-                <div className="carousel-info">
-                  <span className="photo-counter">
-                    {currentIndex + 1} / {photos.length}
-                  </span>
-                  {photos[currentIndex]?.title && (
-                    <span className="photo-title">
-                      {photos[currentIndex]?.title}
+        {
+          showPhotoCarousel && photos && photos.length > 0 && (
+            <div className="photo-carousel-overlay">
+              <div className="photo-carousel-container">
+                {/* ヘッダー */}
+                <div className="carousel-header">
+                  <div className="carousel-info">
+                    <span className="photo-counter">
+                      {currentIndex + 1} / {photos.length}
                     </span>
-                  )}
+                    {photos[currentIndex]?.title && (
+                      <span className="photo-title">
+                        {photos[currentIndex]?.title}
+                      </span>
+                    )}
+                  </div>
+                  <div className="carousel-controls">
+                    <button onClick={closePhotoCarousel} className="close-button">
+                      ×
+                    </button>
+                  </div>
                 </div>
-                <div className="carousel-controls">
-                  <button onClick={closePhotoCarousel} className="close-button">
-                    ×
+
+                {/* メイン写真 */}
+                <div className="carousel-main">
+                  <button
+                    onClick={() => setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1)}
+                    className="nav-button prev-button"
+                  >
+                    ‹
+                  </button>
+
+                  <div className="main-photo-container">
+                    <img
+                      src={getPhotoUrl(photos[currentIndex]?.file_path)}
+                      alt={photos[currentIndex]?.title || `写真 ${currentIndex + 1}`}
+                      className="main-photo"
+                    />
+                    {photos[currentIndex]?.description && (
+                      <div className="photo-description">
+                        <p>{photos[currentIndex]?.description}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentIndex(prev => prev === photos.length - 1 ? 0 : prev + 1)}
+                    className="nav-button next-button"
+                  >
+                    ›
                   </button>
                 </div>
-              </div>
 
-              {/* メイン写真 */}
-              <div className="carousel-main">
-                <button
-                  onClick={() => setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1)}
-                  className="nav-button prev-button"
-                >
-                  ‹
-                </button>
-
-                <div className="main-photo-container">
-                  <img
-                    src={getPhotoUrl(photos[currentIndex]?.file_path)}
-                    alt={photos[currentIndex]?.title || `写真 ${currentIndex + 1}`}
-                    className="main-photo"
-                  />
-                  {photos[currentIndex]?.description && (
-                    <div className="photo-description">
-                      <p>{photos[currentIndex]?.description}</p>
-                    </div>
-                  )}
+                {/* サムネイル */}
+                <div className="carousel-thumbnails">
+                  {photos.map((photo, index) => (
+                    <img
+                      key={photo.id}
+                      src={getPhotoUrl(photo?.file_path)}
+                      alt={`サムネイル ${index + 1}`}
+                      className={`thumbnail ${index === currentIndex ? 'active' : ''}`}
+                      onClick={() => setCurrentIndex(index)}
+                    />
+                  ))}
                 </div>
-
-                <button
-                  onClick={() => setCurrentIndex(prev => prev === photos.length - 1 ? 0 : prev + 1)}
-                  className="nav-button next-button"
-                >
-                  ›
-                </button>
-              </div>
-
-              {/* サムネイル */}
-              <div className="carousel-thumbnails">
-                {photos.map((photo, index) => (
-                  <img
-                    key={photo.id}
-                    src={getPhotoUrl(photo?.file_path)}
-                    alt={`サムネイル ${index + 1}`}
-                    className={`thumbnail ${index === currentIndex ? 'active' : ''}`}
-                    onClick={() => setCurrentIndex(index)}
-                  />
-                ))}
               </div>
             </div>
-          </div>
-        )}
+          )
+        }
         {/* コメントセクション */}
         <CommentSection
           postId={post.id}
           userId={JSON.parse(localStorage.getItem('user'))?.id}
           token={localStorage.getItem('token')}
         />
-      </div>
-    </div>
+      </div >
+
+
+      {/* 公開範囲変更モーダル */}
+      {
+        showVisibilityModal && (
+          <div className="modal-overlay" onClick={() => setShowVisibilityModal(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <h3>公開範囲の設定</h3>
+              <div className="visibility-options">
+                <button
+                  className={`visibility-option ${post.visibility === 'public' ? 'active' : ''}`}
+                  onClick={() => handleUpdateVisibility('public')}
+                >
+                  🌐 全員に公開
+                </button>
+                <button
+                  className={`visibility-option ${post.visibility === 'followers' ? 'active' : ''}`}
+                  onClick={() => handleUpdateVisibility('followers')}
+                >
+                  👥 フォロワーのみ公開
+                </button>
+                <button
+                  className={`visibility-option ${post.visibility === 'private' ? 'active' : ''}`}
+                  onClick={() => handleUpdateVisibility('private')}
+                >
+                  🔒 自分のみ公開
+                </button>
+              </div>
+              <button onClick={() => setShowVisibilityModal(false)} className="cancel-button">
+                キャンセル
+              </button>
+            </div>
+          </div>
+        )
+      }
+    </div >
   );
 }
 

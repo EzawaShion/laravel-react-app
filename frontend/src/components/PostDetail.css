@@ -116,8 +116,10 @@
 
 .post-detail-meta {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
   padding: var(--spacing-lg);
   background: var(--bg-color);
@@ -130,23 +132,18 @@
   align-items: center;
   gap: var(--spacing-sm);
   flex-wrap: wrap;
+  margin-bottom: var(--spacing-xs);
 }
 
 .post-date,
 .post-likes,
-.post-location {
+.post-location,
+.post-visibility {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-}
-
-.author-label,
-.date-label,
-.likes-label,
-.location-label {
   color: var(--text-secondary);
   font-size: 0.9rem;
-  min-width: 80px;
 }
 
 .author-name {
@@ -155,13 +152,10 @@
   font-size: 1rem;
 }
 
-.date-value {
-  color: var(--text-primary);
-  font-size: 0.9rem;
-}
-
-.location-value {
-  color: var(--text-primary);
+.date-value,
+.location-value,
+.visibility-value {
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 

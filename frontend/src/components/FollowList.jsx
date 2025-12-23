@@ -20,7 +20,7 @@ function FollowList({ userId, type, onClose, onUserClick }) {
       setError('');
 
       const token = localStorage.getItem('token');
-      const endpoint = type === 'followers' 
+      const endpoint = type === 'followers'
         ? `http://localhost:8000/api/follow/followers/${userId}?page=${page}`
         : `http://localhost:8000/api/follow/followings/${userId}?page=${page}`;
 
@@ -32,16 +32,16 @@ function FollowList({ userId, type, onClose, onUserClick }) {
 
       if (response.ok) {
         const data = await response.json();
-        
+
         // APIレスポンスからユーザー配列を取得
         const userList = data[type] || [];
-        
+
         if (page === 1) {
           setUsers(userList);
         } else {
           setUsers(prev => [...prev, ...userList]);
         }
-        
+
         // ページネーション情報を設定
         setCurrentPage(data.current_page || page);
         setLastPage(data.last_page || 1);
@@ -106,21 +106,25 @@ function FollowList({ userId, type, onClose, onUserClick }) {
           ) : (
             <div className="users-list">
               {users.map((user) => (
-                <div key={user.id} className="user-item">
-                  <div className="user-link" onClick={() => handleUserClick(user.id)}>
+                <div key={user.id} className="follow-user-card">
+                  <div className="follow-user-info" onClick={() => handleUserClick(user.id)}>
                     <img
-                      src={user.profile_image_url || '/images/default-avatar.svg'}
+                      src={user.profile_image_url || 'http://localhost:8000/images/default-avatar.svg'}
                       alt={user.name}
-                      className="user-image"
+                      className="follow-user-avatar"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'http://localhost:8000/images/default-avatar.svg';
+                      }}
                     />
-                    <div className="user-text">
-                      <div className="user-name">{user.name}</div>
-                      <div className="user-username">@{user.username}</div>
+                    <div className="follow-user-details">
+                      <div className="follow-user-name">{user.name}</div>
+                      <div className="follow-user-username">@{user.username}</div>
                     </div>
                   </div>
-                  
+
                   {user.id !== getCurrentUserId() && (
-                    <div className="user-actions">
+                    <div className="follow-user-actions">
                       <FollowButton
                         userId={user.id}
                         initialIsFollowing={user.is_following || false}
@@ -130,10 +134,10 @@ function FollowList({ userId, type, onClose, onUserClick }) {
                   )}
                 </div>
               ))}
-              
+
               {hasMore && (
                 <div className="load-more-container">
-                  <button 
+                  <button
                     className="load-more-button"
                     onClick={loadMore}
                     disabled={loading}

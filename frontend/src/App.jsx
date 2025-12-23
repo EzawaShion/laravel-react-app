@@ -17,6 +17,7 @@ import MapView from './components/MapView'
 import EditPost from './components/EditPost'
 import UserProfile from './components/UserProfile'
 import UserSearch from './components/UserSearch'
+import Sidebar from './components/Sidebar'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -42,19 +43,67 @@ function App() {
   const [selectedPostId, setSelectedPostId] = useState(null)
   const [selectedPost, setSelectedPost] = useState(null)
   const [user, setUser] = useState(null)
-  
 
-  // ユーザー認証状態の確認
+
+  // ユーザー認証状態と表示画面の復元
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
-    
+    const savedView = localStorage.getItem('appViewState');
+
     if (token && userData) {
       setUser(JSON.parse(userData));
-      // ログイン済みの場合はホーム画面（MapView）を表示
-      // showMapViewは使わず、条件分岐で判定
+
+      // 保存された表示状態があれば復元
+      if (savedView) {
+        try {
+          const state = JSON.parse(savedView);
+          setShowPostList(state.showPostList || false);
+          setShowCreatePost(state.showCreatePost || false);
+          setShowPostDetail(state.showPostDetail || false);
+          setShowPhotoUpload(state.showPhotoUpload || false);
+          setShowProfile(state.showProfile || false);
+          setShowEditPost(state.showEditPost || false);
+          setShowUserProfile(state.showUserProfile || false);
+          setShowUserSearch(state.showUserSearch || false);
+          setShowMapView(state.showMapView || false);
+          setSelectedUserId(state.selectedUserId || null);
+          setSelectedPostId(state.selectedPostId || null);
+          setPreviousScreen(state.previousScreen || null);
+        } catch (e) {
+          console.error('Failed to restore view state:', e);
+        }
+      }
     }
   }, []);
+
+  // 表示状態が変わるたびにlocalStorageに保存
+  useEffect(() => {
+    if (user) {
+      const state = {
+        showPostList,
+        showCreatePost,
+        showPostDetail,
+        showPhotoUpload,
+        showProfile,
+        showEditPost,
+        showUserProfile,
+        showUserSearch,
+        showMapView,
+        selectedUserId,
+        selectedPostId,
+        previousScreen
+      };
+      localStorage.setItem('appViewState', JSON.stringify(state));
+    } else {
+      // ログアウト時は状態をクリア
+      localStorage.removeItem('appViewState');
+    }
+  }, [
+    user, showPostList, showCreatePost, showPostDetail, showPhotoUpload,
+    showProfile, showEditPost, showUserProfile, showUserSearch, showMapView,
+    selectedUserId, selectedPostId, previousScreen
+  ]);
 
 
   // Google OAuthコールバック処理
@@ -62,16 +111,16 @@ function App() {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     const user = urlParams.get('user');
-    
+
     if (token && user) {
       // トークンとユーザー情報を保存
       localStorage.setItem('token', token);
       localStorage.setItem('user', user);
       setUser(JSON.parse(user));
-      
+
       // URLからパラメータを削除
       window.history.replaceState({}, document.title, window.location.pathname);
-      
+
       // ログイン後はホーム画面（MapView）を表示
       // showMapViewは使わず、条件分岐で判定
     }
@@ -97,7 +146,7 @@ function App() {
         // ログイン画面を表示
         setShowLogin(true);
       }
-      
+
       // URLパラメータをクリア
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -138,7 +187,7 @@ function App() {
   const handleLoginSuccess = (userData) => {
     setUser(userData);
     setShowLogin(false);
-    
+
     // URLパラメータをクリア
     window.history.replaceState({}, document.title, window.location.pathname);
   };
@@ -172,7 +221,7 @@ function App() {
     alert(message);
     setShowForgotPassword(false);
     setShowLogin(true);
-    
+
     // URLパラメータをクリア
     window.history.replaceState({}, document.title, window.location.pathname);
   };
@@ -316,6 +365,17 @@ function App() {
         const data = await response.json();
         setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
+
+        // 他の画面を閉じてプロフィールを表示
+        setShowPostList(false);
+        setShowCreatePost(false);
+        setShowPostDetail(false);
+        setShowUserProfile(false);
+        setShowUserSearch(false);
+        setShowEditPost(false);
+        setShowPhotoUpload(false);
+        setShowMapView(false); // MapViewは状態フラグではなく条件分岐で制御されているが念のため
+
         setShowProfile(true);
       } else {
         console.error('プロフィールの取得に失敗しました');
@@ -323,6 +383,15 @@ function App() {
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
+  };
+
+  const handleNavigateToUserSearch = () => {
+    // 他の画面を閉じずに、ユーザー検索画面だけを表示（オーバーレイとして重ねる）
+    setShowUserSearch(true);
+  };
+
+  const handleCloseUserSearch = () => {
+    setShowUserSearch(false);
   };
 
   // プロフィール画面から戻る
@@ -334,7 +403,7 @@ function App() {
   const handleUserProfileBack = () => {
     setShowUserProfile(false);
     setSelectedUserId(null);
-    
+
     // 前の画面に戻る
     if (previousScreen === 'postList') {
       setShowPostList(true);
@@ -349,7 +418,7 @@ function App() {
       // デフォルトは投稿一覧
       setShowPostList(true);
     }
-    
+
     setPreviousScreen(null);
   };
 
@@ -374,178 +443,188 @@ function App() {
     console.log('Profile updated in App.jsx:', updatedUser);
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
-    
+
     // プロフィール画面を閉じる
     setShowProfile(false);
-    
+
     // 成功メッセージを表示
     alert('プロフィールが正常に更新されました！');
   };
 
-  // マップ画面を表示
-  if (showMapView) {
+  // ログイン済みユーザーの場合、Sidebarを表示し、各画面を制御
+  if (user) {
+    const handleNavigateToHome = () => {
+      // 全てのフラグをオフにするとMapView（ホーム）が表示される
+      setShowPostList(false);
+      setShowCreatePost(false);
+      setShowPostDetail(false);
+      setShowProfile(false);
+      setShowUserProfile(false);
+      setShowUserSearch(false);
+      setShowEditPost(false);
+      setShowPhotoUpload(false);
+    };
+
+    const handleNavigateToPostList = () => {
+      handleNavigateToHome();
+      setShowPostList(true);
+    };
+
+    const handleNavigateToCreatePost = () => {
+      handleNavigateToHome();
+      setShowCreatePost(true);
+    };
+
+    const handleNavigateToProfile = () => {
+      handleSwitchToProfile();
+    };
+
     return (
-      <MapView
-        onBack={() => {
-          setShowMapView(false);
-          setShowPostList(true);
-        }}
-        onPostClick={(postId) => {
-          setSelectedPostId(postId);
-          setShowPostDetail(true);
-          setShowMapView(false);
-        }}
-      />
+      <div className="app-container">
+        {/* 地図（ホーム）画面 */}
+        {(!showPostList && !showCreatePost && !showPostDetail && !showProfile && !showUserProfile && !showEditPost && !showPhotoUpload) && (
+          (!showUserSearch || window.innerWidth > 768) ? (
+            <MapView
+              onBack={() => { }}
+              onPostClick={(postId) => {
+                setSelectedPostId(postId);
+                setShowPostDetail(true);
+              }}
+              onNavigateToPostList={handleNavigateToPostList}
+              onNavigateToCreatePost={handleNavigateToCreatePost}
+              onNavigateToProfile={handleNavigateToProfile}
+            />
+          ) : null
+        )}
+
+        {/* 投稿一覧画面 */}
+        {showPostList && (
+          <PostList
+            onPostClick={handlePostClick}
+            onCreatePost={handleSwitchToCreatePost}
+            onUserClick={(userId) => {
+              setPreviousScreen('postList');
+              setShowPostList(false);
+              setSelectedUserId(userId);
+              setShowUserProfile(true);
+            }}
+            onMapView={handleNavigateToHome}
+          />
+        )}
+
+        {/* 投稿作成画面 */}
+        {showCreatePost && (
+          <CreatePost
+            onPostCreated={handlePostCreated}
+            onCancel={handleCancelCreatePost}
+            onPhotoUpload={handleSwitchToPhotoUpload}
+          />
+        )}
+
+        {/* 投稿詳細画面 */}
+        {showPostDetail && selectedPostId && (
+          <PostDetail
+            postId={selectedPostId}
+            onBackToList={handleBackToPostList}
+            onEditPost={handleEditPost}
+            onDeletePost={handleDeletePost}
+            onPhotoUpload={() => handleSwitchToPhotoUpload(selectedPostId)}
+            onUserClick={(userId) => {
+              setPreviousScreen('postDetail');
+              setShowPostDetail(false);
+              setSelectedUserId(userId);
+              setShowUserProfile(true);
+            }}
+          />
+        )}
+
+        {/* プロフィール画面 */}
+        {showProfile && (
+          <Profile
+            onBack={handleProfileBack}
+            onProfileUpdated={handleProfileUpdated}
+            onUserClick={(userId) => {
+              setPreviousScreen('profile');
+              setShowProfile(false);
+              setSelectedUserId(userId);
+              setShowUserProfile(true);
+            }}
+            onPostClick={(postId) => {
+              setSelectedPostId(postId);
+              setShowPostDetail(true);
+              setShowProfile(false);
+            }}
+            onLogout={handleLogout}
+            onNavigateToUserSearch={handleNavigateToUserSearch}
+          />
+        )}
+
+        {/* 他のユーザーのプロフィール */}
+        {showUserProfile && selectedUserId && (
+          <UserProfile
+            userId={selectedUserId}
+            onBack={handleUserProfileBack}
+            onSwitchToProfile={handleNavigateToProfile}
+            onUserClick={(userId) => {
+              setPreviousScreen('userProfile');
+              setShowUserProfile(false);
+              setSelectedUserId(userId);
+              setShowUserProfile(true);
+            }}
+            onPostClick={(postId) => {
+              setSelectedPostId(postId);
+              setShowPostDetail(true);
+              setShowUserProfile(false);
+            }}
+          />
+        )}
+
+        {/* ユーザー検索 */}
+        {showUserSearch && (
+          <UserSearch
+            onNavigateToProfile={handleNavigateToProfile}
+            onNavigateToUserProfile={(userId) => {
+              setPreviousScreen('userSearch');
+              setShowUserSearch(false);
+              setSelectedUserId(userId);
+              setShowUserProfile(true);
+            }}
+            onClose={handleCloseUserSearch}
+          />
+        )}
+
+        {/* 投稿編集 */}
+        {showEditPost && selectedPost && (
+          <EditPost
+            post={selectedPost}
+            onBack={handleEditPostBack}
+            onUpdateSuccess={handleEditPostSuccess}
+          />
+        )}
+
+        {/* 写真アップロード */}
+        {showPhotoUpload && selectedPostId && (
+          <PhotoUpload
+            postId={selectedPostId}
+            onUploadSuccess={showCreatePost ? handleCreatePostPhotoUploadSuccess : handlePhotoUploadSuccess}
+            onCancel={handlePhotoUploadCancel}
+          />
+        )}
+
+        <Sidebar
+          onNavigateToHome={handleNavigateToHome}
+          onNavigateToCreatePost={handleNavigateToCreatePost}
+          onNavigateToProfile={handleNavigateToProfile}
+          onNavigateToUserSearch={handleNavigateToUserSearch}
+        />
+      </div>
     );
   }
 
-  // 投稿詳細画面を表示
-  if (showPostDetail && selectedPostId) {
-    return (
-      <PostDetail 
-        postId={selectedPostId}
-        onBackToList={handleBackToPostList}
-        onEditPost={handleEditPost}
-        onDeletePost={handleDeletePost}
-        onPhotoUpload={() => handleSwitchToPhotoUpload(selectedPostId)}
-        onUserClick={(userId) => {
-          console.log('PostDetail onUserClick called with userId:', userId);
-          setPreviousScreen('postDetail');
-          setShowPostDetail(false);
-          setSelectedUserId(userId);
-          setShowUserProfile(true);
-        }}
-      />
-    );
-  }
-
-  // プロフィール画面を表示
-  if (showProfile) {
-    return (
-      <Profile
-        onBack={handleProfileBack}
-        onProfileUpdated={handleProfileUpdated}
-        onUserClick={(userId) => {
-          setPreviousScreen('profile');
-          setShowProfile(false);
-          setSelectedUserId(userId);
-          setShowUserProfile(true);
-        }}
-        onPostClick={(postId) => {
-          setSelectedPostId(postId);
-          setShowPostDetail(true);
-          setShowProfile(false);
-        }}
-        onLogout={handleLogout}
-        onNavigateToUserSearch={() => {
-          setShowProfile(false);
-          setShowUserSearch(true);
-        }}
-      />
-    );
-  }
-
-  // 他のユーザーのプロフィール画面を表示
-  if (showUserProfile && selectedUserId) {
-    return (
-      <UserProfile
-        userId={selectedUserId}
-        onBack={handleUserProfileBack}
-        onSwitchToProfile={() => {
-          setShowUserProfile(false);
-          setSelectedUserId(null);
-          setShowProfile(true);
-        }}
-        onUserClick={(userId) => {
-          setPreviousScreen('userProfile');
-          setShowUserProfile(false);
-          setSelectedUserId(userId);
-          setShowUserProfile(true);
-        }}
-        onPostClick={(postId) => {
-          setSelectedPostId(postId);
-          setShowPostDetail(true);
-          setShowUserProfile(false);
-        }}
-      />
-    );
-  }
-
-  // 写真アップロード画面を表示
-  if (showPhotoUpload && selectedPostId) {
-    return (
-      <PhotoUpload
-        postId={selectedPostId}
-        onUploadSuccess={showCreatePost ? handleCreatePostPhotoUploadSuccess : handlePhotoUploadSuccess}
-        onCancel={handlePhotoUploadCancel}
-      />
-    );
-  }
-
-  // 投稿一覧画面を表示
-  if (showPostList) {
-    return (
-      <PostList 
-        onPostClick={handlePostClick}
-        onCreatePost={handleSwitchToCreatePost}
-        onUserClick={(userId) => {
-          setPreviousScreen('postList');
-          setShowPostList(false);
-          setSelectedUserId(userId);
-          setShowUserProfile(true);
-        }}
-        onMapView={() => {
-          setShowPostList(false);
-        }}
-      />
-    );
-  }
-
-  // 投稿作成画面を表示
-  if (showCreatePost) {
-    return (
-      <CreatePost 
-        onPostCreated={handlePostCreated}
-        onCancel={handleCancelCreatePost}
-        onPhotoUpload={handleSwitchToPhotoUpload}
-      />
-    );
-  }
-
-  // メール認証依頼画面を表示
-  if (showEmailVerificationRequest) {
-    return (
-      <EmailVerificationRequest 
-        onSwitchToResendVerification={handleSwitchToResendVerification}
-        onSwitchToLogin={handleBackToLoginFromEmailVerification}
-      />
-    );
-  }
-
-  // サインアップ画面を表示
-  if (showSignUp) {
-    return (
-      <SignUp 
-        onSignUpSuccess={handleSignUpSuccess}
-        onSwitchToLogin={handleSwitchToLogin}
-        onSwitchToEmailVerificationRequest={handleSwitchToEmailVerificationRequest}
-      />
-    );
-  }
-
-  // メール再送画面を表示
-  if (showResendVerification) {
-    return (
-      <ResendVerification 
-        onBackToLogin={handleBackToLoginFromResend}
-      />
-    );
-  }
-
-  // ログイン画面を表示
+  // 未ログインユーザー向けの画面制御
   if (showLogin) {
     return (
-      <Login 
+      <Login
         onLoginSuccess={handleLoginSuccess}
         onSwitchToSignUp={handleSwitchToSignUp}
         onSwitchToForgotPassword={handleSwitchToForgotPassword}
@@ -553,12 +632,38 @@ function App() {
     );
   }
 
-  // パスワードリセット要求画面を表示
+  if (showSignUp) {
+    return (
+      <SignUp
+        onSignUpSuccess={handleSignUpSuccess}
+        onSwitchToLogin={handleSwitchToLogin}
+        onSwitchToEmailVerificationRequest={handleSwitchToEmailVerificationRequest}
+      />
+    );
+  }
+
   if (showForgotPassword) {
     return (
-      <ForgotPassword 
+      <ForgotPassword
         onBackToLogin={handleBackToLogin}
         onSwitchToResendVerification={handleSwitchToResendVerification}
+      />
+    );
+  }
+
+  if (showEmailVerificationRequest) {
+    return (
+      <EmailVerificationRequest
+        onSwitchToResendVerification={handleSwitchToResendVerification}
+        onSwitchToLogin={handleBackToLoginFromEmailVerification}
+      />
+    );
+  }
+
+  if (showResendVerification) {
+    return (
+      <ResendVerification
+        onBackToLogin={handleBackToLoginFromResend}
       />
     );
   }
@@ -567,116 +672,11 @@ function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const resetToken = urlParams.get('token');
   const resetEmail = urlParams.get('email');
-  
-  // パスワードリセット用のトークンとメールアドレスが両方存在する場合のみ表示
+
   if (resetToken && resetEmail && !user) {
     return (
-      <ResetPassword 
+      <ResetPassword
         onResetSuccess={handleResetSuccess}
-      />
-    );
-  }
-
-  // 投稿編集画面
-  if (showEditPost && selectedPost) {
-    return (
-      <EditPost
-        post={selectedPost}
-        onBack={handleEditPostBack}
-        onUpdateSuccess={handleEditPostSuccess}
-      />
-    );
-  }
-
-
-
-
-  // 投稿作成画面
-  if (showCreatePost) {
-    return (
-      <CreatePost
-        onBackToList={handleBackToPostList}
-        onPhotoUpload={handleSwitchToPhotoUpload}
-        onPhotoUploadSuccess={handleCreatePostPhotoUploadSuccess}
-      />
-    );
-  }
-
-  // プロフィール画面（重複チェック用 - 既に上で定義済み）
-  // この部分は削除予定
-  // if (showProfile) {
-  //   return (
-  //     <Profile
-  //       onBack={handleProfileBack}
-  //       onProfileUpdated={handleProfileUpdated}
-  //       onPostClick={(postId) => {
-  //         setSelectedPostId(postId);
-  //         setShowPostDetail(true);
-  //         setShowProfile(false);
-  //       }}
-  //     />
-  //   );
-  // }
-
-  // 写真アップロード画面
-  if (showPhotoUpload && selectedPostId) {
-    return (
-      <PhotoUpload
-        postId={selectedPostId}
-        onBack={handlePhotoUploadCancel}
-        onUploadSuccess={handlePhotoUploadSuccess}
-      />
-    );
-  }
-
-  // ユーザー検索画面を表示
-  if (showUserSearch) {
-    return (
-      <UserSearch
-        onNavigateToProfile={() => {
-          setShowUserSearch(false);
-          setShowProfile(true);
-        }}
-        onNavigateToUserProfile={(userId) => {
-          setPreviousScreen('userSearch');
-          setShowUserSearch(false);
-          setSelectedUserId(userId);
-          setShowUserProfile(true);
-        }}
-      />
-    );
-  }
-
-  // ログイン済みユーザーの場合、MapViewをホーム画面として表示
-  if (user && !showSignUp && !showLogin && !showForgotPassword && !showResendVerification && !showEmailVerificationRequest && !showCreatePost && !showPostList && !showPostDetail && !showPhotoUpload && !showProfile && !showEditPost && !showUserProfile && !showUserSearch) {
-    // デバッグ用ログ
-    console.log('App.jsx: Rendering MapView with navigation functions');
-    
-    const handleNavigateToPostList = () => {
-      console.log('App.jsx: Navigate to PostList');
-      setShowPostList(true);
-    };
-    
-    const handleNavigateToCreatePost = () => {
-      console.log('App.jsx: Navigate to CreatePost');
-      setShowCreatePost(true);
-    };
-    
-    const handleNavigateToProfile = () => {
-      console.log('App.jsx: Navigate to Profile');
-      setShowProfile(true);
-    };
-    
-    return (
-      <MapView
-        onBack={() => {}} // ホーム画面なのでバック機能は不要
-        onPostClick={(postId) => {
-          setSelectedPostId(postId);
-          setShowPostDetail(true);
-        }}
-        onNavigateToPostList={handleNavigateToPostList}
-        onNavigateToCreatePost={handleNavigateToCreatePost}
-        onNavigateToProfile={handleNavigateToProfile}
       />
     );
   }
@@ -695,49 +695,20 @@ function App() {
 
       {/* ユーザー認証状態の表示 */}
       <div className="auth-section">
-        {user ? (
-          <div className="user-info">
-            <p>ようこそ、{user.name}さん！</p>
-            <div className="user-actions">
-              <button 
-                onClick={handleSwitchToPostList}
-                className="post-list-button"
-              >
-                投稿一覧
-              </button>
-              <button 
-                onClick={handleSwitchToCreatePost}
-                className="create-post-button"
-              >
-                新規投稿
-              </button>
-              <button 
-                onClick={handleSwitchToProfile}
-                className="profile-button"
-              >
-                プロフィール
-              </button>
-              <button onClick={handleLogout} className="logout-button">
-                ログアウト
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="auth-buttons">
-            <button 
-              onClick={() => setShowLogin(true)}
-              className="login-button"
-            >
-              ログイン
-            </button>
-            <button 
-              onClick={() => setShowSignUp(true)}
-              className="signup-button"
-            >
-              アカウント作成
-            </button>
-          </div>
-        )}
+        <div className="auth-buttons">
+          <button
+            onClick={() => setShowLogin(true)}
+            className="login-button"
+          >
+            ログイン
+          </button>
+          <button
+            onClick={() => setShowSignUp(true)}
+            className="signup-button"
+          >
+            アカウント作成
+          </button>
+        </div>
       </div>
 
       {/* APIデータの表示 */}

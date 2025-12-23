@@ -29,6 +29,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
   const [myPosts, setMyPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('posts');
+  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -311,6 +312,29 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
     }
   };
 
+  const toggleMenu = () => {
+    setShowMenu(!showMenu);
+  };
+
+  // メニューを閉じる
+  const closeMenu = () => {
+    setShowMenu(false);
+  };
+
+  // メニュー以外をクリックしたときに閉じる
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showMenu && !event.target.closest('.profile-menu-container')) {
+        closeMenu();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
+
   if (!user) {
     return <div className="profile-loading">読み込み中...</div>;
   }
@@ -322,27 +346,58 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
           ← 戻る
         </button>
         <h1>プロフィール</h1>
-        <div className="header-buttons">
-          {onNavigateToUserSearch && (
-            <button
-              className="user-search-button"
-              onClick={onNavigateToUserSearch}
-            >
-              🔍 ユーザー検索
+        <div className="header-actions">
+
+          <div className="profile-menu-container">
+            <button className="hamburger-button" onClick={toggleMenu} aria-label="メニュー">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
             </button>
-          )}
-          {onLogout && (
-            <button
-              className="logout-button"
-              onClick={() => {
-                if (window.confirm('ログアウトしますか？')) {
-                  onLogout();
-                }
-              }}
-            >
-              ログアウト
-            </button>
-          )}
+
+            {showMenu && (
+              <div className="profile-dropdown-menu">
+                <button
+                  className="menu-item"
+                  onClick={() => {
+                    closeMenu();
+                    setIsEditing(true);
+                    setEditForm({
+                      name: user.name || '',
+                      username: user.username || '',
+                      bio: user.bio || '',
+                      website: user.website || '',
+                      profile_image_preview: null,
+                      privacy_settings: user.privacy_settings || {
+                        show_followers: true,
+                        show_followings: true
+                      }
+                    });
+                  }}
+                >
+                  <span className="menu-icon">✏️</span>
+                  プロフィール編集
+                </button>
+
+                {onLogout && (
+                  <button
+                    className="menu-item logout"
+                    onClick={() => {
+                      closeMenu();
+                      if (window.confirm('ログアウトしますか？')) {
+                        onLogout();
+                      }
+                    }}
+                  >
+                    <span className="menu-icon">🚪</span>
+                    ログアウト
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -401,40 +456,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
               </div>
             </div>
 
-            <div className="profile-actions">
-              <button
-                className="edit-button"
-                onClick={() => {
-                  console.log('=== Entering Edit Mode ===');
-                  console.log('Current user data:', user);
-                  setIsEditing(true);
-                  // フォームを確実に初期化
-                  setEditForm({
-                    name: user.name || '',
-                    username: user.username || '',
-                    bio: user.bio || '',
-                    website: user.website || '',
-                    profile_image_preview: null,
-                    privacy_settings: user.privacy_settings || {
-                      show_followers: true,
-                      show_followings: true
-                    }
-                  });
-                  console.log('Edit form initialized:', {
-                    name: user.name || '',
-                    username: user.username || '',
-                    bio: user.bio || '',
-                    website: user.website || '',
-                    privacy_settings: user.privacy_settings || {
-                      show_followers: true,
-                      show_followings: true
-                    }
-                  });
-                }}
-              >
-                編集
-              </button>
-            </div>
+            {/* 編集ボタンをここから削除しました */}
           </div>
         </div>
       ) : (
@@ -600,7 +622,8 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
             </button>
           </div>
         </div>
-      )}
+      )
+      }
 
       {/* 自分の投稿一覧セクション */}
       <div className="profile-posts-section">
@@ -695,15 +718,17 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
         )}
       </div>
 
-      {showFollowList && (
-        <FollowList
-          userId={user.id}
-          type={followListType}
-          onClose={closeFollowListModal}
-          onUserClick={handleUserClick}
-        />
-      )}
-    </div>
+      {
+        showFollowList && (
+          <FollowList
+            userId={user.id}
+            type={followListType}
+            onClose={closeFollowListModal}
+            onUserClick={handleUserClick}
+          />
+        )
+      }
+    </div >
   );
 }
 

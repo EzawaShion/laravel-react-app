@@ -49,7 +49,7 @@ class UserController extends Controller
                                   'avatar_url' => $avatarUrl, // 後方互換性のため
                                   'location' => $user->location,
                                   'followers_count' => $user->followers_count,
-                                  'is_following' => Auth::check() ? Auth::user()->followings->contains($user->id) : false,
+                                  'is_following' => auth('sanctum')->check() ? auth('sanctum')->user()->followings->contains($user->id) : false,
                               ];
                           });
 
@@ -95,7 +95,7 @@ class UserController extends Controller
                     'followers_count' => $user->followers_count,
                     'followings_count' => $user->followings_count,
                     'posts_count' => $user->posts_count,
-                    'is_following' => Auth::check() ? Auth::user()->followings->contains($user->id) : false,
+                    'is_following' => auth('sanctum')->check() ? auth('sanctum')->user()->followings->contains($user->id) : false,
                 ]
             ]);
         } catch (\Exception $e) {

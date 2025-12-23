@@ -60,6 +60,7 @@
 .user-profile-info {
   flex: 1;
   min-width: 0;
+  width: 100%;
 }
 
 .user-profile-info h2 {
@@ -82,6 +83,7 @@
   font-size: 1rem;
   line-height: 1.5;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .user-profile-details {
@@ -105,6 +107,7 @@
   color: var(--primary-color);
   text-decoration: none;
   transition: color var(--transition-fast);
+  word-break: break-all;
 }
 
 .detail-item a:hover {
@@ -185,6 +188,10 @@
 
 /* レスポンシブデザイン */
 @media (max-width: 768px) {
+  .user-profile-container {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+
   .user-profile-content {
     flex-direction: column;
     align-items: center;
@@ -211,6 +218,18 @@
 
   .follow-stats {
     justify-content: center;
+  }
+
+  .detail-item {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .detail-item .label {
+    min-width: unset;
+    margin-right: 0;
+    font-size: 0.85rem;
   }
 }
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON, Pane } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -54,8 +54,53 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
     city_id: '',
     keyword: ''
   });
+  const [mapStyle, setMapStyle] = useState('standard'); // 'standard' or 'simple'
+  const [geojsonData, setGeojsonData] = useState(null);
   const [prefectures, setPrefectures] = useState([]);
   const [cities, setCities] = useState([]);
+
+  // 日本以外を隠すためのマスクデータを生成（メモ化してパフォーマンスを確保）
+  const maskData = useMemo(() => {
+    if (!geojsonData) return null;
+
+    // 世界全体を覆うポリゴン（反時計回り）
+    const worldCoords = [
+      [180, 90],
+      [-180, 90],
+      [-180, -90],
+      [180, -90],
+      [180, 90]
+    ];
+
+    const rings = [worldCoords];
+
+    // 日本の全領土を「穴」として追加
+    // 地形データの座標を反転させることで、世界を覆うポリゴンの中に「穴」を作ります
+    geojsonData.features.forEach(feature => {
+      if (feature.geometry.type === 'Polygon') {
+        feature.geometry.coordinates.forEach(ring => {
+          // 配列をコピーして反転（CCW -> CW）
+          rings.push([...ring].reverse());
+        });
+      } else if (feature.geometry.type === 'MultiPolygon') {
+        feature.geometry.coordinates.forEach(poly => {
+          poly.forEach(ring => {
+            // 配列をコピーして反転（CCW -> CW）
+            rings.push([...ring].reverse());
+          });
+        });
+      }
+    });
+
+    return {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "Polygon",
+        coordinates: rings
+      }
+    };
+  }, [geojsonData]);
 
   // debounceされた検索パラメータ（500ms遅延）
   const debouncedSearchParams = useDebounce(searchParams, 500);
@@ -69,12 +114,19 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   useEffect(() => {
     fetchPostsWithCoordinates();
     getUserLocation();
+
+    // 日本の県境データを取得（シンプル表示用）
+    fetch('https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson')
+      .then(res => res.json())
+      .then(data => setGeojsonData(data))
+      .catch(err => console.error('GeoJSON loading error:', err));
   }, []);
 
   // 初期表示時にすべての投稿を表示
   useEffect(() => {
     if (posts.length > 0 && selectedLocationPosts.length === 0) {
       setSelectedLocationPosts(posts);
+      setSelectedLocationName('すべての投稿');
     }
   }, [posts, selectedLocationPosts.length]);
 
@@ -150,7 +202,14 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
       const url = `http://localhost:8000/api/posts/search?${queryParams.toString()}`;
       console.log('リアルタイム検索URL:', url);
 
-      const response = await fetch(url);
+      const token = localStorage.getItem('token');
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -221,10 +280,12 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   const fetchPostsWithCoordinates = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:8000/api/posts', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
 
@@ -376,41 +437,6 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   return (
     <div className="map-view-container">
       <div className="map-header-container">
-        <div className="header-buttons-group">
-          <button
-            onClick={() => {
-              console.log('投稿一覧ボタンクリック');
-              if (onNavigateToPostList) {
-                onNavigateToPostList();
-              }
-            }}
-            className="header-action-button"
-          >
-            📋 投稿一覧
-          </button>
-          <button
-            onClick={() => {
-              console.log('新規投稿ボタンクリック');
-              if (onNavigateToCreatePost) {
-                onNavigateToCreatePost();
-              }
-            }}
-            className="header-action-button"
-          >
-            ✏️ 新規投稿
-          </button>
-          <button
-            onClick={() => {
-              console.log('プロフィールボタンクリック');
-              if (onNavigateToProfile) {
-                onNavigateToProfile();
-              }
-            }}
-            className="header-action-button"
-          >
-            👤 プロフィール
-          </button>
-        </div>
 
         {/* 検索欄 */}
         <div className="search-bar-container">
@@ -472,6 +498,31 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
               }));
             }}
           />
+
+          {(searchParams.prefecture_id || searchParams.keyword) && (
+            <button
+              className="search-reset-btn"
+              onClick={() => {
+                setSearchParams({
+                  prefecture_id: '',
+                  city_id: '',
+                  keyword: ''
+                });
+                setCities([]); // Clear cities as well
+              }}
+              title="検索条件をクリア"
+            >
+              ✕
+            </button>
+          )}
+
+          <button
+            className={`map-style-toggle-btn ${mapStyle}`}
+            onClick={() => setMapStyle(mapStyle === 'standard' ? 'simple' : 'standard')}
+            title={mapStyle === 'standard' ? 'シンプル地図に切り替え' : '標準地図に切り替え'}
+          >
+            {mapStyle === 'standard' ? '🎨 シンプル' : '🗺️ 標準'}
+          </button>
         </div>
         <h1 className="map-title">📍 投稿マップ</h1>
         <div className="post-count-badge">
@@ -489,13 +540,14 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
         })}
         <div className="map-container">
           <MapContainer
-            ref={mapRef}
             center={center}
-            zoom={8}
-            minZoom={6}
+            zoom={5}
+            minZoom={5}
             maxZoom={18}
+            className={`leaflet-container ${mapStyle === 'simple' ? 'simple-map' : ''}`}
             maxBounds={japanBounds}
             maxBoundsViscosity={1.0}
+            ref={mapRef}
             style={{
               height: '100%',
               width: '100%',
@@ -504,9 +556,46 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
             }}
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              url={mapStyle === 'simple'
+                ? "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
+                : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+              opacity={mapStyle === 'simple' ? (maskData ? 0.3 : 0.5) : 1}
             />
+
+            {/* 日本以外を隠すマスクレイヤーを専用のペインで管理 */}
+            <Pane name="mask-pane" style={{ zIndex: 450 }}>
+              {maskData && (
+                <GeoJSON
+                  data={maskData}
+                  interactive={false}
+                  style={{
+                    fillColor: '#b5dffbff', // アプリの背景色に合わせた海の色
+                    fillOpacity: 1,
+                    color: '#cbd5e1',   // 境界線（控えめな色）
+                    weight: 1,
+                    stroke: true
+                  }}
+                />
+              )}
+            </Pane>
+
+            {/* シンプルモード時の陸地（日本）の色付け */}
+            {mapStyle === 'simple' && geojsonData && (
+              <Pane name="land-pane" style={{ zIndex: 460 }}>
+                <GeoJSON
+                  data={geojsonData}
+                  interactive={false}
+                  style={{
+                    fillColor: '#30ba28ff', // 薄い緑色 (green-100相当)
+                    fillOpacity: 1,
+                    color: '#86efac',   // 境界線 (green-300相当)
+                    weight: 1,
+                    stroke: true
+                  }}
+                />
+              </Pane>
+            )}
 
             <MarkerClusterGroup
               chunkedLoading
@@ -591,12 +680,16 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                   }}
                   title="投稿リストを非表示"
                 >
-                  <span className="hide-icon">−</span>
+                  <span className="hide-icon"></span>
                 </button>
-                <h3>{selectedLocationName}</h3>
-              </div>
-              <div className="location-posts-count">
-                {selectedLocationPosts.length > 0 ? `${selectedLocationPosts.length}件の投稿` : ''}
+                <div className="sidebar-header-text">
+                  <h3>{selectedLocationName}</h3>
+                  {selectedLocationPosts.length > 0 && (
+                    <span className="sidebar-post-count-badge">
+                      {selectedLocationPosts.length}件
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="location-posts-list">
@@ -622,21 +715,15 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                       )}
 
                       <div className="sidebar-post-content">
-                        <h4 className="sidebar-post-title">{post.title}</h4>
-                        <p className="sidebar-post-description">
-                          {post.description.length > 60
-                            ? `${post.description.substring(0, 60)}...`
-                            : post.description
-                          }
-                        </p>
-
-                        <div className="sidebar-post-meta">
-                          <span className="sidebar-post-date">
-                            {new Date(post.created_at).toLocaleDateString('ja-JP')}
-                          </span>
-                          <div className="sidebar-post-stats">
-                            <span>❤️ {post.likes_count}</span>
-                            <span>📷 {post.total_photos || 0}</span>
+                        <div className="sidebar-post-title-wrapper">
+                          <h4 className="sidebar-post-title">{post.title}</h4>
+                        </div>
+                        <div className="sidebar-post-info-wrapper">
+                          <div className="sidebar-post-location">
+                            📍 {post.location_name}
+                          </div>
+                          <div className="sidebar-post-likes">
+                            ❤️ {post.likes_count}
                           </div>
                         </div>
                       </div>
@@ -647,16 +734,32 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
             </div>
           </div>
         )}
+
+        {/* サイドバー再表示ボタン */}
+        {(!showSidePanel || isSidebarCollapsed) && (
+          <button
+            className="show-sidebar-btn"
+            onClick={() => {
+              console.log('再表示ボタンがクリックされました');
+              openSidePanel();
+            }}
+            title="投稿リストを表示"
+          >
+            <span className="show-icon"></span>
+          </button>
+        )}
       </div>
 
-      {posts.length === 0 && !showSidePanel && (
-        <div className="no-coordinates-message">
-          <p>位置情報付きの投稿がまだありません</p>
-          <p>投稿作成時に位置情報を追加すると、地図上に表示されます</p>
-        </div>
-      )}
+      {
+        posts.length === 0 && !showSidePanel && (
+          <div className="no-coordinates-message">
+            <p>位置情報付きの投稿がまだありません</p>
+            <p>投稿作成時に位置情報を追加すると、地図上に表示されます</p>
+          </div>
+        )
+      }
 
-    </div>
+    </div >
   );
 }
 

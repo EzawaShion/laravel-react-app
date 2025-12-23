@@ -1,0 +1,41 @@
+/* サイドバー再表示ボタン */
+.show-sidebar-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+  transition: all 0.2s ease;
+}
+
+.show-sidebar-btn:hover {
+  transform: scale(1.05);
+  background: var(--surface-hover);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.show-icon {
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  margin-left: 2px;
+  /* Visual centering adjustment for play icon */
+}
+
+/* モバイルでの位置調整 */
+@media (max-width: 768px) {
+  .show-sidebar-btn {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+  }
+}

@@ -5,6 +5,7 @@ function EditPost({ post, onBack, onUpdateSuccess }) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    prefecture_id: '',
     city_id: '',
     custom_location: '',
     visibility: 'public'
@@ -20,10 +21,16 @@ function EditPost({ post, onBack, onUpdateSuccess }) {
       setFormData({
         title: post.title || '',
         description: post.description || '',
+        prefecture_id: post.city?.prefecture_id || '',
         city_id: post.city_id || '',
         custom_location: post.custom_location || '',
         visibility: post.visibility || 'public'
       });
+      // 既存のcityがある場合、またはprefecture_idがある場合、対応する都道府県の市区町村を取得
+      const prefectureId = post.city?.prefecture_id;
+      if (prefectureId) {
+        fetchCities(prefectureId);
+      }
     }
     fetchPrefectures();
   }, [post]);
@@ -56,7 +63,11 @@ function EditPost({ post, onBack, onUpdateSuccess }) {
 
   // 都道府県選択時の処理
   const handlePrefectureChange = (prefectureId) => {
-    setFormData(prev => ({ ...prev, city_id: '' }));
+    setFormData(prev => ({
+      ...prev,
+      prefecture_id: prefectureId,
+      city_id: '' // 都道府県が変わったら都市はリセット
+    }));
     setCities([]);
     if (prefectureId) {
       fetchCities(prefectureId);
@@ -148,6 +159,8 @@ function EditPost({ post, onBack, onUpdateSuccess }) {
           <label htmlFor="prefecture">都道府県</label>
           <select
             id="prefecture"
+            name="prefecture_id"
+            value={formData.prefecture_id}
             onChange={(e) => handlePrefectureChange(e.target.value)}
             className="form-select"
           >

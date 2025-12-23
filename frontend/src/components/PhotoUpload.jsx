@@ -15,7 +15,12 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
   useEffect(() => {
     const fetchExistingPhotoCount = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/photos/post/${postId}`);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:8000/api/photos/post/${postId}`, {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
         const data = await response.json();
         if (response.ok) {
           setExistingPhotoCount(data.photos?.length || 0);
@@ -31,9 +36,9 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
   // ファイル選択時の処理（1件ずつ）
   const handleFileSelect = (e) => {
     const file = e.target.files[0]; // 1件のみ取得
-    
+
     if (!file) return;
-    
+
     // 既存の写真数 + 選択中の写真数が10枚を超えないかチェック
     const totalPhotoCount = existingPhotoCount + selectedFiles.length + 1;
     if (totalPhotoCount > 10) {
@@ -106,7 +111,7 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
     try {
       const formData = new FormData();
       formData.append('post_id', postId);
-      
+
       selectedFiles.forEach((file, index) => {
         formData.append('photos[]', file);
         formData.append(`titles[${index}]`, photoData[index]?.title || '');
@@ -138,10 +143,14 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
         // バックエンドからのエラーメッセージを表示
         const errorMessage = data.message || 'アップロードに失敗しました';
         setError(errorMessage);
-        
+
         // 10枚制限エラーの場合は、既存写真数を再取得
         if (errorMessage.includes('写真は合計10枚までです')) {
-          const response = await fetch(`http://localhost:8000/api/photos/post/${postId}`);
+          const response = await fetch(`http://localhost:8000/api/photos/post/${postId}`, {
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          });
           const data = await response.json();
           if (response.ok) {
             setExistingPhotoCount(data.photos?.length || 0);
@@ -180,14 +189,14 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
       </div>
 
       <div className="upload-methods">
-        <button 
-          onClick={() => fileInputRef.current.click()} 
+        <button
+          onClick={() => fileInputRef.current.click()}
           className="upload-button"
         >
           写真を追加
         </button>
-        <button 
-          onClick={handleCameraCapture} 
+        <button
+          onClick={handleCameraCapture}
           className="camera-button"
         >
           カメラで撮影
@@ -207,55 +216,55 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
       {previews.length > 0 && (
         <div className="photo-previews">
           <h3>選択された写真 ({previews.length}枚) - 合計: {existingPhotoCount + selectedFiles.length}/10枚</h3>
-          
 
-          
+
+
           {/* カルーセル表示 */}
           <div className="photo-carousel">
             <div className="carousel-main-photo">
               {/* 前の写真の端 */}
               {previews.length > 1 && (
                 <div className="carousel-prev-photo">
-                  <img 
-                    src={previews[currentPhotoIndex === 0 ? previews.length - 1 : currentPhotoIndex - 1].src} 
+                  <img
+                    src={previews[currentPhotoIndex === 0 ? previews.length - 1 : currentPhotoIndex - 1].src}
                     alt="前の写真"
                     className="carousel-edge-photo"
                   />
                 </div>
               )}
-              
+
               {/* メイン写真 */}
               <div className="preview-image-container">
-                <img 
-                  src={previews[currentPhotoIndex].src} 
+                <img
+                  src={previews[currentPhotoIndex].src}
                   alt={`Preview ${currentPhotoIndex + 1}`}
                   className="main-carousel-photo"
                 />
-                <button 
+                <button
                   onClick={() => handleRemovePhoto(currentPhotoIndex)}
                   className="remove-photo-button"
                 >
                   ×
                 </button>
               </div>
-              
+
               {/* 次の写真の端 */}
               {previews.length > 1 && (
                 <div className="carousel-next-photo">
-                  <img 
-                    src={previews[currentPhotoIndex === previews.length - 1 ? 0 : currentPhotoIndex + 1].src} 
+                  <img
+                    src={previews[currentPhotoIndex === previews.length - 1 ? 0 : currentPhotoIndex + 1].src}
                     alt="次の写真"
                     className="carousel-edge-photo"
                   />
                 </div>
               )}
             </div>
-            
+
             {/* 写真枚数インジケーター */}
             {previews.length > 1 && (
               <div className="carousel-indicators">
                 {previews.map((_, index) => (
-                  <div 
+                  <div
                     key={index}
                     className={`carousel-indicator ${index === currentPhotoIndex ? 'active' : ''}`}
                     onClick={() => setCurrentPhotoIndex(index)}
@@ -263,17 +272,17 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
                 ))}
               </div>
             )}
-            
+
             {/* ナビゲーションボタン */}
             {previews.length > 1 && (
               <>
-                <button 
+                <button
                   onClick={() => setCurrentPhotoIndex(prev => prev === 0 ? previews.length - 1 : prev - 1)}
                   className="carousel-nav-button prev"
                 >
                   ‹
                 </button>
-                <button 
+                <button
                   onClick={() => setCurrentPhotoIndex(prev => prev === previews.length - 1 ? 0 : prev + 1)}
                   className="carousel-nav-button next"
                 >
@@ -282,7 +291,7 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
               </>
             )}
           </div>
-          
+
           {/* 写真詳細入力 */}
           <div className="photo-details">
             <input
@@ -311,8 +320,8 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel }) {
 
       {previews.length > 0 && (
         <div className="upload-actions">
-          <button 
-            onClick={handleUpload} 
+          <button
+            onClick={handleUpload}
             disabled={loading}
             className="submit-upload-button"
           >
