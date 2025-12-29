@@ -4,6 +4,7 @@ import MarkerClusterGroup from 'react-leaflet-markercluster';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import SearchPanel from './SearchPanel';
+import MapPostGrid from './MapPostGrid';
 import './MapView.css';
 
 // debounce用のカスタムhook
@@ -31,7 +32,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreatePost, onNavigateToProfile }) {
+function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreatePost, onNavigateToProfile, onUserClick }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -276,6 +277,19 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
     }
   }, [selectedLocationPosts.length, showSidePanel]);
 
+  // サイドバーの開閉に合わせて地図のサイズを更新
+  useEffect(() => {
+    if (mapRef.current) {
+      // CSSアニメーション（transition）の完了を待つために少し遅らせて実行
+      const timer = setTimeout(() => {
+        mapRef.current.invalidateSize();
+        console.log('Map size invalidated');
+      }, 300); // MapView.cssのtransition時間（通常300ms程度）に合わせる
+
+      return () => clearTimeout(timer);
+    }
+  }, [isSidebarCollapsed]);
+
   // 座標情報がある投稿を取得
   const fetchPostsWithCoordinates = async () => {
     try {
@@ -398,6 +412,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
     });
     setIsSidebarCollapsed(true);
     setShowSidePanel(false);
+    setIsSidebarExpanded(false); // 縮小状態もリセット
     // 選択された投稿をクリアして、useEffectが動作しないようにする
     setSelectedLocationPosts([]);
   };
@@ -415,6 +430,36 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
       setSelectedLocationPosts(posts);
       setSelectedLocationName('すべての投稿');
     }
+  };
+
+  // サイドパネルの全画面切替
+  // サイドパネルの全画面切替
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
+    return localStorage.getItem('isMapSidebarExpanded') === 'true';
+  });
+
+  const toggleSidebarExpand = () => {
+    setIsSidebarExpanded(prev => {
+      const newState = !prev;
+      localStorage.setItem('isMapSidebarExpanded', newState);
+      if (newState) {
+        setIsSidebarCollapsed(false);
+        setShowSidePanel(true);
+      }
+      return newState;
+    });
+  };
+
+  // 投稿の作成日をフォーマット
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ja-JP', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   if (loading) {
@@ -530,10 +575,11 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
         </div>
       </div>
 
-      <div className={`map-main-content ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <div className={`map-main-content ${isSidebarCollapsed ? 'sidebar-collapsed' : ''} ${isSidebarExpanded ? 'sidebar-expanded' : ''}`}>
         {console.log('現在の状態:', {
           isSidebarCollapsed,
           showSidePanel,
+          isSidebarExpanded,
           '投稿リスト表示中': showSidePanel && !isSidebarCollapsed,
           'selectedLocationPosts数': selectedLocationPosts.length,
           'selectedLocationName': selectedLocationName
@@ -646,7 +692,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                   });
 
                   setSelectedLocationPosts(clusterPosts);
-                  setSelectedLocationName(clusterPosts[0]?.location_name || '選択された場所');
+                  setSelectedLocationName(null);
                   setShowSidePanel(true);
                 }
               }}
@@ -672,18 +718,27 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
           <div className="map-sidebar">
             <div className="sidebar-content">
               <div className="sidebar-header">
-                <button
-                  className="hide-sidebar-btn"
-                  onClick={() => {
-                    console.log('非表示ボタンがクリックされました');
-                    closeSidePanel();
-                  }}
-                  title="投稿リストを非表示"
-                >
-                  <span className="hide-icon"></span>
-                </button>
+                <div className="sidebar-header-left">
+                  <button
+                    className="expand-sidebar-btn"
+                    onClick={toggleSidebarExpand}
+                    title="全画面表示"
+                  >
+                    <span className="expand-icon"></span>
+                  </button>
+                  <button
+                    className="hide-sidebar-btn"
+                    onClick={() => {
+                      console.log('非表示ボタンがクリックされました');
+                      closeSidePanel();
+                    }}
+                    title="投稿リストを非表示"
+                  >
+                    <span className="hide-icon"></span>
+                  </button>
+                </div>
                 <div className="sidebar-header-text">
-                  <h3>{selectedLocationName}</h3>
+                  {selectedLocationName && <h3>{selectedLocationName}</h3>}
                   {selectedLocationPosts.length > 0 && (
                     <span className="sidebar-post-count-badge">
                       {selectedLocationPosts.length}件
@@ -733,6 +788,18 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
               </div>
             </div>
           </div>
+        )}
+
+        {/* 全画面表示コンポーネント */}
+        {isSidebarExpanded && (
+          <MapPostGrid
+            posts={selectedLocationPosts}
+            onClose={toggleSidebarExpand}
+            onPostClick={handlePostClick}
+            onUserClick={onUserClick}
+            locationName={selectedLocationName}
+            formatDate={formatDate}
+          />
         )}
 
         {/* サイドバー再表示ボタン */}

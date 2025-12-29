@@ -18,7 +18,7 @@ class PostController extends Controller
     {
         $query = Post::with(['user', 'city.prefecture.capitalCity', 'photos' => function($query) {
             $query->orderBy('order_num')->limit(1); // 最初の写真のみを取得
-        }]);
+        }])->withCount('photos');
 
         // 公開範囲のフィルタリング
         $query->where(function($q) {
@@ -155,7 +155,7 @@ class PostController extends Controller
     {
         $query = Post::with(['user', 'city.prefecture.capitalCity', 'photos' => function($query) {
             $query->orderBy('order_num')->limit(1); // 最初の写真のみを取得
-        }]);
+        }])->withCount('photos');
 
         // 公開範囲のフィルタリング
         $query->where(function($q) {

@@ -43,6 +43,7 @@ function App() {
   const [selectedPostId, setSelectedPostId] = useState(null)
   const [selectedPost, setSelectedPost] = useState(null)
   const [user, setUser] = useState(null)
+  const [isFromCreatePost, setIsFromCreatePost] = useState(false)
 
 
   // ユーザー認証状態と表示画面の復元
@@ -75,6 +76,55 @@ function App() {
         }
       }
     }
+  }, []);
+
+  // ブラウザの戻るボタン処理
+  useEffect(() => {
+    const handlePopState = (event) => {
+      // 全て閉じる（デフォルトでマップビュー）
+      setShowPostList(false);
+      setShowCreatePost(false);
+      setShowPostDetail(false);
+      setShowPhotoUpload(false);
+      setShowProfile(false);
+      setShowEditPost(false);
+      setShowUserProfile(false);
+      setShowUserSearch(false);
+      setShowMapView(false);
+      setSelectedPostId(null);
+
+      if (event.state) {
+        switch (event.state.view) {
+          case 'profile':
+            setShowProfile(true);
+            break;
+          case 'userProfile':
+            if (event.state.userId) {
+              setSelectedUserId(event.state.userId);
+              setShowUserProfile(true);
+            }
+            break;
+          case 'postList':
+            setShowPostList(true);
+            break;
+          case 'postDetail':
+            if (event.state.postId) {
+              setSelectedPostId(event.state.postId);
+              setShowPostDetail(true);
+            }
+            break;
+          case 'createPost':
+            setShowCreatePost(true);
+            break;
+          default:
+            // マップビュー（何もしない）
+            break;
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   // 表示状態が変わるたびにlocalStorageに保存
@@ -250,6 +300,7 @@ function App() {
 
   const handleSwitchToCreatePost = () => {
     setShowPostList(false);
+    window.history.pushState({ view: 'createPost' }, '');
     setShowCreatePost(true);
   };
 
@@ -266,11 +317,13 @@ function App() {
   };
 
   const handleSwitchToPostList = () => {
+    window.history.pushState({ view: 'postList' }, '');
     setShowPostList(true);
   };
 
   const handlePostClick = (post) => {
     setSelectedPostId(post.id);
+    window.history.pushState({ view: 'postDetail', postId: post.id }, '');
     setShowPostDetail(true);
     setShowPostList(false);
   };
@@ -321,10 +374,18 @@ function App() {
   };
 
   // 写真アップロード画面を表示
+  // 写真アップロード画面を表示
   const handleSwitchToPhotoUpload = (postId) => {
     setSelectedPostId(postId);
     setShowPhotoUpload(true);
     setShowPostDetail(false);
+
+    if (showCreatePost) {
+      setIsFromCreatePost(true);
+      setShowCreatePost(false);
+    } else {
+      setIsFromCreatePost(false);
+    }
   };
 
   // 写真アップロード完了時の処理
@@ -348,7 +409,12 @@ function App() {
   // 写真アップロードキャンセル時の処理
   const handlePhotoUploadCancel = () => {
     setShowPhotoUpload(false);
-    setShowPostDetail(true);
+    if (isFromCreatePost) {
+      setShowPostList(true);
+      setIsFromCreatePost(false);
+    } else {
+      setShowPostDetail(true);
+    }
   };
 
   // プロフィール画面に切り替え
@@ -376,6 +442,7 @@ function App() {
         setShowPhotoUpload(false);
         setShowMapView(false); // MapViewは状態フラグではなく条件分岐で制御されているが念のため
 
+        window.history.pushState({ view: 'profile' }, '');
         setShowProfile(true);
       } else {
         console.error('プロフィールの取得に失敗しました');
@@ -467,11 +534,13 @@ function App() {
 
     const handleNavigateToPostList = () => {
       handleNavigateToHome();
+      window.history.pushState({ view: 'postList' }, '');
       setShowPostList(true);
     };
 
     const handleNavigateToCreatePost = () => {
       handleNavigateToHome();
+      window.history.pushState({ view: 'createPost' }, '');
       setShowCreatePost(true);
     };
 
@@ -488,11 +557,19 @@ function App() {
               onBack={() => { }}
               onPostClick={(postId) => {
                 setSelectedPostId(postId);
+                window.history.pushState({ view: 'postDetail', postId }, '');
                 setShowPostDetail(true);
               }}
               onNavigateToPostList={handleNavigateToPostList}
               onNavigateToCreatePost={handleNavigateToCreatePost}
               onNavigateToProfile={handleNavigateToProfile}
+              onUserClick={(userId) => {
+                setPreviousScreen('mapView');
+                setShowMapView(false);
+                setSelectedUserId(userId);
+                window.history.pushState({ view: 'userProfile', userId }, '');
+                setShowUserProfile(true);
+              }}
             />
           ) : null
         )}
@@ -606,7 +683,7 @@ function App() {
         {showPhotoUpload && selectedPostId && (
           <PhotoUpload
             postId={selectedPostId}
-            onUploadSuccess={showCreatePost ? handleCreatePostPhotoUploadSuccess : handlePhotoUploadSuccess}
+            onUploadSuccess={isFromCreatePost ? handleCreatePostPhotoUploadSuccess : handlePhotoUploadSuccess}
             onCancel={handlePhotoUploadCancel}
           />
         )}

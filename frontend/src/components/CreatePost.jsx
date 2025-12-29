@@ -111,7 +111,7 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
 
       // 2. 仮投稿完了 - 写真の有無に関わらず写真追加画面を表示
       setCreatedPostId(postId);
-      setShowPhotoUpload(true);
+      onPhotoUpload(postId);
 
     } catch (error) {
       setErrors({ general: 'ネットワークエラーが発生しました' });
@@ -119,52 +119,6 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
       setLoading(false);
     }
   };
-
-
-
-  // 仮投稿完了後の写真追加画面
-  if (showPhotoUpload && createdPostId) {
-    return (
-      <div className="create-post-container">
-        <div className="create-post-card">
-          <h2>✅ 仮投稿が完了しました</h2>
-          <p className="success-message">
-            文字の投稿が作成されました！<br />
-            写真を追加して投稿を完成させましょう。
-          </p>
-
-          <div className="photo-upload-actions">
-            <button
-              onClick={() => onPhotoUpload(createdPostId)}
-              className="photo-upload-button"
-            >
-              📷 写真を追加
-            </button>
-            <button
-              onClick={() => onPostCreated({ id: createdPostId })}
-              className="skip-button"
-            >
-              このまま投稿を完了
-            </button>
-          </div>
-
-          <div className="post-preview">
-            <h4>📝 作成された投稿</h4>
-            <div className="post-preview-content">
-              <p><strong>タイトル:</strong> {formData.title}</p>
-              <p><strong>内容:</strong> {formData.description}</p>
-              {formData.city && (
-                <p><strong>場所:</strong> {formData.city.name} ({formData.city.prefecture.name})</p>
-              )}
-              {formData.custom_location && (
-                <p><strong>カスタム場所:</strong> {formData.custom_location}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="create-post-container">
@@ -209,13 +163,14 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="prefecture_id">都道府県</label>
+            <label htmlFor="prefecture_id">都道府県 *</label>
             <select
               id="prefecture_id"
               name="prefecture_id"
               value={formData.prefecture_id}
               onChange={handleChange}
               className={errors.prefecture_id ? 'error' : ''}
+              required
             >
               <option value="">都道府県を選択</option>
               {prefectures.map(prefecture => (
@@ -292,7 +247,7 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
               className="submit-button"
               disabled={loading}
             >
-              {loading ? '投稿中...' : '仮投稿'}
+              {loading ? '投稿中...' : '画像選択'}
             </button>
           </div>
         </form>
