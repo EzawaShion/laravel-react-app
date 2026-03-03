@@ -142,7 +142,7 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
     <div className="user-search-container">
       <div className="user-search-header">
         <div className="header-left">
-          <h2>ユーザー検索</h2>
+          <div className="user-search-page-title">ユーザー検索</div>
         </div>
         {onClose && (
           <button onClick={onClose} className="close-search-btn" title="閉じる">
@@ -153,7 +153,6 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
 
       <div className="user-search-filters">
         <div className="filter-group-single">
-          <label>キーワード検索</label>
           <input
             type="text"
             value={keyword}
@@ -166,7 +165,7 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
       </div>
 
       <div className="user-search-results">
-        <h3>{getSearchTitle()}</h3>
+        <div className="section-title">{getSearchTitle()}</div>
         {keyword && keyword.trim() !== '' && (
           <p className="user-count">{users.length}人のユーザー</p>
         )}
@@ -178,10 +177,18 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
         ) : users.length > 0 ? (
           <div className="user-list">
             {users.map(user => (
-              <div key={user.id} className="us-user-card">
+              <div
+                key={user.id}
+                className="us-user-card"
+                onClick={(e) => {
+                  console.log('Navigating to user:', user.id);
+                  if (onNavigateToUserProfile) {
+                    onNavigateToUserProfile(user.id);
+                  }
+                }}
+              >
                 <div
                   className="us-user-info"
-                  onClick={() => onNavigateToUserProfile && onNavigateToUserProfile(user.id)}
                 >
                   <img
                     src={user.avatar_url || 'http://localhost:8000/images/default-avatar.svg'}
@@ -193,7 +200,7 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
                     }}
                   />
                   <div className="us-user-details">
-                    <h4 className="us-user-name-text">{user.name}</h4>
+                    <div className="us-user-name-text">{user.name}</div>
                     {user.username && (
                       <p className="us-user-username-text">@{user.username}</p>
                     )}
@@ -201,7 +208,10 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
                 </div>
                 <button
                   className={`us-follow-button ${user.is_following ? 'following' : ''}`}
-                  onClick={() => handleFollowToggle(user.id, user.is_following)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleFollowToggle(user.id, user.is_following);
+                  }}
                 >
                   {user.is_following ? 'フォロー中' : 'フォロー'}
                 </button>

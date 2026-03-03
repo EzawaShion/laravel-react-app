@@ -475,6 +475,9 @@
   padding: var(--spacing-md);
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .sidebar-header-left {
@@ -519,7 +522,7 @@
 }
 
 .expand-icon::before {
-  content: "<<";
+  content: "＜";
 }
 
 /* モバイルでのボタン表示切替 */
@@ -535,6 +538,10 @@
     content: "∨" !important;
     font-size: 1.2rem;
   }
+}
+
+.sidebar-header {
+  padding: 8px;
 }
 
 .sidebar-header h3 {
@@ -694,41 +701,12 @@
   gap: var(--spacing-md);
 }
 
-.header-buttons-group {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
-.header-action-button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0.5rem 1rem;
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.header-action-button:hover {
-  background: var(--surface-hover);
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
 .search-bar-container {
   display: flex;
   gap: var(--spacing-sm);
   flex: 1;
   max-width: 800px;
   min-width: 300px;
-  margin: 0 var(--spacing-md);
 }
 
 .search-select,
@@ -799,101 +777,104 @@
   flex-shrink: 0;
 }
 
-.search-reset-btn:hover {
-  background: var(--surface-hover);
-  color: var(--error-color);
-  border-color: var(--error-color);
+/* 地図スタイル切り替えスイッチ (スライドアニメーション) */
+.map-style-toggle-group {
+  display: flex;
+  background-color: white;
+  border: 1px solid var(--primary-color);
+  border-radius: 9999px;
+  padding: 2px;
+  height: 38px;
+  width: 140px;
+  box-sizing: border-box;
+  position: relative;
 }
 
-/* 地図スタイル切り替えボタン */
-.map-style-toggle-btn {
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 0.9rem;
+.toggle-slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  bottom: 2px;
+  width: calc(50% - 2px);
+  /* 幅は全体の半分からパディング分を調整 */
+  background-color: var(--primary-color);
+  border-radius: 9999px;
+  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  z-index: 1;
+}
+
+/* 不要な要素（白い円など）が表示されないようにする対策 */
+.map-style-toggle-group::before,
+.map-style-toggle-group::after,
+.toggle-slider::before,
+.toggle-slider::after,
+.style-toggle-option::before,
+.style-toggle-option::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* シンプルモード時は自身の幅分だけ右に移動 */
+.map-style-toggle-group.simple .toggle-slider {
+  transform: translateX(100%);
+}
+
+.style-toggle-option {
+  flex: 1;
+  border: none;
+  background: transparent !important;
+  color: var(--primary-color);
+  padding: 0;
+  border-radius: 9999px;
+  cursor: pointer;
   font-weight: 600;
-  padding: 0 1rem;
-  height: 42px;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+  z-index: 2;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-  gap: 6px;
-  flex-shrink: 0;
-  box-shadow: var(--shadow-sm);
+  height: 100%;
 }
 
-.map-style-toggle-btn:hover {
-  background: var(--surface-hover);
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+.style-toggle-option:hover {
+  background-color: transparent;
 }
 
-.map-style-toggle-btn.simple {
-  background: #f8fafc;
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+.style-toggle-option.active {
+  color: white;
+  background-color: transparent;
 }
 
-/* Mobile Responsive Adjustments */
-@media (max-width: 768px) {
-  .map-header-container {
-    flex-direction: column;
-    gap: var(--spacing-md);
-    padding: var(--spacing-sm);
-  }
-
-  .search-bar-container {
-    width: 100%;
-    margin: 0;
-    flex-wrap: wrap;
-  }
-
-  .search-select,
-  .search-input {
-    flex: 1;
-  }
-
-  .map-title,
-  .post-count-badge {
-    display: none !important;
-  }
-}
-
-/* サイドバー再表示ボタン */
+/* 再表示ボタンのスタイル (元のデザインに合わせる) */
 .show-sidebar-btn {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  top: 10px;
+  /* Header下、少し空ける */
+  right: 10px;
+  /* 右サイドバーなので右に配置 */
+  z-index: 1000;
+  background: white !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
   height: 38px;
   min-width: 50px;
-  padding: 0 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 1001;
-  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all var(--transition-fast);
 }
 
 .show-sidebar-btn:hover {
-  transform: scale(1.05);
-  background: var(--surface-hover);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  background: var(--surface-hover) !important;
+  border-color: var(--text-secondary) !important;
 }
 
 .show-icon {
-  font-size: 1.4rem;
-  /* Slightly larger for plus */
+  font-size: 1rem;
   font-weight: bold;
   color: var(--text-primary);
   line-height: 1;
@@ -901,56 +882,171 @@
 
 .show-icon::before {
   content: "＜";
+  /* 右から出すので左向き矢印 */
 }
 
-/* モバイルでの位置調整 */
+/* モバイル用ハンバーガーメニュー、ドロワー関連スタイル */
+.mobile-menu-btn {
+  display: none;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  /* Slightly raised */
+}
+
+.mobile-search-header {
+  display: none;
+}
+
+.mobile-search-overlay {
+  display: none;
+}
+
+/* モバイル調整 */
 @media (max-width: 768px) {
-  .show-sidebar-btn {
-    top: auto;
-    bottom: 80px;
-    /* 左下に配置 */
-    right: auto;
-    left: 20px;
+
+  /* PCヘッダーのスタイルをモバイルでは無効化 (display: contentsでラッパーを無視) */
+  .map-header-container {
+    display: contents;
   }
 
-  .hide-sidebar-btn {
-    top: auto;
-    bottom: 30px;
-    right: auto;
-    left: 20px;
-    width: 44px;
+  .map-header-container>* {
+    pointer-events: auto;
+  }
+
+  /* ハンバーガーメニューを右端に */
+  .mobile-menu-btn {
+    display: flex;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 2200;
+    /* Max z-index */
+    background: #ffffff;
+    color: #333333;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* 検索バー（ドロワー） */
+  .search-bar-container {
+    position: fixed !important;
+    top: 0;
+    right: 0;
+    height: 100dvh;
+    width: 60%;
+    /* 少し広めに */
+    min-width: 250px;
+    background: #ffffff;
+    /* 確実に白 */
+    z-index: 2100;
+    flex-direction: column !important;
+    padding: 20px;
+
+    transform: translateX(100%);
+    box-shadow: none;
+
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 16px !important;
+    margin: 0 !important;
+    border-left: 1px solid #e2e8f0;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    opacity: 1 !important;
+  }
+
+  .search-bar-container.mobile-open {
+    transform: translateX(0) !important;
+    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.2);
+  }
+
+  /* ドロワー内ヘッダー */
+  .mobile-search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+  }
+
+  .mobile-search-label {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+  }
+
+  .mobile-search-close-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+  }
+
+  /* 入力欄リセット */
+  .search-select,
+  .search-input {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
     height: 44px;
+    order: 0 !important;
+    /* Reset order */
+  }
+
+  /* スタイル切り替え */
+  .map-style-toggle-group {
+    order: 0 !important;
+    /* Reset order */
+    margin: 20px auto 0;
+    width: 140px;
+    border: 1px solid var(--primary-color);
+  }
+
+  /* Clear button inside drawer */
+  .search-reset-btn {
+    display: flex;
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 8px;
+    justify-content: center;
+    background: #f1f5f9;
+    order: 0 !important;
+  }
+
+  /* Overlay */
+  .mobile-search-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1050;
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.3s;
+  }
+
+  /* 既存の調整: 再表示ボタンは左下 */
+  .show-sidebar-btn {
+    top: auto;
+    bottom: 90px;
+    left: 16px;
+    right: auto;
   }
 
   .show-icon::before {
-    content: "^";
-    /* 上向き矢印 */
-    position: relative;
-    top: 2px;
-    /* 微調整 */
-  }
-
-  .hide-icon::before {
-    content: "∨";
-    position: relative;
-    top: 1px;
+    content: "∧" !important;
   }
 }
-/* Sidebar Resizer */
-.sidebar-resizer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 5px;
-  height: 100%;
-  cursor: col-resize;
-  z-index: 100;
-  background-color: transparent;
-  transition: background-color 0.2s;
-}
-
-.sidebar-resizer:hover,
-.sidebar-resizer:active {
-  background-color: var(--primary-color);
-}
-

@@ -44,6 +44,7 @@ function App() {
   const [selectedPost, setSelectedPost] = useState(null)
   const [user, setUser] = useState(null)
   const [isFromCreatePost, setIsFromCreatePost] = useState(false)
+  const [draftPost, setDraftPost] = useState(null)
 
 
   // ユーザー認証状態と表示画面の復元
@@ -322,6 +323,7 @@ function App() {
   };
 
   const handlePostClick = (post) => {
+    setPreviousScreen('postList');
     setSelectedPostId(post.id);
     window.history.pushState({ view: 'postDetail', postId: post.id }, '');
     setShowPostDetail(true);
@@ -331,7 +333,19 @@ function App() {
   const handleBackToPostList = () => {
     setShowPostDetail(false);
     setSelectedPostId(null);
-    setShowPostList(true);
+
+    // 前の画面に戻るロジック
+    if (previousScreen === 'profile') {
+      setShowProfile(true);
+    } else if (previousScreen === 'userProfile') {
+      setShowUserProfile(true);
+    } else if (previousScreen === 'postList') {
+      setShowPostList(true);
+    } else {
+      // デフォルト（マップビュー）
+      // 何もしなくても他のフラグがfalseならマップが表示される
+    }
+    setPreviousScreen(null);
   };
 
   const handleEditPost = (post) => {
@@ -341,29 +355,23 @@ function App() {
     setShowPostDetail(false);
   };
 
-  const handleDeletePost = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/posts/${selectedPostId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+  const handleDeletePost = () => {
+    // 既にPostDetail側で削除が完了しているので、ここでは画面遷移のみ行う
+    setShowPostDetail(false);
+    setSelectedPostId(null);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        alert('投稿が削除されました');
-        setShowPostDetail(false);
-        setSelectedPostId(null);
-        setShowPostList(true);
-      } else {
-        alert(data.message || '投稿の削除に失敗しました');
-      }
-    } catch (error) {
-      alert('ネットワークエラーが発生しました');
+    // 削除後、前の画面に戻る
+    if (previousScreen === 'profile') {
+      setShowProfile(true);
+    } else if (previousScreen === 'userProfile') {
+      setShowUserProfile(true);
+    } else if (previousScreen === 'postList') {
+      setShowPostList(true);
+    } else {
+      // デフォルト（マップビュー）
+      // 特に処理不要（自動的にMapが表示される）
     }
+    setPreviousScreen(null);
   };
 
   // ログアウト処理
@@ -375,7 +383,25 @@ function App() {
 
   // 写真アップロード画面を表示
   // 写真アップロード画面を表示
-  const handleSwitchToPhotoUpload = (postId) => {
+  const handleSwitchToPhotoUpload = (postOrIdOrDraft) => {
+    let postId;
+    if (typeof postOrIdOrDraft === 'object') {
+      if (postOrIdOrDraft.id) {
+        postId = postOrIdOrDraft.id;
+        setSelectedPost(postOrIdOrDraft);
+        setDraftPost(null);
+      } else {
+        // IDがない場合はドラフトデータ
+        setDraftPost(postOrIdOrDraft);
+        postId = null;
+        setSelectedPost(null);
+      }
+    } else {
+      postId = postOrIdOrDraft;
+      setSelectedPost(null);
+      setDraftPost(null);
+    }
+
     setSelectedPostId(postId);
     setShowPhotoUpload(true);
     setShowPostDetail(false);
@@ -410,8 +436,9 @@ function App() {
   const handlePhotoUploadCancel = () => {
     setShowPhotoUpload(false);
     if (isFromCreatePost) {
-      setShowPostList(true);
-      setIsFromCreatePost(false);
+      // 新規投稿フローからのキャンセルの場合は編集画面に戻る
+      setShowCreatePost(true);
+      // setShowEditPost(true); 
     } else {
       setShowPostDetail(true);
     }
@@ -556,6 +583,7 @@ function App() {
             <MapView
               onBack={() => { }}
               onPostClick={(postId) => {
+                setPreviousScreen('mapView');
                 setSelectedPostId(postId);
                 window.history.pushState({ view: 'postDetail', postId }, '');
                 setShowPostDetail(true);
@@ -595,6 +623,7 @@ function App() {
             onPostCreated={handlePostCreated}
             onCancel={handleCancelCreatePost}
             onPhotoUpload={handleSwitchToPhotoUpload}
+            initialData={draftPost}
           />
         )}
 
@@ -627,6 +656,7 @@ function App() {
               setShowUserProfile(true);
             }}
             onPostClick={(postId) => {
+              setPreviousScreen('profile');
               setSelectedPostId(postId);
               setShowPostDetail(true);
               setShowProfile(false);
@@ -649,6 +679,7 @@ function App() {
               setShowUserProfile(true);
             }}
             onPostClick={(postId) => {
+              setPreviousScreen('userProfile');
               setSelectedPostId(postId);
               setShowPostDetail(true);
               setShowUserProfile(false);
@@ -663,6 +694,7 @@ function App() {
             onNavigateToUserProfile={(userId) => {
               setPreviousScreen('userSearch');
               setShowUserSearch(false);
+              setShowProfile(false);
               setSelectedUserId(userId);
               setShowUserProfile(true);
             }}
@@ -680,11 +712,13 @@ function App() {
         )}
 
         {/* 写真アップロード */}
-        {showPhotoUpload && selectedPostId && (
+        {showPhotoUpload && (selectedPostId || draftPost) && (
           <PhotoUpload
             postId={selectedPostId}
             onUploadSuccess={isFromCreatePost ? handleCreatePostPhotoUploadSuccess : handlePhotoUploadSuccess}
             onCancel={handlePhotoUploadCancel}
+            isFromCreatePost={isFromCreatePost}
+            draftPost={draftPost}
           />
         )}
 

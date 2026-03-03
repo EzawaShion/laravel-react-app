@@ -83,7 +83,7 @@ const CommentSection = ({ postId, userId, token }) => {
 
   return (
     <div className="comment-section">
-      <h3>コメント</h3>
+      <div className="section-title">コメント</div>
       <div className="comment-list">
         {comments.length === 0 ? (
           <div className="no-comments">コメントはまだありません</div>

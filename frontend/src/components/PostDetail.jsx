@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import LikeButton from './LikeButton';
 import FollowButton from './FollowButton';
 import CommentSection from './CommentSection';
+import PhotoCarousel from './PhotoCarousel';
 import './PostDetail.css';
 import './PostDetailMenu.css';
 
@@ -272,6 +273,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
 
   // コンポーネントマウント時に投稿詳細と写真を取得
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (postId) {
       fetchPostDetail();
       fetchPhotos();
@@ -466,7 +468,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         </div>
 
         <div className="post-detail-title">
-          <h1>{post.title}</h1>
+          <div className="detail-page-title">{post.title}</div>
         </div>
 
         {/* 写真ギャラリー (上に移動) */}
@@ -533,7 +535,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
               {(photos[currentIndex]?.title || photos[currentIndex]?.description) && (
                 <div className="carousel-photo-info">
                   {photos[currentIndex]?.title && (
-                    <h4 className="carousel-photo-title">{photos[currentIndex].title}</h4>
+                    <div className="carousel-photo-title">{photos[currentIndex].title}</div>
                   )}
                   {photos[currentIndex]?.description && (
                     <p className="carousel-photo-description">{photos[currentIndex].description}</p>
@@ -570,7 +572,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         {/* 投稿内容 */}
         <div className="post-detail-content">
           <div className="post-description">
-            {post.description.split('\n').map((line, index) => (
+            {post.description && post.description.split('\n').map((line, index) => (
               <p key={index}>{line}</p>
             ))}
           </div>
@@ -589,71 +591,11 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         {/* PhotoCarousel */}
         {
           showPhotoCarousel && photos && photos.length > 0 && (
-            <div className="photo-carousel-overlay">
-              <div className="photo-carousel-container">
-                {/* ヘッダー */}
-                <div className="carousel-header">
-                  <div className="carousel-info">
-                    <span className="photo-counter">
-                      {currentIndex + 1} / {photos.length}
-                    </span>
-                    {photos[currentIndex]?.title && (
-                      <span className="photo-title">
-                        {photos[currentIndex]?.title}
-                      </span>
-                    )}
-                  </div>
-                  <div className="carousel-controls">
-                    <button onClick={closePhotoCarousel} className="close-button">
-                      ×
-                    </button>
-                  </div>
-                </div>
-
-                {/* メイン写真 */}
-                <div className="carousel-main">
-                  <button
-                    onClick={() => setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1)}
-                    className="nav-button prev-button"
-                  >
-                    ‹
-                  </button>
-
-                  <div className="main-photo-container">
-                    <img
-                      src={getPhotoUrl(photos[currentIndex]?.file_path)}
-                      alt={photos[currentIndex]?.title || `写真 ${currentIndex + 1}`}
-                      className="main-photo"
-                    />
-                    {photos[currentIndex]?.description && (
-                      <div className="photo-description">
-                        <p>{photos[currentIndex]?.description}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => setCurrentIndex(prev => prev === photos.length - 1 ? 0 : prev + 1)}
-                    className="nav-button next-button"
-                  >
-                    ›
-                  </button>
-                </div>
-
-                {/* サムネイル */}
-                <div className="carousel-thumbnails">
-                  {photos.map((photo, index) => (
-                    <img
-                      key={photo.id}
-                      src={getPhotoUrl(photo?.file_path)}
-                      alt={`サムネイル ${index + 1}`}
-                      className={`thumbnail ${index === currentIndex ? 'active' : ''}`}
-                      onClick={() => setCurrentIndex(index)}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+            <PhotoCarousel
+              photos={photos}
+              onClose={closePhotoCarousel}
+              initialIndex={currentIndex}
+            />
           )
         }
         {/* コメントセクション */}
@@ -670,7 +612,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         showVisibilityModal && (
           <div className="modal-overlay" onClick={() => setShowVisibilityModal(false)}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <h3>公開範囲の設定</h3>
+              <div className="section-title">公開範囲の設定</div>
               <div className="visibility-options">
                 <button
                   className={`visibility-option ${post.visibility === 'public' ? 'active' : ''}`}

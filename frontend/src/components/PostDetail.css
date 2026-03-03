@@ -106,7 +106,7 @@
   box-sizing: border-box;
 }
 
-.post-detail-title h1 {
+.post-detail-title .detail-page-title {
   color: var(--text-primary);
   font-size: 2rem;
   font-weight: 800;
@@ -163,7 +163,7 @@
   margin-bottom: var(--spacing-xl);
 }
 
-.post-detail-content h3 {
+.post-detail-content .section-title {
   color: var(--text-primary);
   font-size: 1.25rem;
   font-weight: 600;
@@ -255,7 +255,7 @@
   box-sizing: border-box;
 }
 
-.post-photos-section h3 {
+.post-photos-section .section-title {
   margin-bottom: var(--spacing-lg);
   color: var(--text-primary);
   font-size: 1.1rem;
@@ -449,38 +449,40 @@
 }
 
 /* ナビゲーションボタン */
+/* ナビゲーションボタン */
 .carousel-nav-button {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.8);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
   border: none;
-  width: 50px;
-  height: 50px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all var(--transition-fast);
   z-index: 10;
-  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(2px);
+  padding-bottom: 4px;
+  box-shadow: none;
 }
 
 .carousel-nav-button:hover {
-  background: white;
-  transform: translateY(-50%) scale(1.1);
-  box-shadow: var(--shadow-lg);
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-50%) scale(1.05);
 }
 
 .carousel-nav-button.prev {
-  left: var(--spacing-lg);
+  left: 10px;
 }
 
 .carousel-nav-button.next {
-  right: var(--spacing-lg);
+  right: 10px;
 }
 
 /* 写真枚数インジケーター（点のみ） */
@@ -534,9 +536,7 @@
   }
 
   .carousel-nav-button {
-    width: 40px;
-    height: 40px;
-    font-size: 1.2rem;
+    display: none !important;
   }
 
   .carousel-nav-button.prev {
@@ -781,7 +781,7 @@
 }
 
 .main-carousel-photo.clickable:hover {
-  transform: scale(1.05);
+  transform: none;
 }
 
 /* ユーザー情報のスタイル */

@@ -310,7 +310,7 @@ class PostController extends Controller
         // バリデーション
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'city_id' => 'nullable|integer|exists:cities,id',
             'prefecture_id' => 'nullable|integer|exists:prefectures,id',
             'custom_location' => 'nullable|string|max:255',
@@ -479,7 +479,7 @@ class PostController extends Controller
         // バリデーション
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'city_id' => 'nullable|integer|exists:cities,id',
             'prefecture_id' => 'nullable|integer|exists:prefectures,id',
             'custom_location' => 'nullable|string|max:255',

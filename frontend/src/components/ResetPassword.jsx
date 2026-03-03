@@ -89,7 +89,7 @@ function ResetPassword({ onResetSuccess }) {
   return (
     <div className="reset-password-container">
       <div className="reset-password-card">
-        <h2>新しいパスワードを設定</h2>
+        <div className="page-title">新しいパスワードを設定</div>
         <p className="reset-password-subtitle">
           新しいパスワードを入力してください。
         </p>

@@ -649,7 +649,7 @@ function JapanMapSimple({ userId }) {
         <div className="map-photo-modal" onClick={(event) => event.stopPropagation()}>
           <div className="map-photo-modal-header">
             <div>
-              <h3>{selectedBlock.name} の写真</h3>
+              <div className="map-section-title">{selectedBlock.name} の写真</div>
               <p className="map-photo-modal-subtitle">
                 {prefectureData
                   ? `訪問回数 ${prefectureData.visit_count} 回 / 写真 ${photos.length} 枚`
@@ -744,7 +744,7 @@ function JapanMapSimple({ userId }) {
           </div>
           <div className="post-detail-sidebar">
             <div className="post-detail-header">
-              <h3>投稿詳細</h3>
+              <div className="map-section-title">投稿詳細</div>
               <button onClick={closePostDetailModal} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
             </div>
             <div className="post-detail-content">
@@ -831,7 +831,7 @@ function JapanMapSimple({ userId }) {
       <div className="map-photo-modal-overlay" onClick={closeAdjustmentModal}>
         <div className="map-adjustment-modal" onClick={(e) => e.stopPropagation()}>
           <div className="map-adjustment-header">
-            <h3>写真の表示位置を調整</h3>
+            <div className="map-section-title">写真の表示位置を調整</div>
             <button onClick={closeAdjustmentModal} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
           </div>
           <div className="map-adjustment-body">
@@ -913,7 +913,7 @@ function JapanMapSimple({ userId }) {
     <div className="japan-map-container">
       <div className="japan-map-header">
         <div className="header-content">
-          <h3>訪問した都道府県</h3>
+          <div className="map-section-title">訪問した都道府県</div>
           <p className="visit-count">
             {loading
               ? '読み込み中...'

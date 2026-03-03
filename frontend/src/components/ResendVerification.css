@@ -16,7 +16,7 @@
   max-width: 400px;
 }
 
-.resend-verification-form h2 {
+.resend-verification-form .page-title {
   text-align: center;
   color: var(--text-primary);
   margin-bottom: var(--spacing-sm);
@@ -138,7 +138,7 @@
     padding: var(--spacing-xl) var(--spacing-lg);
   }
 
-  .resend-verification-form h2 {
+  .resend-verification-form .page-title {
     font-size: 1.25rem;
   }
 }

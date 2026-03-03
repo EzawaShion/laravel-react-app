@@ -345,7 +345,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
         <button className="back-button" onClick={onBack}>
           ← 戻る
         </button>
-        <h1>プロフィール</h1>
+        <div className="profile-page-title">プロフィール</div>
         <div className="header-actions">
 
           <div className="profile-menu-container">
@@ -419,7 +419,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
           </div>
 
           <div className="profile-info">
-            <h2>{user.name || user.username}</h2>
+            <div className="profile-user-name">{user.name || user.username}</div>
             <p className="username">@{user.username}</p>
 
             {user.bio && user.bio !== 'null' && user.bio.trim() !== '' && <p className="bio">{user.bio}</p>}
@@ -644,7 +644,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
 
         {activeTab === 'posts' && (
           <>
-            <h3 className="posts-section-title">自分の投稿</h3>
+            <div className="posts-section-title">自分の投稿</div>
 
             {postsLoading ? (
               <div className="posts-loading">
@@ -660,7 +660,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
                   <div key={post.id} className="post-card" onClick={() => onPostClick && onPostClick(post.id)}>
                     <div className="post-header">
                       <div className="post-header-top">
-                        <h4 className="post-title">{post.title}</h4>
+                        <div className="post-title">{post.title}</div>
                         <span className="post-visibility-icon" title={
                           post.visibility === 'public' ? '全員に公開' :
                             post.visibility === 'followers' ? 'フォロワーのみ公開' :

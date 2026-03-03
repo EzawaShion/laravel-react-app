@@ -32,7 +32,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
         return;
       }
     }
-    
+
     fetchUserProfile();
     fetchFollowStatus();
   }, [userId, onSwitchToProfile]);
@@ -58,12 +58,12 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
 
       if (response.ok) {
         const data = await response.json();
-        
+
         // 画像URLを絶対URLに変換
         if (data.user.profile_image_url && !data.user.profile_image_url.startsWith('http')) {
           data.user.profile_image_url = 'http://localhost:8000' + data.user.profile_image_url;
         }
-        
+
         setUser(data.user);
         setFollowStats({
           followers_count: data.user.followers_count || 0,
@@ -122,7 +122,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
   const fetchUserPosts = async () => {
     try {
       setPostsLoading(true);
-      
+
       // 全ての投稿を取得して、指定されたユーザーの投稿をフィルタリング
       const response = await fetch('http://localhost:8000/api/posts', {
         headers: {
@@ -137,11 +137,11 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
         const data = await response.json();
         console.log('=== All Posts Response ===');
         console.log('Total posts:', data.posts?.length || 0);
-        
+
         // 指定されたユーザーの投稿のみをフィルタリング
         const filteredPosts = data.posts?.filter(post => post.user_id === parseInt(userId)) || [];
         console.log('User posts:', filteredPosts.length);
-        
+
         setUserPosts(filteredPosts);
       } else {
         console.error('投稿の取得に失敗しました');
@@ -180,7 +180,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
         <button className="back-button" onClick={onBack}>
           ← 戻る
         </button>
-        <h1>プロフィール</h1>
+        <div className="profile-page-title">プロフィール</div>
       </div>
 
       <div className="user-profile-content">
@@ -197,13 +197,13 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
         </div>
 
         <div className="user-profile-info">
-          <h2>{user.name}</h2>
+          <div className="profile-user-name">{user.name}</div>
           <p className="username">@{user.username}</p>
-          
+
           {user.bio && user.bio !== 'null' && user.bio.trim() !== '' && (
             <p className="bio">{user.bio}</p>
           )}
-          
+
           <div className="user-profile-details">
             {user.website && user.website !== 'null' && user.website.trim() !== '' && (
               <div className="detail-item">
@@ -213,12 +213,12 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
                 </a>
               </div>
             )}
-            
+
             <div className="detail-item">
               <span className="label">投稿数:</span>
               <span>{user.posts_count || 0}</span>
             </div>
-            
+
             <div className="follow-stats">
               <div className="follow-stat-item" onClick={() => showFollowListModal('followers')}>
                 <span className="follow-count">{followStats.followers_count}</span>
@@ -229,7 +229,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
                 <span className="follow-label">フォロー中</span>
               </div>
             </div>
-            
+
             <div className="detail-item">
               <span className="label">登録日:</span>
               <span>{new Date(user.created_at).toLocaleDateString('ja-JP')}</span>
@@ -248,8 +248,8 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
 
       {/* ユーザーの投稿一覧セクション */}
       <div className="user-posts-section">
-        <h3 className="posts-section-title">{user.name}の投稿</h3>
-        
+        <div className="posts-section-title">{user.name}の投稿</div>
+
         {postsLoading ? (
           <div className="posts-loading">
             <p>投稿を読み込み中...</p>
@@ -263,7 +263,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
             {userPosts.map((post) => (
               <div key={post.id} className="post-card" onClick={() => onPostClick && onPostClick(post.id)}>
                 <div className="post-header">
-                  <h4 className="post-title">{post.title}</h4>
+                  <div className="post-title">{post.title}</div>
                   <span className="post-date">
                     {new Date(post.created_at).toLocaleDateString('ja-JP')}
                   </span>
@@ -272,14 +272,14 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
                 <div className="post-content">
                   {post.first_photo_url && (
                     <div className="post-image">
-                      <img 
-                        src={post.first_photo_url} 
+                      <img
+                        src={post.first_photo_url}
                         alt={post.title}
                         className="post-thumbnail"
                       />
                     </div>
                   )}
-                  
+
                   <p className="post-description">{post.description}</p>
 
                   {post.city && (

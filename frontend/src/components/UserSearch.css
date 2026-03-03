@@ -61,7 +61,7 @@
   flex-direction: column;
 }
 
-.user-search-header h2 {
+.user-search-header .user-search-page-title {
   margin: 0;
   font-size: 1.25rem;
   color: var(--text-primary);
@@ -150,7 +150,7 @@
   background: var(--bg-color);
 }
 
-.user-search-results h3 {
+.user-search-results .section-title {
   margin: 0 0 var(--spacing-xs) 0;
   font-size: 1.1rem;
   color: var(--text-primary);
@@ -190,6 +190,9 @@
   margin-bottom: 8px;
   width: 100%;
   box-sizing: border-box;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
 }
 
 .us-user-card:hover {
@@ -204,9 +207,9 @@
   flex-direction: row;
   align-items: center;
   gap: 12px;
-  cursor: pointer;
   min-width: 0;
   text-align: left;
+  flex: 1;
 }
 
 .us-user-avatar {
@@ -293,7 +296,7 @@
   }
 
   .user-search-header {
-    padding-top: env(safe-area-inset-top, var(--spacing-md));
+    display: none;
   }
 
   .user-search-results {

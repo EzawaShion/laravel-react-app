@@ -250,7 +250,7 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
   return (
     <div className="search-panel">
       <div className="search-header">
-        <h3>投稿を検索</h3>
+        <div className="section-title">投稿を検索</div>
       </div>
 
       <div className="search-content">

@@ -17,7 +17,7 @@
   border: 1px solid var(--border-color);
 }
 
-.login-card h2 {
+.login-card .page-title {
   text-align: center;
   color: var(--text-primary);
   margin-bottom: var(--spacing-xs);

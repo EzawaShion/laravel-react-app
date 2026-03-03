@@ -124,15 +124,16 @@
 }
 
 /* ナビゲーションボタン */
-.nav-button {
+/* ナビゲーションボタン */
+.pc-nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
   border: none;
-  width: 50px;
-  height: 50px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   font-size: 1.5rem;
   cursor: pointer;
@@ -141,19 +142,28 @@
   justify-content: center;
   transition: all var(--transition-fast);
   z-index: 10;
+  backdrop-filter: blur(2px);
+  padding-bottom: 4px;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.nav-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-50%) scale(1.1);
+.pc-nav-btn:focus {
+  outline: none;
+  box-shadow: none;
 }
 
-.prev-button {
-  left: var(--spacing-lg);
+.pc-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-50%) scale(1.05);
 }
 
-.next-button {
-  right: var(--spacing-lg);
+.prev-btn {
+  left: 10px;
+}
+
+.next-btn {
+  right: 10px;
 }
 
 /* サムネイル */
@@ -230,18 +240,18 @@
     padding: 70px var(--spacing-sm) 100px var(--spacing-sm);
   }
 
-  .nav-button {
-    width: 40px;
-    height: 40px;
+  .pc-nav-btn {
+    width: 32px;
+    height: 32px;
     font-size: 1.2rem;
   }
 
-  .prev-button {
-    left: var(--spacing-sm);
+  .prev-btn {
+    left: 5px;
   }
 
-  .next-button {
-    right: var(--spacing-sm);
+  .next-btn {
+    right: 5px;
   }
 
   .carousel-thumbnails {
@@ -280,10 +290,8 @@
     padding: 60px 5px 80px 5px;
   }
 
-  .nav-button {
-    width: 35px;
-    height: 35px;
-    font-size: 1.1rem;
+  .pc-nav-btn {
+    display: none;
   }
 
   .thumbnail-item {

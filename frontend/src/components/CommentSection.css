@@ -4,7 +4,7 @@
   padding-top: var(--spacing-md);
 }
 
-.comment-section h3 {
+.comment-section .section-title {
   font-size: 1.1rem;
   margin-bottom: var(--spacing-md);
   color: var(--text-primary);

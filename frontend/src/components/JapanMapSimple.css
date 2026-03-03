@@ -20,7 +20,7 @@
   text-align: left;
 }
 
-.japan-map-header h3 {
+.japan-map-header .map-section-title {
   margin: 0;
   color: var(--text-primary);
   font-size: 1.25rem;
@@ -133,9 +133,6 @@
   transform-origin: center;
 }
 
-.prefecture:hover .map-prefecture-photo {
-  /* No hover effect */
-}
 
 .map-photo-modal-overlay {
   position: fixed;
@@ -172,7 +169,7 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.map-photo-modal-header h3 {
+.map-photo-modal-header .map-section-title {
   margin: 0;
   font-size: 1.25rem;
   color: var(--text-primary);
@@ -291,10 +288,26 @@
 
 @media (max-width: 768px) {
   .japan-map-container {
-    padding: var(--spacing-md);
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
   }
 
-  .japan-map-header h3 {
+  .japan-map-svg-container {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  .japan-map-header {
+    padding: var(--spacing-md);
+    margin-bottom: 0;
+  }
+
+  .japan-map-header .map-section-title {
     font-size: 1.1rem;
   }
 
@@ -338,7 +351,7 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
-.map-adjustment-header h3 {
+.map-adjustment-header .map-section-title {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
@@ -503,7 +516,7 @@
   align-items: center;
 }
 
-.post-detail-header h3 {
+.post-detail-header .map-section-title {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;

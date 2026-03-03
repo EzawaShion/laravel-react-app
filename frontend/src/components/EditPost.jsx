@@ -120,7 +120,7 @@ function EditPost({ post, onBack, onUpdateSuccess }) {
   return (
     <div className="edit-post-container">
       <div className="edit-post-header">
-        <h2>投稿を編集</h2>
+        <div className="page-title">投稿を編集</div>
         <button onClick={onBack} className="back-button">
           ← 戻る
         </button>
@@ -142,13 +142,12 @@ function EditPost({ post, onBack, onUpdateSuccess }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="description">投稿内容 *</label>
+          <label htmlFor="description">投稿内容</label>
           <textarea
             id="description"
             name="description"
             value={formData.description}
             onChange={handleInputChange}
-            required
             className="form-textarea"
             placeholder="投稿の内容を入力してください"
             rows="6"

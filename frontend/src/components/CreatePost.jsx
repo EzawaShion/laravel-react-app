@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
+import TextField from '@mui/material/TextField';
 import './CreatePost.css';
+import Select from './ui/Select';
+import Button from './ui/Button';
 
-function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
+function CreatePost({ onPostCreated, onCancel, onPhotoUpload, initialData }) {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    prefecture_id: '',
-    city_id: '',
-    custom_location: '',
-    visibility: 'public'
+    title: initialData?.title || '',
+    description: initialData?.description || '',
+    prefecture_id: initialData?.prefecture_id || '',
+    city_id: initialData?.city_id || '',
+    custom_location: initialData?.custom_location || '',
+    visibility: initialData?.visibility || 'public'
   });
-  const [createdPostId, setCreatedPostId] = useState(null);
-  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [prefectures, setPrefectures] = useState([]);
@@ -39,6 +40,13 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
       }
     }
   };
+
+  // 初期データがある場合、その都道府県の市町村を取得
+  React.useEffect(() => {
+    if (initialData?.prefecture_id) {
+      fetchCities(initialData.prefecture_id);
+    }
+  }, [initialData]);
 
   // 都道府県一覧を取得
   const fetchPrefectures = async () => {
@@ -78,52 +86,28 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
     fetchPrefectures();
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
     setErrors({});
 
-    try {
-      const token = localStorage.getItem('token');
-
-      // 1. 投稿を作成
-      const postResponse = await fetch('http://localhost:8000/api/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const postData = await postResponse.json();
-
-      if (!postResponse.ok) {
-        if (postData.errors) {
-          setErrors(postData.errors);
-        } else {
-          setErrors({ general: postData.message || '投稿の作成に失敗しました' });
-        }
-        return;
-      }
-
-      const postId = postData.post.id;
-
-      // 2. 仮投稿完了 - 写真の有無に関わらず写真追加画面を表示
-      setCreatedPostId(postId);
-      onPhotoUpload(postId);
-
-    } catch (error) {
-      setErrors({ general: 'ネットワークエラーが発生しました' });
-    } finally {
-      setLoading(false);
+    // バリデーション（簡易）
+    if (!formData.title) {
+      setErrors({ title: ['タイトルは必須です'] });
+      return;
     }
+    if (!formData.prefecture_id) {
+      setErrors({ prefecture_id: ['都道府県は必須です'] });
+      return;
+    }
+
+    // 投稿データ（ドラフト）を親コンポーネントに渡して画面遷移
+    onPhotoUpload(formData);
   };
 
   return (
     <div className="create-post-container">
       <div className="create-post-card">
-        <h2>新しい投稿を作成</h2>
+        <div className="page-title">新規投稿</div>
 
         {errors.general && (
           <div className="error-message">
@@ -132,123 +116,150 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload }) {
         )}
 
         <form onSubmit={handleSubmit} className="create-post-form">
-          <div className="form-group">
-            <label htmlFor="title">投稿タイトル *</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              className={errors.title ? 'error' : ''}
-              placeholder="旅行のタイトルを入力"
-              required
-            />
-            {errors.title && <span className="error-text">{errors.title[0]}</span>}
+          <TextField
+            id="title"
+            name="title"
+            label="title"
+            value={formData.title}
+            onChange={handleChange}
+            error={!!(errors.title && errors.title[0])}
+            helperText={errors.title ? errors.title[0] : null}
+            required
+            fullWidth
+            variant="outlined"
+            sx={{
+              mb: 3,
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'white'
+              },
+              '& .MuiOutlinedInput-input': {
+                padding: '26px 14px',
+              },
+              '& .MuiInputLabel-shrink': {
+                backgroundColor: 'white',
+                padding: '0 4px'
+              }
+            }}
+          />
+
+          <TextField
+            id="description"
+            name="description"
+            label="description"
+            value={formData.description}
+            onChange={handleChange}
+            error={!!(errors.description && errors.description[0])}
+            helperText={errors.description ? errors.description[0] : null}
+            multiline
+            rows={6}
+            fullWidth
+            variant="outlined"
+            sx={{
+              mb: 3,
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'white'
+              }
+            }}
+          />
+
+          <div className="form-row">
+            <div className="form-group">
+              <Select
+                id="prefecture_id"
+                name="prefecture_id"
+                label="都道府県"
+                value={formData.prefecture_id}
+                onChange={handleChange}
+                error={errors.prefecture_id ? errors.prefecture_id[0] : null}
+                required
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'white'
+                  },
+                  '& .MuiInputLabel-shrink': {
+                    backgroundColor: 'white',
+                    padding: '0 4px'
+                  }
+                }}
+              >
+                <option value="" disabled hidden></option>
+                {prefectures.map(prefecture => (
+                  <option key={prefecture.id} value={prefecture.id}>
+                    {prefecture.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div className="form-group">
+              <Select
+                id="city_id"
+                name="city_id"
+                label="市区町村"
+                value={formData.city_id}
+                onChange={handleChange}
+                error={errors.city_id ? errors.city_id[0] : null}
+                disabled={!formData.prefecture_id || loadingLocations}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'white'
+                  },
+                  '& .MuiInputLabel-shrink': {
+                    backgroundColor: 'white',
+                    padding: '0 4px'
+                  }
+                }}
+              >
+                <option value="" disabled hidden></option>
+                {loadingLocations ? (
+                  <option disabled>読み込み中...</option>
+                ) : (
+                  cities.map(city => (
+                    <option key={city.id} value={city.id}>
+                      {city.name}
+                    </option>
+                  ))
+                )}
+              </Select>
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="description">投稿内容 *</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className={errors.description ? 'error' : ''}
-              placeholder="旅行の詳細や感想を入力"
-              rows="6"
-              required
-            />
-            {errors.description && <span className="error-text">{errors.description[0]}</span>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="prefecture_id">都道府県 *</label>
-            <select
-              id="prefecture_id"
-              name="prefecture_id"
-              value={formData.prefecture_id}
-              onChange={handleChange}
-              className={errors.prefecture_id ? 'error' : ''}
-              required
-            >
-              <option value="">都道府県を選択</option>
-              {prefectures.map(prefecture => (
-                <option key={prefecture.id} value={prefecture.id}>
-                  {prefecture.name}
-                </option>
-              ))}
-            </select>
-            {errors.prefecture_id && <span className="error-text">{errors.prefecture_id[0]}</span>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="city_id">市町村</label>
-            <select
-              id="city_id"
-              name="city_id"
-              value={formData.city_id}
-              onChange={handleChange}
-              className={errors.city_id ? 'error' : ''}
-              disabled={!formData.prefecture_id || loadingLocations}
-            >
-              <option value="">
-                {loadingLocations ? '読み込み中...' : '市町村を選択'}
-              </option>
-              {cities.map(city => (
-                <option key={city.id} value={city.id}>
-                  {city.name}
-                </option>
-              ))}
-            </select>
-            {errors.city_id && <span className="error-text">{errors.city_id[0]}</span>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="custom_location">カスタム場所</label>
-            <input
-              type="text"
-              id="custom_location"
-              name="custom_location"
-              value={formData.custom_location}
-              onChange={handleChange}
-              className={errors.custom_location ? 'error' : ''}
-              placeholder="具体的な場所やスポット名"
-            />
-            {errors.custom_location && <span className="error-text">{errors.custom_location[0]}</span>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="visibility">公開範囲</label>
-            <select
-              id="visibility"
-              name="visibility"
-              value={formData.visibility}
-              onChange={handleChange}
-              className="form-control"
-            >
-              <option value="public">全員に公開</option>
-              <option value="followers">フォロワーのみ公開</option>
-              <option value="private">自分のみ公開</option>
-            </select>
-          </div>
+          <Select
+            id="visibility"
+            name="visibility"
+            label="公開範囲"
+            value={formData.visibility}
+            onChange={handleChange}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'white'
+              },
+              '& .MuiInputLabel-shrink': {
+                backgroundColor: 'white',
+                padding: '0 4px'
+              }
+            }}
+          >
+            <option value="public">全員に公開</option>
+            <option value="followers">フォロワーのみ公開</option>
+            <option value="private">自分のみ公開</option>
+          </Select>
 
           <div className="form-actions">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
               onClick={onCancel}
-              className="cancel-button"
               disabled={loading}
             >
               キャンセル
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="submit-button"
-              disabled={loading}
+              variant="primary"
+              isLoading={loading}
             >
-              {loading ? '投稿中...' : '画像選択'}
-            </button>
+              {loading ? '処理中...' : '次へ（画像選択）'}
+            </Button>
           </div>
         </form>
       </div>

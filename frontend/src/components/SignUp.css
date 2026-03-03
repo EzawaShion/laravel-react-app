@@ -17,7 +17,7 @@
   border: 1px solid var(--border-color);
 }
 
-.signup-card h2 {
+.signup-card .page-title {
   text-align: center;
   color: var(--text-primary);
   margin-bottom: var(--spacing-xs);

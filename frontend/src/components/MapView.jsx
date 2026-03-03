@@ -50,6 +50,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   const [selectedLocationName, setSelectedLocationName] = useState('すべての投稿');
   const [showSearchPanel, setShowSearchPanel] = useState(true); // 常に表示
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); // サイドバーが折りたたまれているか
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false); // モバイル検索メニュー
   const [searchParams, setSearchParams] = useState({
     prefecture_id: '',
     city_id: '',
@@ -482,9 +483,22 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   return (
     <div className="map-view-container">
       <div className="map-header-container">
+        {/* モバイル用ハンバーガーメニュー */}
+        <button
+          className="mobile-menu-btn"
+          onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+        >
+          <span className="material-icons">
+            {isMobileSearchOpen ? 'close' : 'menu'}
+          </span>
+        </button>
 
         {/* 検索欄 */}
-        <div className="search-bar-container">
+        <div className={`search-bar-container ${isMobileSearchOpen ? 'mobile-open' : ''}`}>
+          <div className="mobile-search-header">
+            <span className="mobile-search-label">検索フィルター</span>
+          </div>
+
           <select
             className="search-select"
             value={searchParams.prefecture_id || ''}
@@ -561,15 +575,23 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
             </button>
           )}
 
-          <button
-            className={`map-style-toggle-btn ${mapStyle}`}
-            onClick={() => setMapStyle(mapStyle === 'standard' ? 'simple' : 'standard')}
-            title={mapStyle === 'standard' ? 'シンプル地図に切り替え' : '標準地図に切り替え'}
-          >
-            {mapStyle === 'standard' ? '🎨 シンプル' : '🗺️ 標準'}
-          </button>
+          <div className={`map-style-toggle-group ${mapStyle}`}>
+            <div className="toggle-slider" />
+            <button
+              className={`style-toggle-option ${mapStyle === 'standard' ? 'active' : ''}`}
+              onClick={() => setMapStyle('standard')}
+            >
+              標準
+            </button>
+            <button
+              className={`style-toggle-option ${mapStyle === 'simple' ? 'active' : ''}`}
+              onClick={() => setMapStyle('simple')}
+            >
+              シンプル
+            </button>
+          </div>
         </div>
-        <h1 className="map-title">📍 投稿マップ</h1>
+        <div className="map-title">📍 投稿マップ</div>
         <div className="post-count-badge">
           {posts.length}件の投稿
         </div>
@@ -737,14 +759,14 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                     <span className="hide-icon"></span>
                   </button>
                 </div>
-                <div className="sidebar-header-text">
+                {/* <div className="sidebar-header-text">
                   {selectedLocationName && <h3>{selectedLocationName}</h3>}
                   {selectedLocationPosts.length > 0 && (
                     <span className="sidebar-post-count-badge">
                       {selectedLocationPosts.length}件
                     </span>
                   )}
-                </div>
+                </div> */}
               </div>
 
               <div className="location-posts-list">
@@ -771,7 +793,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
 
                       <div className="sidebar-post-content">
                         <div className="sidebar-post-title-wrapper">
-                          <h4 className="sidebar-post-title">{post.title}</h4>
+                          <div className="sidebar-post-title">{post.title}</div>
                         </div>
                         <div className="sidebar-post-info-wrapper">
                           <div className="sidebar-post-location">
@@ -826,6 +848,11 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
         )
       }
 
+      {
+        isMobileSearchOpen && (
+          <div className="mobile-search-overlay" onClick={() => setIsMobileSearchOpen(false)} />
+        )
+      }
     </div >
   );
 }

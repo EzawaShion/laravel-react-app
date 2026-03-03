@@ -31,14 +31,14 @@ function MapPostGrid({
         </div>
 
         <div className="header-right-group">
-          <div className="grid-header-info">
+          {/*<div className="grid-header-info">
             {locationName && <h3>{locationName}</h3>}
             {posts.length > 0 && (
               <span className="grid-post-count">
                 {posts.length}件
               </span>
             )}
-          </div>
+          </div>*/}
         </div>
       </div>
 
@@ -77,7 +77,7 @@ function MapPostGrid({
                   </div>
                 </div>
 
-                <h4 className="grid-post-title">{post.title}</h4>
+                <div className="grid-post-title">{post.title}</div>
 
                 <div className="grid-post-image-container">
                   {post.first_photo_url ? (

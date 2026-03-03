@@ -11,7 +11,7 @@ function EmailVerificationRequest({ onSwitchToResendVerification, onSwitchToLogi
           </svg>
         </div>
         
-        <h2>メール認証をお願いします</h2>
+        <div className="page-title">メール認証をお願いします</div>
         
         <div className="message-content">
           <p>

@@ -40,7 +40,7 @@ function ResendVerification({ onBackToLogin }) {
   return (
     <div className="resend-verification-container">
       <div className="resend-verification-form">
-        <h2>メール認証メールの再送</h2>
+        <div className="page-title">メール認証メールの再送</div>
         <p className="description">
           メールが届かない場合は、登録時のメールアドレスを入力して再送してください。
         </p>

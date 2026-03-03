@@ -40,7 +40,7 @@ function ForgotPassword({ onBackToLogin, onSwitchToResendVerification }) {
   return (
     <div className="forgot-password-container">
       <div className="forgot-password-card">
-        <h2>パスワードを忘れた場合</h2>
+        <div className="page-title">パスワードを忘れた場合</div>
         <p className="forgot-password-subtitle">
           登録したメールアドレスを入力してください。<br />
           パスワードリセット用のメールをお送りします。

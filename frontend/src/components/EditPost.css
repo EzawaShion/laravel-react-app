@@ -13,7 +13,7 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.edit-post-header h2 {
+.edit-post-header .page-title {
   color: var(--text-primary);
   font-size: 1.75rem;
   font-weight: 700;

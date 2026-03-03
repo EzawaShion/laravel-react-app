@@ -1,9 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import './PhotoCarousel.css';
 
-function PhotoCarousel({ photos, onClose }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+function PhotoCarousel({ photos, onClose, initialIndex = 0 }) {
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrevious();
+    }
+  };
 
   // キーボードナビゲーション
   useEffect(() => {
@@ -23,14 +49,14 @@ function PhotoCarousel({ photos, onClose }) {
 
   // 前の写真に移動
   const handlePrevious = () => {
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? photos.length - 1 : prevIndex - 1
     );
   };
 
   // 次の写真に移動
   const handleNext = () => {
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex === photos.length - 1 ? 0 : prevIndex + 1
     );
   };
@@ -65,9 +91,6 @@ function PhotoCarousel({ photos, onClose }) {
             )}
           </div>
           <div className="carousel-controls">
-            <button onClick={toggleFullscreen} className="fullscreen-button">
-              {isFullscreen ? '⤓' : '⤢'}
-            </button>
             <button onClick={onClose} className="close-button">
               ×
             </button>
@@ -75,13 +98,18 @@ function PhotoCarousel({ photos, onClose }) {
         </div>
 
         {/* メイン写真 */}
-        <div className="carousel-main">
-          <button onClick={handlePrevious} className="nav-button prev-button">
+        <div
+          className="carousel-main"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
+          <button onClick={handlePrevious} className="pc-nav-btn prev-btn">
             ‹
           </button>
-          
+
           <div className="main-photo-container">
-            <img 
+            <img
               src={`http://localhost:8000/storage/${currentPhoto.file_path}`}
               alt={currentPhoto.title || `写真 ${currentIndex + 1}`}
               className="main-photo"
@@ -92,8 +120,8 @@ function PhotoCarousel({ photos, onClose }) {
               </div>
             )}
           </div>
-          
-          <button onClick={handleNext} className="nav-button next-button">
+
+          <button onClick={handleNext} className="pc-nav-btn next-btn">
             ›
           </button>
         </div>
@@ -102,12 +130,12 @@ function PhotoCarousel({ photos, onClose }) {
         {photos.length > 1 && (
           <div className="carousel-thumbnails">
             {photos.map((photo, index) => (
-              <div 
+              <div
                 key={photo.id}
                 className={`thumbnail-item ${index === currentIndex ? 'active' : ''}`}
                 onClick={() => handleThumbnailClick(index)}
               >
-                <img 
+                <img
                   src={`http://localhost:8000/storage/${photo.file_path}`}
                   alt={`サムネイル ${index + 1}`}
                   className="thumbnail-image"
@@ -117,10 +145,6 @@ function PhotoCarousel({ photos, onClose }) {
           </div>
         )}
 
-        {/* ナビゲーションヒント */}
-        <div className="carousel-hints">
-          <p>← → キーで写真を切り替え、ESCキーで閉じる</p>
-        </div>
       </div>
     </div>
   );

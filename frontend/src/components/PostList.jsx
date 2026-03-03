@@ -129,7 +129,7 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
   return (
     <div className="post-list-container">
       <div className="post-list-header">
-        <h2>投稿一覧</h2>
+        <div className="page-title">投稿一覧</div>
         <div className="header-buttons">
           <button
             onClick={() => onMapView && onMapView()}
@@ -163,7 +163,7 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
               onClick={() => onPostClick(post)}
             >
               <div className="post-header">
-                <h3 className="post-title">{post.title}</h3>
+                <div className="post-title">{post.title}</div>
                 <span className="post-date">{formatDate(post.created_at)}</span>
               </div>
 
@@ -187,7 +187,7 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
                   </div>
                 )}
                 <p className="post-description">
-                  {post.description.length > 100
+                  {post.description?.length > 100
                     ? `${post.description.substring(0, 100)}...`
                     : post.description
                   }

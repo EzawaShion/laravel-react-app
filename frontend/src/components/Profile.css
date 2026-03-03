@@ -39,7 +39,7 @@
   color: var(--text-primary);
 }
 
-.profile-header h1 {
+.profile-header .profile-page-title {
   margin: 0;
   color: var(--text-primary);
   font-size: 1.75rem;
@@ -206,7 +206,7 @@
   width: 100%;
 }
 
-.profile-info h2 {
+.profile-info .profile-user-name {
   margin: 0 0 var(--spacing-xs) 0;
   color: var(--text-primary);
   font-size: 1.5rem;
@@ -805,6 +805,27 @@
 
   .modal-actions {
     flex-direction: column;
+  }
+
+  .profile-posts-section {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin-top: var(--spacing-xl);
+    width: calc(100% + 2 * var(--spacing-md));
+    margin-left: calc(-1 * var(--spacing-md));
+    margin-right: calc(-1 * var(--spacing-md));
+  }
+
+  .posts-section-title {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+
+  .posts-grid {
+    padding: 0 var(--spacing-md);
   }
 }
 

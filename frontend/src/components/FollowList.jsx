@@ -88,7 +88,7 @@ function FollowList({ userId, type, onClose, onUserClick }) {
     <div className="follow-list-overlay">
       <div className="follow-list-container">
         <div className="follow-list-header">
-          <h2>{type === 'followers' ? 'フォロワー' : 'フォロー中'}</h2>
+          <div className="page-title">{type === 'followers' ? 'フォロワー' : 'フォロー中'}</div>
           <button className="close-button" onClick={onClose}>
             ×
           </button>

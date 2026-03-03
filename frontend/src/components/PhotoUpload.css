@@ -10,14 +10,15 @@
 
 .photo-upload-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: var(--spacing-xl);
   padding-bottom: var(--spacing-lg);
   border-bottom: 1px solid var(--border-color);
+  position: relative;
 }
 
-.photo-upload-header h2 {
+.photo-upload-header .page-title {
   margin: 0;
   color: var(--text-primary);
   font-size: 1.5rem;
@@ -25,15 +26,17 @@
 }
 
 .cancel-button {
-  background: var(--error-color);
-  color: white;
-  border: none;
+  position: absolute;
+  left: 0;
+  background: var(--surface-active);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   padding: 0.5rem 1rem;
   border-radius: var(--radius-md);
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .cancel-button:hover {
@@ -42,13 +45,16 @@
 
 .upload-methods {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-xl);
 }
 
-.upload-button,
-.camera-button {
-  flex: 1;
+.upload-button {
+  width: 100%;
+  max-width: 300px;
   padding: var(--spacing-md);
   border: 2px dashed var(--primary-color);
   background: var(--primary-gradient);
@@ -71,14 +77,6 @@
   filter: brightness(1.1);
 }
 
-.camera-button {
-  background: var(--secondary-gradient);
-  border-color: var(--secondary-color);
-}
-
-.camera-button:hover {
-  box-shadow: var(--shadow-md);
-}
 
 .error-message {
   background: #fef2f2;
@@ -94,7 +92,7 @@
   margin-top: var(--spacing-lg);
 }
 
-.photo-previews h3 {
+.photo-previews .section-title {
   margin-bottom: var(--spacing-md);
   color: var(--text-primary);
   font-size: 1.1rem;

@@ -68,7 +68,7 @@
 }
 
 .back-icon::before {
-  content: ">>";
+  content: "＞";
 }
 
 @media (max-width: 768px) {
@@ -277,5 +277,9 @@
   .grid-search-container {
     flex-wrap: wrap;
     max-width: none;
+  }
+
+  .map-post-grid-header {
+    min-height: 40px;
   }
 }

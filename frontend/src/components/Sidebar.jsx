@@ -1,5 +1,12 @@
 import React from 'react';
 import './Sidebar.css';
+import Box from '@mui/material/Box';
+import Fab from '@mui/material/Fab';
+import AddIcon from '@mui/icons-material/Add';
+
+import HomeIcon from '@mui/icons-material/Home';
+import PersonIcon from '@mui/icons-material/Person';
+import SearchIcon from '@mui/icons-material/Search';
 
 function Sidebar({
   onNavigateToHome,
@@ -14,23 +21,25 @@ function Sidebar({
         className="sidebar-action-button"
         title="マップ画面"
       >
-        <span className="sidebar-icon">🗺️</span>
+        <HomeIcon className="sidebar-icon" />
         <span className="sidebar-text">マップ画面</span>
       </button>
-      <button
-        onClick={onNavigateToCreatePost}
-        className="sidebar-action-button"
-        title="新規投稿"
-      >
-        <span className="sidebar-icon">✏️</span>
+      <div className="sidebar-fab-wrapper">
+        <Fab
+          color="primary"
+          aria-label="add"
+          onClick={onNavigateToCreatePost}
+        >
+          <AddIcon className="sidebar-icon" />
+        </Fab>
         <span className="sidebar-text">新規投稿</span>
-      </button>
+      </div>
       <button
         onClick={onNavigateToProfile}
         className="sidebar-action-button"
         title="プロフィール"
       >
-        <span className="sidebar-icon">👤</span>
+        <PersonIcon className="sidebar-icon" />
         <span className="sidebar-text">プロフィール</span>
       </button>
       <button
@@ -38,7 +47,7 @@ function Sidebar({
         className="sidebar-action-button"
         title="ユーザー検索"
       >
-        <span className="sidebar-icon">🔍</span>
+        <SearchIcon className="sidebar-icon" />
         <span className="sidebar-text">ユーザー検索</span>
       </button>
     </div>
