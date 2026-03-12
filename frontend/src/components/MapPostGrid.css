@@ -129,38 +129,40 @@
 /* Grids - copied from previous implementation but adapted */
 .location-posts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--spacing-xl);
-  padding: var(--spacing-xl);
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 0;
+  padding: 0;
   max-width: 1400px;
   margin: 0 auto;
 }
 
 /* Grid Post Card Layout Updates */
 .grid-post-card {
-  background: var(--surface-color);
-  border-radius: var(--radius-lg);
+  background: transparent;
+  border-radius: 0;
   padding: var(--spacing-md);
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
   cursor: pointer;
   transition: all var(--transition-fast);
   border: 1px solid var(--border-color);
+  margin-right: -1px;
+  margin-bottom: -1px;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
 }
 
 .grid-post-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-xl);
-  border-color: var(--primary-color);
+  background-color: rgba(0, 0, 0, 0.02);
 }
 
 /* Row 1: Avatar | Name --- Location */
-.grid-post-header-row {
+.location-posts-grid .grid-post-header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: var(--spacing-sm);
+  width: 100%;
 }
 
 .grid-post-user {
@@ -168,8 +170,7 @@
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  padding: 4px 8px;
-  margin-left: -8px;
+  padding: 4px;
   border-radius: var(--radius-md);
   transition: background-color 0.2s ease;
 }
@@ -192,17 +193,22 @@
 }
 
 .grid-post-location {
-  font-size: 0.8rem;
+  display: block;
+  font-size: 0.85rem;
   color: var(--text-secondary);
+  text-align: left;
 }
 
 /* Post Title */
 .grid-post-title {
-  font-size: 1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
   padding: 0 4px;
+  text-align: center;
+  line-height: 1.3;
+  margin-bottom: var(--spacing-sm);
 }
 
 /* Row 2: Thumbnail */
@@ -232,45 +238,48 @@
 
 /* Row 3: Description */
 .grid-post-description {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin: 4px 0;
+  margin: 4px 8px;
+  text-align: left;
 }
 
 /* Divider Line */
 .grid-post-divider {
-  border: none;
-  border-top: 1px solid var(--border-color);
-  margin: var(--spacing-sm) 0;
+  display: none;
 }
 
 /* Row 4: Footer (Like Button aligned right) */
 .grid-post-footer-row {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   margin-top: auto;
+  padding: 4px 8px 0;
+}
+
+.grid-post-date {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .grid-post-actions-right {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-left: auto;
 }
 
 .grid-photo-count {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  display: none;
 }
 
 @media (max-width: 768px) {
@@ -281,5 +290,9 @@
 
   .map-post-grid-header {
     min-height: 40px;
+  }
+
+  .location-posts-grid {
+    grid-template-columns: 1fr !important;
   }
 }

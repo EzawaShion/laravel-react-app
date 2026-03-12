@@ -55,7 +55,7 @@ function MapPostGrid({
                 className="grid-post-card"
                 onClick={() => onPostClick(post.id)}
               >
-                <div className="grid-post-header-row">
+                <div className="grid-post-header-top">
                   <div
                     className="grid-post-user"
                     onClick={(e) => {
@@ -72,8 +72,8 @@ function MapPostGrid({
                     />
                     <span className="grid-author-username">@{post.user?.username}</span>
                   </div>
-                  <div className="grid-post-location">
-                    📍 {post.location_name}
+                  <div className="grid-post-date">
+                    {formatDate ? formatDate(post.created_at) : new Date(post.created_at).toLocaleDateString()}
                   </div>
                 </div>
 
@@ -101,6 +101,10 @@ function MapPostGrid({
                 <hr className="grid-post-divider" />
 
                 <div className="grid-post-footer-row">
+                  <div className="grid-post-location">
+                    📍 {post.location_name}
+                  </div>
+
                   <div className="grid-post-actions-right">
                     {/* コメント機能が実装されたらここに件数を表示 */}
                     {/* <span className="comment-count">💬 0</span> */}

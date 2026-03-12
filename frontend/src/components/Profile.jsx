@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FollowList from './FollowList';
 import JapanMapSimple from './JapanMapSimple';
+import LikeButton from './LikeButton';
 import './Profile.css';
 
 function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout, onNavigateToUserSearch }) {
@@ -422,41 +423,29 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
             <div className="profile-user-name">{user.name || user.username}</div>
             <p className="username">@{user.username}</p>
 
+            <div className="profile-stats-row">
+              <div className="stat-item clickable" onClick={() => showFollowListModal('followers')}>
+                <span className="stat-value">{followStats.followers_count}</span>
+                <span className="stat-label">フォロワー</span>
+              </div>
+              <div className="stat-item clickable" onClick={() => showFollowListModal('followings')}>
+                <span className="stat-value">{followStats.followings_count}</span>
+                <span className="stat-label">フォロー中</span>
+              </div>
+            </div>
+
             {user.bio && user.bio !== 'null' && user.bio.trim() !== '' && <p className="bio">{user.bio}</p>}
 
-            <div className="profile-details">
+            <div className="profile-meta-row">
               {user.website && user.website !== 'null' && user.website.trim() !== '' && (
-                <div className="detail-item">
-                  <span className="label">ウェブサイト:</span>
+                <div className="meta-item">
+                  <span className="meta-icon">🔗</span>
                   <a href={user.website} target="_blank" rel="noopener noreferrer">
                     {user.website}
                   </a>
                 </div>
               )}
-
-              <div className="detail-item">
-                <span className="label">投稿数:</span>
-                <span>{user.posts_count || 0}</span>
-              </div>
-
-              <div className="follow-stats">
-                <div className="follow-stat-item" onClick={() => showFollowListModal('followers')}>
-                  <span className="follow-count">{followStats.followers_count}</span>
-                  <span className="follow-label">フォロワー</span>
-                </div>
-                <div className="follow-stat-item" onClick={() => showFollowListModal('followings')}>
-                  <span className="follow-count">{followStats.followings_count}</span>
-                  <span className="follow-label">フォロー中</span>
-                </div>
-              </div>
-
-              <div className="detail-item">
-                <span className="label">登録日:</span>
-                <span>{new Date(user.created_at).toLocaleDateString('ja-JP')}</span>
-              </div>
             </div>
-
-            {/* 編集ボタンをここから削除しました */}
           </div>
         </div>
       ) : (
@@ -657,10 +646,10 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
             ) : (
               <div className="posts-grid">
                 {myPosts.map((post) => (
-                  <div key={post.id} className="post-card" onClick={() => onPostClick && onPostClick(post.id)}>
-                    <div className="post-header">
-                      <div className="post-header-top">
-                        <div className="post-title">{post.title}</div>
+                  <div key={post.id} className="grid-post-card" onClick={() => onPostClick && onPostClick(post.id)}>
+                    <div className="grid-post-header-top">
+                      <div className="grid-post-title">{post.title}</div>
+                      <div className="grid-post-visibility">
                         <span className="post-visibility-icon" title={
                           post.visibility === 'public' ? '全員に公開' :
                             post.visibility === 'followers' ? 'フォロワーのみ公開' :
@@ -671,40 +660,53 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
                           {post.visibility === 'private' && '🔒'}
                         </span>
                       </div>
-                      <span className="post-date">
-                        {new Date(post.created_at).toLocaleDateString('ja-JP')}
-                      </span>
                     </div>
 
-                    <div className="post-content">
-                      {post.first_photo_url && (
-                        <div className="post-image">
-                          <img
-                            src={post.first_photo_url}
-                            alt={post.title}
-                            className="post-thumbnail"
+                    <div className="grid-post-image-container">
+                      {post.first_photo_url ? (
+                        <img
+                          src={post.first_photo_url}
+                          alt={post.title}
+                          className="grid-post-thumbnail"
+                        />
+                      ) : (
+                        <div className="grid-no-image-placeholder">No Image</div>
+                      )}
+                    </div>
+
+                    <div className="grid-post-description">
+                      {post.description?.length > 100
+                        ? `${post.description.substring(0, 100)}...`
+                        : post.description
+                      }
+                    </div>
+
+                    <hr className="grid-post-divider" />
+
+                    <div className="grid-post-footer-row">
+                      <div className="grid-post-location">
+                        {post.city ? `📍 ${post.city.prefecture?.name} ${post.city.name}` :
+                          post.custom_location ? `📍 ${post.custom_location}` : ''}
+                      </div>
+
+                      <div className="grid-post-actions-right">
+                        {(post.photos_count > 0 || post.photos?.length > 0 || post.total_photos > 0 || post.first_photo_url) && (
+                          <span className="grid-photo-count">
+                            📷 {post.photos_count || post.photos?.length || post.total_photos || 1}
+                          </span>
+                        )}
+
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <LikeButton
+                            postId={post.id}
+                            initialIsLiked={(() => {
+                              const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;
+                              return post.liked_user_ids?.includes(currentUserId) ?? false;
+                            })()}
+                            initialLikesCount={post.likes_count ?? 0}
                           />
                         </div>
-                      )}
-
-                      <p className="post-description">{post.description}</p>
-
-                      {post.city && (
-                        <div className="post-location">
-                          📍 {post.city.prefecture?.name} {post.city.name}
-                        </div>
-                      )}
-
-                      {post.custom_location && (
-                        <div className="post-location">
-                          📍 {post.custom_location}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="post-stats">
-                      <span className="likes-count">❤️ {post.likes_count}</span>
-                      <span className="photos-count">📷 {post.total_photos || 0}</span>
+                      </div>
                     </div>
                   </div>
                 ))}

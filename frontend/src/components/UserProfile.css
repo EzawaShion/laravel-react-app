@@ -1,5 +1,5 @@
 .user-profile-container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: var(--spacing-lg);
   background: var(--bg-color);
@@ -41,7 +41,8 @@
 .user-profile-content {
   display: flex;
   gap: var(--spacing-2xl);
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-profile-image-section {
@@ -58,9 +59,8 @@
 }
 
 .user-profile-info {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
-  width: 100%;
 }
 
 .user-profile-info .profile-user-name {
@@ -68,6 +68,7 @@
   color: var(--text-primary);
   font-size: 1.5rem;
   font-weight: 700;
+  text-align: left;
 }
 
 .username {
@@ -75,6 +76,7 @@
   color: var(--text-secondary);
   font-size: 1rem;
   font-weight: 500;
+  text-align: left;
 }
 
 .bio {
@@ -84,72 +86,69 @@
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
+  text-align: left;
 }
 
-.user-profile-details {
+.profile-stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.stat-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.stat-item.clickable {
+  cursor: pointer;
+}
+
+.stat-item.clickable:hover .stat-value,
+.stat-item.clickable:hover .stat-label {
+  color: var(--primary-color);
+}
+
+.stat-value {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  transition: color var(--transition-fast);
+}
+
+.stat-label {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  transition: color var(--transition-fast);
+}
+
+.profile-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-xl);
 }
 
-.detail-item {
+.meta-item {
   display: flex;
-  margin-bottom: var(--spacing-sm);
   align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
 }
 
-.detail-item .label {
-  font-weight: 600;
-  color: var(--text-primary);
-  min-width: 100px;
-  margin-right: var(--spacing-md);
-}
-
-.detail-item a {
+.meta-item a {
   color: var(--primary-color);
   text-decoration: none;
   transition: color var(--transition-fast);
   word-break: break-all;
 }
 
-.detail-item a:hover {
+.meta-item a:hover {
   text-decoration: underline;
   color: var(--primary-hover);
-}
-
-.follow-stats {
-  display: flex;
-  gap: var(--spacing-xl);
-  margin: var(--spacing-lg) 0;
-  padding: var(--spacing-md) 0;
-  border-top: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.follow-stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--radius-md);
-  transition: background-color var(--transition-fast);
-  min-width: 80px;
-}
-
-.follow-stat-item:hover {
-  background-color: var(--surface-hover);
-}
-
-.follow-count {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1;
-}
-
-.follow-label {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-top: 4px;
 }
 
 .user-profile-actions {
@@ -194,43 +193,93 @@
   }
 
   .user-profile-content {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    grid-template-rows: auto auto auto auto auto auto;
+    gap: var(--spacing-sm) var(--spacing-lg);
     align-items: center;
-    text-align: center;
-    gap: var(--spacing-lg);
+    text-align: left;
+    padding: 0;
+  }
+
+  .user-profile-image-section {
+    grid-column: 1;
+    grid-row: 1 / span 4;
+    align-self: flex-start;
   }
 
   .user-profile-image {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
+    margin: 0;
+  }
+
+  /* Make user-profile-info disappear as a container so its children participate in the grid */
+  .user-profile-info {
+    display: contents;
   }
 
   .user-profile-info .profile-user-name {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: left;
+    margin: 0;
     font-size: 1.25rem;
   }
 
   .username {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: left;
+    margin: 0;
     font-size: 0.9rem;
   }
 
+  .profile-stats-row {
+    grid-column: 2;
+    grid-row: 3;
+    justify-content: flex-start;
+    margin: 0;
+    gap: var(--spacing-sm);
+    flex-wrap: nowrap;
+  }
+
+  .stat-item {
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .stat-value {
+    font-size: 0.9rem;
+  }
+
+  /* Force bio, meta, and actions to take up full width (span 2 columns) */
   .bio {
+    grid-column: 1 / -1;
+    grid-row: 5;
+    text-align: left;
+    margin-top: var(--spacing-md);
     font-size: 0.9rem;
   }
 
-  .follow-stats {
-    justify-content: center;
+  .profile-meta-row {
+    grid-column: 1 / -1;
+    grid-row: 6;
+    align-items: flex-start;
+    text-align: left;
+    justify-content: flex-start;
+    margin-top: 0;
   }
 
-  .detail-item {
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
+  .user-profile-actions {
+    grid-column: 1 / -1;
+    grid-row: 7;
+    margin-top: var(--spacing-md);
+    width: 100%;
   }
 
-  .detail-item .label {
-    min-width: unset;
-    margin-right: 0;
-    font-size: 0.85rem;
+  .user-profile-actions button {
+    width: 100%;
   }
 
   .user-posts-section {
@@ -247,7 +296,8 @@
   }
 
   .posts-grid {
-    padding: 0 var(--spacing-md);
+    padding: 0;
+    grid-template-columns: 1fr;
   }
 }
 
@@ -289,9 +339,10 @@
 
 .posts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--spacing-lg);
-  margin-top: var(--spacing-lg);
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 0;
+  max-width: 1200px;
+  margin: var(--spacing-lg) auto 0;
 }
 
 .post-card {
@@ -314,22 +365,23 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
 }
 
 .post-title {
-  color: var(--text-primary);
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
+  color: var(--text-primary);
   margin: 0;
   flex: 1;
-  margin-right: var(--spacing-sm);
+  line-height: 1.4;
 }
 
 .post-date {
-  color: var(--text-secondary);
   font-size: 0.8rem;
+  color: var(--text-secondary);
   white-space: nowrap;
+  margin-left: var(--spacing-sm);
 }
 
 .post-content {
@@ -337,8 +389,8 @@
 }
 
 .post-description {
-  color: var(--text-primary);
   font-size: 0.9rem;
+  color: var(--text-primary);
   line-height: 1.5;
   margin: 0 0 var(--spacing-xs) 0;
   display: -webkit-box;
@@ -349,26 +401,25 @@
 }
 
 .post-location {
-  color: var(--text-secondary);
   font-size: 0.8rem;
-  margin: var(--spacing-xs) 0;
+  color: var(--text-secondary);
+  margin-top: var(--spacing-xs);
 }
 
 .post-stats {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: var(--spacing-md);
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-sm);
   border-top: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  font-size: 0.9rem;
 }
 
 .likes-count,
 .photos-count {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .posts-loading,
@@ -376,4 +427,149 @@
   text-align: center;
   padding: var(--spacing-2xl) var(--spacing-md);
   color: var(--text-secondary);
+}
+
+/* 投稿ヘッダーの調整 */
+.post-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+}
+
+.post-visibility-icon {
+  font-size: 1rem;
+  margin-left: var(--spacing-sm);
+  cursor: help;
+}
+
+/* Grid Post Card Layout Updates (Matched to MapPostGrid) */
+.grid-post-card {
+  background: transparent;
+  border-radius: 0;
+  padding: var(--spacing-md);
+  box-shadow: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--border-color);
+  margin-right: -1px;
+  margin-bottom: -1px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.grid-post-card:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Row 1: Avatar | Name --- Location */
+/* Row 1: Title and Visibility */
+.posts-grid .grid-post-header-top {
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-sm);
+  width: 100%;
+}
+
+.grid-post-visibility {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.post-visibility-icon {
+  font-size: 1rem;
+  cursor: help;
+}
+
+.posts-grid .grid-post-location {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+/* Post Title */
+.grid-post-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  padding: 0 24px;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* Row 2: Thumbnail */
+.grid-post-image-container {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: #f1f5f9;
+}
+
+.grid-post-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.grid-no-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+/* Row 3: Description */
+.grid-post-description {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 4px 8px;
+  text-align: left;
+}
+
+/* Divider Line */
+.grid-post-divider {
+  display: none;
+}
+
+/* Row 4: Footer */
+.grid-post-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding: 4px 8px 0;
+}
+
+.grid-post-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.grid-photo-count {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .posts-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
