@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import FollowButton from './FollowButton';
 import FollowList from './FollowList';
 import LikeButton from './LikeButton';
-import './UserProfile.css';
+import JapanMapSimple from './JapanMapSimple';
+import './Profile.css';
 
 function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostClick }) {
   const [user, setUser] = useState(null);
@@ -17,6 +18,9 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
   const [followListType, setFollowListType] = useState('followers');
   const [userPosts, setUserPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
+  const [likedPosts, setLikedPosts] = useState([]);
+  const [likedPostsLoading, setLikedPostsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('posts');
 
   // 現在のユーザーIDを取得
   const getCurrentUserId = () => {
@@ -44,6 +48,57 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
       fetchUserPosts();
     }
   }, [user]);
+
+  // いいねタブに切り替えた際にいいね投稿を取得（初回のみ）
+  useEffect(() => {
+    if (activeTab === 'likes' && likedPosts.length === 0 && !likedPostsLoading && user) {
+      fetchUserLikedPosts();
+    }
+  }, [activeTab, user]);
+
+  // 投稿クリック時にスクロール位置を保存するラッパー
+  const handlePostClick = (postId) => {
+    sessionStorage.setItem('userProfileScrollTop', window.scrollY);
+    sessionStorage.setItem('userProfileActiveTab', activeTab);
+    if (onPostClick) onPostClick(postId);
+  };
+
+  // マウント後にスクロール位置を復元処理
+  useEffect(() => {
+    const saved = sessionStorage.getItem('userProfileScrollTop');
+    const savedTab = sessionStorage.getItem('userProfileActiveTab');
+    if (saved) {
+      if (savedTab) setActiveTab(savedTab);
+      if (savedTab === 'likes') {
+        sessionStorage.setItem('userProfileScrollRestoreLikes', saved);
+      } else {
+        sessionStorage.setItem('userProfileScrollRestore', saved);
+      }
+      sessionStorage.removeItem('userProfileScrollTop');
+      sessionStorage.removeItem('userProfileActiveTab');
+    }
+  }, []);
+
+  // 投稿データ読み込み完了後にスクロール復元
+  useEffect(() => {
+    const saved = sessionStorage.getItem('userProfileScrollRestore');
+    if (!postsLoading && saved) {
+      setTimeout(() => {
+        window.scrollTo({ top: parseInt(saved, 10), behavior: 'instant' });
+        sessionStorage.removeItem('userProfileScrollRestore');
+      }, 80);
+    }
+  }, [postsLoading]);
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem('userProfileScrollRestoreLikes');
+    if (!likedPostsLoading && likedPosts.length > 0 && saved) {
+      setTimeout(() => {
+        window.scrollTo({ top: parseInt(saved, 10), behavior: 'instant' });
+        sessionStorage.removeItem('userProfileScrollRestoreLikes');
+      }, 80);
+    }
+  }, [likedPostsLoading, likedPosts.length]);
 
   const fetchUserProfile = async () => {
     try {
@@ -100,7 +155,6 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
 
   const handleFollowChange = (isFollowing) => {
     setIsFollowing(isFollowing);
-    // フォロー状態が変わったら統計を更新
     fetchUserProfile();
   };
 
@@ -114,7 +168,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
   };
 
   const handleUserClick = (clickedUserId) => {
-    setShowFollowList(false); // Close the follow list modal
+    setShowFollowList(false);
     if (onUserClick) {
       onUserClick(clickedUserId);
     }
@@ -124,28 +178,20 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
     try {
       setPostsLoading(true);
 
-      // 全ての投稿を取得して、指定されたユーザーの投稿をフィルタリング
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:8000/api/posts', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
       });
 
-      console.log('User posts response status:', response.status);
-
       if (response.ok) {
         const data = await response.json();
-        console.log('=== All Posts Response ===');
-        console.log('Total posts:', data.posts?.length || 0);
-
-        // 指定されたユーザーの投稿のみをフィルタリング
         const filteredPosts = data.posts?.filter(post => post.user_id === parseInt(userId)) || [];
-        console.log('User posts:', filteredPosts.length);
-
         setUserPosts(filteredPosts);
       } else {
-        console.error('投稿の取得に失敗しました');
         setUserPosts([]);
       }
     } catch (error) {
@@ -156,40 +202,132 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
     }
   };
 
+  const fetchUserLikedPosts = async () => {
+    try {
+      setLikedPostsLoading(true);
+      const token = localStorage.getItem('token');
+      // 全投稿を取得してこのユーザーがいいねしたものをフィルタリング
+      const response = await fetch('http://localhost:8000/api/posts', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const liked = data.posts?.filter(post =>
+          post.liked_user_ids?.includes(parseInt(userId))
+        ) || [];
+        setLikedPosts(liked);
+      } else {
+        setLikedPosts([]);
+      }
+    } catch (error) {
+      console.error('いいね投稿の取得エラー:', error);
+      setLikedPosts([]);
+    } finally {
+      setLikedPostsLoading(false);
+    }
+  };
+
+  const renderPostCard = (post) => (
+    <div key={post.id} className="grid-post-card" onClick={() => handlePostClick(post.id)}>
+      <div className="grid-post-header-top">
+        <div className="grid-post-title">{post.title}</div>
+      </div>
+
+      <div className="grid-post-image-container">
+        {post.first_photo_url ? (
+          <img
+            src={post.first_photo_url}
+            alt={post.title}
+            className="grid-post-thumbnail"
+          />
+        ) : (
+          <div className="grid-no-image-placeholder">No Image</div>
+        )}
+      </div>
+
+      <div className="grid-post-description">
+        {post.description?.length > 100
+          ? `${post.description.substring(0, 100)}...`
+          : post.description
+        }
+      </div>
+
+      <hr className="grid-post-divider" />
+
+      <div className="grid-post-footer-row">
+        <div className="grid-post-location">
+          {post.city ? `📍 ${post.city.prefecture?.name} ${post.city.name}` :
+            post.custom_location ? `📍 ${post.custom_location}` : ''}
+        </div>
+        <div className="grid-post-actions-right">
+          <div onClick={(e) => e.stopPropagation()}>
+            <LikeButton
+              postId={post.id}
+              initialIsLiked={(() => {
+                const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;
+                return post.liked_user_ids?.includes(currentUserId) ?? false;
+              })()}
+              initialLikesCount={post.likes_count ?? 0}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   if (loading) {
-    return <div className="user-profile-loading">読み込み中...</div>;
+    return <div className="profile-loading">読み込み中...</div>;
   }
 
   if (error) {
     return (
-      <div className="user-profile-error">
+      <div className="error-message">
         <div className="error-message">{error}</div>
-        <button className="back-button" onClick={onBack}>
-          ← 戻る
-        </button>
       </div>
     );
   }
 
   if (!user) {
-    return <div className="user-profile-error">ユーザーが見つかりません</div>;
+    return <div className="profile-loading">ユーザーが見つかりません</div>;
   }
 
+  // 公開範囲チェック（自分のプロフィールは常に表示）
+  const currentUserId = getCurrentUserId();
+  const isSelf = currentUserId && parseInt(userId) === parseInt(currentUserId);
+
+  const canView = (visibility) => {
+    if (isSelf) return true;
+    if (visibility === 'public') return true;
+    if (visibility === 'followers') return isFollowing;
+    return false; // private
+  };
+
+  const canViewLikes = canView(user.likes_visibility ?? 'public');
+  const canViewMap   = canView(user.map_visibility ?? 'public');
+
   return (
-    <div className="user-profile-container">
-      <div className="user-profile-header">
-        <button className="back-button" onClick={onBack}>
-          ← 戻る
-        </button>
+    <div className="profile-container">
+      <div className="profile-header">
         <div className="profile-page-title">プロフィール</div>
+        <div className="header-actions">
+          <FollowButton
+            userId={user.id}
+            initialIsFollowing={isFollowing}
+            onFollowChange={handleFollowChange}
+          />
+        </div>
       </div>
 
-      <div className="user-profile-content">
-        <div className="user-profile-image-section">
+      <div className="profile-content">
+        <div className="profile-image-section">
           <img
             src={user.profile_image_url || '/images/default-avatar.svg'}
             alt="プロフィール画像"
-            className="user-profile-image"
+            className="profile-image"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = '/images/default-avatar.svg';
@@ -197,7 +335,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
           />
         </div>
 
-        <div className="user-profile-info">
+        <div className="profile-info">
           <div className="profile-user-name">{user.name}</div>
           <p className="username">@{user.username}</p>
 
@@ -226,97 +364,68 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
               </div>
             )}
           </div>
-
-          <div className="user-profile-actions">
-            <FollowButton
-              userId={user.id}
-              initialIsFollowing={isFollowing}
-              onFollowChange={handleFollowChange}
-            />
-          </div>
         </div>
       </div>
 
-      {/* ユーザーの投稿一覧セクション */}
-      <div className="user-posts-section">
-        <div className="posts-section-title">{user.name}の投稿</div>
+      {/* タブ付き投稿セクション */}
+      <div className="profile-posts-section">
+        <div className="tabs">
+          <button
+            onClick={() => setActiveTab('posts')}
+            className={`tab-button ${activeTab === 'posts' ? 'active' : ''}`}
+          >
+            投稿一覧
+          </button>
+          {canViewLikes && (
+            <button
+              onClick={() => setActiveTab('likes')}
+              className={`tab-button ${activeTab === 'likes' ? 'active' : ''}`}
+            >
+              ❤️ いいね
+            </button>
+          )}
+          {canViewMap && (
+            <button
+              onClick={() => setActiveTab('map')}
+              className={`tab-button ${activeTab === 'map' ? 'active' : ''}`}
+            >
+              日本地図
+            </button>
+          )}
+        </div>
 
-        {postsLoading ? (
-          <div className="posts-loading">
-            <p>投稿を読み込み中...</p>
-          </div>
-        ) : userPosts.length === 0 ? (
-          <div className="no-posts">
-            <p>まだ投稿がありません</p>
-          </div>
-        ) : (
-          <div className="posts-grid">
-            {userPosts.map((post) => (
-              <div key={post.id} className="grid-post-card" onClick={() => onPostClick && onPostClick(post.id)}>
-                <div className="grid-post-header-top">
-                  <div className="grid-post-title">{post.title}</div>
-                  <div className="grid-post-visibility">
-                    <span className="post-visibility-icon" title={
-                      post.visibility === 'public' ? '全員に公開' :
-                        post.visibility === 'followers' ? 'フォロワーのみ公開' :
-                          '自分のみ公開'
-                    }>
-                      {post.visibility === 'public' && '🌐'}
-                      {post.visibility === 'followers' && '👥'}
-                      {post.visibility === 'private' && '🔒'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid-post-image-container">
-                  {post.first_photo_url ? (
-                    <img
-                      src={post.first_photo_url}
-                      alt={post.title}
-                      className="grid-post-thumbnail"
-                    />
-                  ) : (
-                    <div className="grid-no-image-placeholder">No Image</div>
-                  )}
-                </div>
-
-                <div className="grid-post-description">
-                  {post.description?.length > 100
-                    ? `${post.description.substring(0, 100)}...`
-                    : post.description
-                  }
-                </div>
-
-                <hr className="grid-post-divider" />
-
-                <div className="grid-post-footer-row">
-                  <div className="grid-post-location">
-                    {post.city ? `📍 ${post.city.prefecture?.name} ${post.city.name}` :
-                      post.custom_location ? `📍 ${post.custom_location}` : ''}
-                  </div>
-
-                  <div className="grid-post-actions-right">
-                    {(post.photos_count > 0 || post.photos?.length > 0 || post.total_photos > 0 || post.first_photo_url) && (
-                      <span className="grid-photo-count">
-                        📷 {post.photos_count || post.photos?.length || post.total_photos || 1}
-                      </span>
-                    )}
-
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <LikeButton
-                        postId={post.id}
-                        initialIsLiked={(() => {
-                          const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;
-                          return post.liked_user_ids?.includes(currentUserId) ?? false;
-                        })()}
-                        initialLikesCount={post.likes_count ?? 0}
-                      />
-                    </div>
-                  </div>
-                </div>
+        {activeTab === 'posts' && (
+          <>
+            <div className="posts-section-title">{user.name}の投稿</div>
+            {postsLoading ? (
+              <div className="posts-loading"><p>投稿を読み込み中...</p></div>
+            ) : userPosts.length === 0 ? (
+              <div className="no-posts"><p>まだ投稿がありません</p></div>
+            ) : (
+              <div className="posts-grid">
+                {userPosts.map(renderPostCard)}
               </div>
-            ))}
-          </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'likes' && canViewLikes && (
+          <>
+            <div className="posts-section-title">❤️ {user.name}がいいねした投稿</div>
+            {likedPostsLoading ? (
+              <div className="posts-loading"><p>読み込み中...</p></div>
+            ) : likedPosts.length === 0 ? (
+              <div className="no-posts"><p>まだいいねした投稿はありません</p></div>
+            ) : (
+              <div className="posts-grid">
+                {likedPosts.map(renderPostCard)}
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'map' && canViewMap && user && (
+          <JapanMapSimple userId={user.id} />
         )}
       </div>
 

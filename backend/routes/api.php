@@ -100,6 +100,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // いいね関連のルート
     Route::post('/like', [LikeController::class, 'like']);
+    Route::get('/like/my', [LikeController::class, 'myLikedPosts']);
     Route::get('/like/status/{postId}', [LikeController::class, 'getLikeStatus']);
     Route::get('/like/post/{postId}', [LikeController::class, 'getPostLikes']);
     

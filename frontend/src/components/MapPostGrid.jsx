@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import LikeButton from './LikeButton';
 import './MapPostGrid.css';
 
@@ -17,6 +17,29 @@ function MapPostGrid({
   locationName,
   formatDate
 }) {
+  const contentRef = useRef(null);
+
+  // マウント時にスクロール位置を復元
+  useEffect(() => {
+    const saved = sessionStorage.getItem('mapGridScrollTop');
+    if (saved && contentRef.current) {
+      setTimeout(() => {
+        if (contentRef.current) {
+          contentRef.current.scrollTop = parseInt(saved, 10);
+          sessionStorage.removeItem('mapGridScrollTop');
+        }
+      }, 80);
+    }
+  }, []);
+
+  // 投稿クリック時にスクロール位置を保存
+  const handlePostClick = (postId) => {
+    if (contentRef.current) {
+      sessionStorage.setItem('mapGridScrollTop', contentRef.current.scrollTop);
+    }
+    onPostClick(postId);
+  };
+
   return (
     <div className="map-post-grid-overlay">
       <div className="map-post-grid-header">
@@ -42,7 +65,7 @@ function MapPostGrid({
         </div>
       </div>
 
-      <div className="map-post-grid-content">
+      <div className="map-post-grid-content" ref={contentRef}>
         {posts.length === 0 ? (
           <div className="no-posts-message">
             <p>{locationName}には投稿がありません</p>
@@ -53,7 +76,7 @@ function MapPostGrid({
               <div
                 key={post.id}
                 className="grid-post-card"
-                onClick={() => onPostClick(post.id)}
+                onClick={() => handlePostClick(post.id)}
               >
                 <div className="grid-post-header-top">
                   <div
@@ -73,7 +96,11 @@ function MapPostGrid({
                     <span className="grid-author-username">@{post.user?.username}</span>
                   </div>
                   <div className="grid-post-date">
-                    {formatDate ? formatDate(post.created_at) : new Date(post.created_at).toLocaleDateString()}
+                    {(() => {
+                      const d = new Date(post.created_at);
+                      if (isNaN(d.getTime())) return '';
+                      return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+                    })()}
                   </div>
                 </div>
 

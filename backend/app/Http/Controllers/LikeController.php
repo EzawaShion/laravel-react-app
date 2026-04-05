@@ -86,4 +86,49 @@ class LikeController extends Controller
             'likes' => $likes
         ]);
     }
+
+    /**
+     * 自分がいいねした投稿一覧を取得
+     */
+    public function myLikedPosts()
+    {
+        $userId = Auth::id();
+
+        $posts = Post::with(['user', 'city.prefecture', 'photos' => function ($query) {
+            $query->orderBy('order_num')->limit(1);
+        }])
+            ->withCount(['likes', 'photos'])
+            ->whereHas('likes', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->where(function ($q) use ($userId) {
+                $q->where('visibility', 'public')
+                  ->orWhere('user_id', $userId)
+                  ->orWhere(function ($subQ) use ($userId) {
+                      $subQ->where('visibility', 'followers')
+                           ->whereIn('user_id', function ($fQ) use ($userId) {
+                               $fQ->select('following_id')
+                                  ->from('follows')
+                                  ->where('follower_id', $userId);
+                           });
+                  });
+            })
+            ->latest()
+            ->get();
+
+        $posts->each(function ($post) use ($userId) {
+            $post->first_photo_url = $post->photos->first()?->image_url;
+            $post->liked_user_ids  = $post->likes()->pluck('user_id')->toArray();
+            $post->is_liked        = true;
+            $post->current_user_id = $userId;
+            if ($post->user) {
+                $post->user->profile_image_url = $post->user->profile_image_url;
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'posts'   => $posts,
+        ]);
+    }
 }

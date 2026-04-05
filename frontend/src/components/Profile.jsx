@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import FollowList from './FollowList';
 import JapanMapSimple from './JapanMapSimple';
 import LikeButton from './LikeButton';
+import ProfileEditModal from './ui/ProfileEditModal';
 import './Profile.css';
 
 function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout, onNavigateToUserSearch }) {
@@ -18,7 +19,9 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
     privacy_settings: {
       show_followers: true,
       show_followings: true
-    }
+    },
+    likes_visibility: 'public',
+    map_visibility: 'public',
   });
   const [selectedProfileImage, setSelectedProfileImage] = useState(null);
   const [showFollowList, setShowFollowList] = useState(false);
@@ -29,6 +32,8 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
   });
   const [myPosts, setMyPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
+  const [likedPosts, setLikedPosts] = useState([]);
+  const [likedPostsLoading, setLikedPostsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('posts');
   const [showMenu, setShowMenu] = useState(false);
 
@@ -43,6 +48,59 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
       fetchMyPosts();
     }
   }, [user]);
+
+  // いいねタブに切り替えた際にいいね投稿を取得
+  useEffect(() => {
+    if (activeTab === 'likes' && likedPosts.length === 0 && !likedPostsLoading) {
+      fetchLikedPosts();
+    }
+  }, [activeTab]);
+
+  // 投稿クリック時にスクロール位置を保存するラッパー
+  const handlePostClick = (postId) => {
+    sessionStorage.setItem('profileScrollTop', window.scrollY);
+    sessionStorage.setItem('profileActiveTab', activeTab);
+    if (onPostClick) onPostClick(postId);
+  };
+
+  // マウント後、投稿リストが表示されたらスクロール位置を復元
+  useEffect(() => {
+    const saved = sessionStorage.getItem('profileScrollTop');
+    const savedTab = sessionStorage.getItem('profileActiveTab');
+    if (saved) {
+      // タブを復元
+      if (savedTab) setActiveTab(savedTab);
+      // タブ別の復元キーに振り分け
+      if (savedTab === 'likes') {
+        sessionStorage.setItem('profileScrollRestoreLikes', saved);
+      } else {
+        sessionStorage.setItem('profileScrollRestore', saved);
+      }
+      sessionStorage.removeItem('profileScrollTop');
+      sessionStorage.removeItem('profileActiveTab');
+    }
+  }, []);
+
+  // 投稿データ読み込み完了後にスクロール復元
+  useEffect(() => {
+    const saved = sessionStorage.getItem('profileScrollRestore');
+    if (!postsLoading && saved) {
+      setTimeout(() => {
+        window.scrollTo({ top: parseInt(saved, 10), behavior: 'instant' });
+        sessionStorage.removeItem('profileScrollRestore');
+      }, 80);
+    }
+  }, [postsLoading]);
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem('profileScrollRestoreLikes');
+    if (!likedPostsLoading && likedPosts.length > 0 && saved) {
+      setTimeout(() => {
+        window.scrollTo({ top: parseInt(saved, 10), behavior: 'instant' });
+        sessionStorage.removeItem('profileScrollRestoreLikes');
+      }, 80);
+    }
+  }, [likedPostsLoading, likedPosts.length]);
 
   const fetchProfile = async () => {
     try {
@@ -71,7 +129,9 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
           privacy_settings: data.user.privacy_settings || {
             show_followers: true,
             show_followings: true
-          }
+          },
+          likes_visibility: data.user.likes_visibility || 'public',
+          map_visibility: data.user.map_visibility || 'public',
         });
       } else {
         setError('プロフィールの取得に失敗しました');
@@ -140,6 +200,31 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
     }
   };
 
+  const fetchLikedPosts = async () => {
+    try {
+      setLikedPostsLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8000/api/like/my', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setLikedPosts(data.posts || []);
+      } else {
+        setLikedPosts([]);
+      }
+    } catch (error) {
+      console.error('いいね投稿の取得エラー:', error);
+      setLikedPosts([]);
+    } finally {
+      setLikedPostsLoading(false);
+    }
+  };
+
   const showFollowListModal = (type) => {
     setFollowListType(type);
     setShowFollowList(true);
@@ -183,26 +268,6 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
         }));
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  const testApiConnection = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        setSuccess('API接続は正常です');
-        setTimeout(() => setSuccess(''), 3000);
-      } else {
-        setError(`API接続エラー: ${response.status} ${response.statusText}`);
-      }
-    } catch (error) {
-      setError(`API接続テスト失敗: ${error.message}`);
     }
   };
 
@@ -343,9 +408,6 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
   return (
     <div className="profile-container">
       <div className="profile-header">
-        <button className="back-button" onClick={onBack}>
-          ← 戻る
-        </button>
         <div className="profile-page-title">プロフィール</div>
         <div className="header-actions">
 
@@ -374,7 +436,9 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
                       privacy_settings: user.privacy_settings || {
                         show_followers: true,
                         show_followings: true
-                      }
+                      },
+                      likes_visibility: user.likes_visibility || 'public',
+                      map_visibility: user.map_visibility || 'public',
                     });
                   }}
                 >
@@ -405,214 +469,74 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
 
-      {!isEditing ? (
-        <div className="profile-content">
-          <div className="profile-image-section">
-            <img
-              src={user.profile_image_url || '/images/default-avatar.svg'}
-              alt="プロフィール画像"
-              className="profile-image"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = '/images/default-avatar.svg';
-              }}
-            />
+      <div className="profile-content">
+        <div className="profile-image-section">
+          <img
+            src={user.profile_image_url || '/images/default-avatar.svg'}
+            alt="プロフィール画像"
+            className="profile-image"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = '/images/default-avatar.svg';
+            }}
+          />
+        </div>
+
+        <div className="profile-info">
+          <div className="profile-user-name">{user.name || user.username}</div>
+          <p className="username">@{user.username}</p>
+
+          <div className="profile-stats-row">
+            <div className="stat-item clickable" onClick={() => showFollowListModal('followers')}>
+              <span className="stat-value">{followStats.followers_count}</span>
+              <span className="stat-label">フォロワー</span>
+            </div>
+            <div className="stat-item clickable" onClick={() => showFollowListModal('followings')}>
+              <span className="stat-value">{followStats.followings_count}</span>
+              <span className="stat-label">フォロー中</span>
+            </div>
           </div>
 
-          <div className="profile-info">
-            <div className="profile-user-name">{user.name || user.username}</div>
-            <p className="username">@{user.username}</p>
+          {user.bio && user.bio !== 'null' && user.bio.trim() !== '' && <p className="bio">{user.bio}</p>}
 
-            <div className="profile-stats-row">
-              <div className="stat-item clickable" onClick={() => showFollowListModal('followers')}>
-                <span className="stat-value">{followStats.followers_count}</span>
-                <span className="stat-label">フォロワー</span>
+          <div className="profile-meta-row">
+            {user.website && user.website !== 'null' && user.website.trim() !== '' && (
+              <div className="meta-item">
+                <span className="meta-icon">🔗</span>
+                <a href={user.website} target="_blank" rel="noopener noreferrer">
+                  {user.website}
+                </a>
               </div>
-              <div className="stat-item clickable" onClick={() => showFollowListModal('followings')}>
-                <span className="stat-value">{followStats.followings_count}</span>
-                <span className="stat-label">フォロー中</span>
-              </div>
-            </div>
-
-            {user.bio && user.bio !== 'null' && user.bio.trim() !== '' && <p className="bio">{user.bio}</p>}
-
-            <div className="profile-meta-row">
-              {user.website && user.website !== 'null' && user.website.trim() !== '' && (
-                <div className="meta-item">
-                  <span className="meta-icon">🔗</span>
-                  <a href={user.website} target="_blank" rel="noopener noreferrer">
-                    {user.website}
-                  </a>
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
-      ) : (
-        <div className="profile-edit-form">
-          <div className="form-group">
-            <label>名前 *</label>
-            <input
-              type="text"
-              value={editForm.name}
-              onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-              required
-            />
-          </div>
+      </div>
 
-          <div className="form-group">
-            <label>ユーザー名 *</label>
-            <input
-              type="text"
-              value={editForm.username}
-              onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-              required
-            />
-          </div>
-
-
-          <div className="form-group">
-            <label>自己紹介</label>
-            <textarea
-              value={editForm.bio}
-              onChange={(e) => setEditForm(prev => ({ ...prev, bio: e.target.value }))}
-              placeholder="自己紹介を入力してください"
-              rows="3"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>ウェブサイト</label>
-            <input
-              type="url"
-              value={editForm.website}
-              onChange={(e) => setEditForm(prev => ({ ...prev, website: e.target.value }))}
-              placeholder="https://example.com"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>プライバシー設定</label>
-            <div className="privacy-settings">
-              <div className="privacy-setting-item">
-                <span className="privacy-label">フォロワーリストを公開する</span>
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={editForm.privacy_settings.show_followers}
-                    onChange={(e) => setEditForm(prev => ({
-                      ...prev,
-                      privacy_settings: {
-                        ...prev.privacy_settings,
-                        show_followers: e.target.checked
-                      }
-                    }))}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-              <div className="privacy-setting-item">
-                <span className="privacy-label">フォロー中リストを公開する</span>
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={editForm.privacy_settings.show_followings}
-                    onChange={(e) => setEditForm(prev => ({
-                      ...prev,
-                      privacy_settings: {
-                        ...prev.privacy_settings,
-                        show_followings: e.target.checked
-                      }
-                    }))}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>プロフィール画像</label>
-            <div className="image-upload-section">
-              <div className="current-image">
-                <p>現在の画像:</p>
-                <img
-                  src={user.profile_image_url || '/images/default-avatar.svg'}
-                  alt="現在のプロフィール画像"
-                  className="current-profile-image"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = '/images/default-avatar.svg';
-                  }}
-                />
-              </div>
-
-              <div className="new-image-upload">
-                <p>新しい画像を選択:</p>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="file-input"
-                />
-                <div className="file-requirements">
-                  <small>
-                    • 対応形式: JPEG, PNG, JPG, GIF<br />
-                    • 最大ファイルサイズ: 20MB
-                  </small>
-                </div>
-                {editForm.profile_image_preview && (
-                  <div className="image-preview-container">
-                    <p>プレビュー:</p>
-                    <img
-                      src={editForm.profile_image_preview}
-                      alt="プレビュー"
-                      className="image-preview"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button
-              className="save-button"
-              onClick={handleUpdateProfile}
-            >
-              保存
-            </button>
-            <button
-              className="test-connection-button"
-              onClick={testApiConnection}
-              type="button"
-            >
-              接続テスト
-            </button>
-            <button
-              className="cancel-button"
-              onClick={() => {
-                setIsEditing(false);
-                setEditForm({
-                  name: user.name || '',
-                  username: user.username || '',
-                  bio: user.bio || '',
-                  website: user.website || '',
-                  profile_image_preview: null,
-                  privacy_settings: user.privacy_settings || {
-                    show_followers: true,
-                    show_followings: true
-                  }
-                });
-                setSelectedProfileImage(null);
-              }}
-            >
-              キャンセル
-            </button>
-          </div>
-        </div>
-      )
-      }
+      <ProfileEditModal
+        open={isEditing}
+        onClose={() => {
+          setIsEditing(false);
+          setEditForm({
+            name: user.name || '',
+            username: user.username || '',
+            bio: user.bio || '',
+            website: user.website || '',
+            profile_image_preview: null,
+            privacy_settings: user.privacy_settings || {
+              show_followers: true,
+              show_followings: true
+            },
+            likes_visibility: user.likes_visibility || 'public',
+            map_visibility: user.map_visibility || 'public',
+          });
+          setSelectedProfileImage(null);
+        }}
+        user={user}
+        editForm={editForm}
+        setEditForm={setEditForm}
+        handleImageChange={handleImageChange}
+        handleUpdateProfile={handleUpdateProfile}
+      />
 
       {/* 自分の投稿一覧セクション */}
       <div className="profile-posts-section">
@@ -622,6 +546,12 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
             className={`tab-button ${activeTab === 'posts' ? 'active' : ''}`}
           >
             投稿一覧
+          </button>
+          <button
+            onClick={() => setActiveTab('likes')}
+            className={`tab-button ${activeTab === 'likes' ? 'active' : ''}`}
+          >
+            ❤️ いいね
           </button>
           <button
             onClick={() => setActiveTab('map')}
@@ -646,7 +576,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
             ) : (
               <div className="posts-grid">
                 {myPosts.map((post) => (
-                  <div key={post.id} className="grid-post-card" onClick={() => onPostClick && onPostClick(post.id)}>
+                  <div key={post.id} className="grid-post-card" onClick={() => handlePostClick(post.id)}>
                     <div className="grid-post-header-top">
                       <div className="grid-post-title">{post.title}</div>
                       <div className="grid-post-visibility">
@@ -717,6 +647,69 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
 
         {activeTab === 'map' && user && (
           <JapanMapSimple userId={user.id} />
+        )}
+
+        {activeTab === 'likes' && (
+          <>
+            <div className="posts-section-title">❤️ いいねした投稿</div>
+
+            {likedPostsLoading ? (
+              <div className="posts-loading">
+                <p>読み込み中...</p>
+              </div>
+            ) : likedPosts.length === 0 ? (
+              <div className="no-posts">
+                <p>まだいいねした投稿はありません</p>
+              </div>
+            ) : (
+              <div className="posts-grid">
+                {likedPosts.map((post) => (
+                  <div key={post.id} className="grid-post-card" onClick={() => handlePostClick(post.id)}>
+                    <div className="grid-post-header-top">
+                      <div className="grid-post-title">{post.title}</div>
+                    </div>
+
+                    <div className="grid-post-image-container">
+                      {post.first_photo_url ? (
+                        <img
+                          src={post.first_photo_url}
+                          alt={post.title}
+                          className="grid-post-thumbnail"
+                        />
+                      ) : (
+                        <div className="grid-no-image-placeholder">No Image</div>
+                      )}
+                    </div>
+
+                    <div className="grid-post-description">
+                      {post.description?.length > 100
+                        ? `${post.description.substring(0, 100)}...`
+                        : post.description
+                      }
+                    </div>
+
+                    <hr className="grid-post-divider" />
+
+                    <div className="grid-post-footer-row">
+                      <div className="grid-post-location">
+                        {post.city ? `📍 ${post.city.prefecture?.name} ${post.city.name}` :
+                          post.custom_location ? `📍 ${post.custom_location}` : ''}
+                      </div>
+                      <div className="grid-post-actions-right">
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <LikeButton
+                            postId={post.id}
+                            initialIsLiked={true}
+                            initialLikesCount={post.likes_count ?? 0}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 

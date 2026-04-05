@@ -376,6 +376,11 @@ function JapanMapSimple({ userId }) {
   // Post Detail Modal State
   const [detailPost, setDetailPost] = useState(null);
 
+  const isMapOwner = useMemo(() => {
+    const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+    return storedUser && parseInt(storedUser.id) === parseInt(userId);
+  }, [userId]);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -673,15 +678,18 @@ function JapanMapSimple({ userId }) {
               <div className="map-photo-grid">
                 {photos.map((photo) => {
                   const thumbnail = photo.thumbnail_url || photo.url;
-                  const isSelected = favoritePhotoId === photo.id;
+                  const isSelected = favoritePhotoId === photo.id && isMapOwner;
 
                   return (
                     <div key={photo.id} className="map-photo-item-wrapper">
                       <button
                         type="button"
                         className={`map-photo-item ${isSelected ? 'selected' : ''}`}
-                        onClick={() => openPostDetailModal(photo)}
-                        disabled={saving}
+                        onClick={() => {
+                          if (isMapOwner) openPostDetailModal(photo);
+                        }}
+                        disabled={saving || !isMapOwner}
+                        style={{ cursor: isMapOwner ? 'pointer' : 'default' }}
                       >
                         {thumbnail ? (
                           <img src={thumbnail} alt={photo.title || 'photo'} />
@@ -749,28 +757,30 @@ function JapanMapSimple({ userId }) {
             </div>
             <div className="post-detail-content">
               <div className="post-description">{detailPost.description || detailPost.title || 'No description'}</div>
-              <div className="post-actions">
-                {isFavorite && (
+              {isMapOwner && (
+                <div className="post-actions">
+                  {isFavorite && (
+                    <button
+                      className="action-btn"
+                      onClick={() => handleRemoveFavorite(prefectureId)}
+                      style={{ marginRight: '10px', backgroundColor: '#ef4444' }}
+                      disabled={saving}
+                    >
+                      解除
+                    </button>
+                  )}
                   <button
                     className="action-btn"
-                    onClick={() => handleRemoveFavorite(prefectureId)}
-                    style={{ marginRight: '10px', backgroundColor: '#ef4444' }}
+                    onClick={() => {
+                      closePostDetailModal();
+                      openAdjustmentModal(detailPost, isFavorite ? { x: currentX, y: currentY, scale: currentScale } : null);
+                    }}
                     disabled={saving}
                   >
-                    解除
+                    {isFavorite ? '表示位置を調整' : '地図に設定'}
                   </button>
-                )}
-                <button
-                  className="action-btn"
-                  onClick={() => {
-                    closePostDetailModal();
-                    openAdjustmentModal(detailPost, isFavorite ? { x: currentX, y: currentY, scale: currentScale } : null);
-                  }}
-                  disabled={saving}
-                >
-                  {isFavorite ? '表示位置を調整' : '地図に設定'}
-                </button>
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -920,14 +930,16 @@ function JapanMapSimple({ userId }) {
               : `訪問済み ${mapData.totalVisited} / ${mapData.totalPrefectures}`}
           </p>
         </div>
-        <button
-          className="save-map-btn"
-          onClick={handleSaveMapImage}
-          disabled={loading}
-          title="地図を画像として保存"
-        >
-          画像保存
-        </button>
+        {isMapOwner && (
+          <button
+            className="save-map-btn"
+            onClick={handleSaveMapImage}
+            disabled={loading}
+            title="地図を画像として保存"
+          >
+            画像保存
+          </button>
+        )}
         {error && <p className="map-error">{error}</p>}
       </div>
       <div className="japan-map-svg-container" ref={mapRef}>
@@ -951,7 +963,14 @@ function JapanMapSimple({ userId }) {
               const clipId = `clip-${block.id}`;
 
               return (
-                <g key={block.id} className="prefecture" onClick={() => handleBlockClick(block)}>
+                <g 
+                  key={block.id} 
+                  className={`prefecture ${isMapOwner ? 'clickable' : ''}`}
+                  onClick={() => {
+                    if (isMapOwner) handleBlockClick(block);
+                  }}
+                  style={{ cursor: isMapOwner ? 'pointer' : 'default' }}
+                >
                   {hasFavorite && (
                     <defs>
                       <clipPath id={clipId}>

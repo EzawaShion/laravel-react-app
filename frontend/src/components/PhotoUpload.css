@@ -1,61 +1,51 @@
+/* ===========================
+   PhotoUpload コンテナ
+   =========================== */
 .photo-upload-container {
-  max-width: 800px;
+  max-width: 720px;
   margin: 0 auto;
   padding: var(--spacing-lg);
   background: var(--surface-color);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--border-color);
-}
-
-.photo-upload-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-color);
-  position: relative;
-}
-
-.photo-upload-header .page-title {
-  margin: 0;
-  color: var(--text-primary);
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.cancel-button {
-  position: absolute;
-  left: 0;
-  background: var(--surface-active);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.cancel-button:hover {
-  filter: brightness(0.9);
-}
-
-.upload-methods {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
+  gap: var(--spacing-lg);
 }
 
-.upload-button {
-  width: 100%;
-  max-width: 300px;
-  padding: var(--spacing-md);
+/* ヘッダー */
+.pu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pu-back-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+.pu-back-btn:hover { color: var(--primary-color); }
+
+/* 追加ボタンエリア */
+.pu-add-area {
+  display: flex;
+  justify-content: center;
+}
+
+.pu-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: var(--spacing-md) var(--spacing-xl);
   border: 2px dashed var(--primary-color);
   background: var(--primary-gradient);
   color: white;
@@ -64,88 +54,71 @@
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
 }
-
-.upload-button:hover,
-.camera-button:hover {
+.pu-add-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
   filter: brightness(1.1);
 }
+.pu-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.pu-add-icon { font-size: 1.3rem; line-height: 1; }
 
+.pu-add-hint {
+  font-size: 0.78rem;
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+/* エラー */
 .error-message {
   background: #fef2f2;
   color: var(--error-color);
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-lg);
   border-left: 4px solid var(--error-color);
   font-size: 0.9rem;
 }
 
-.photo-previews {
-  margin-top: var(--spacing-lg);
-}
-
-.photo-previews .section-title {
-  margin-bottom: var(--spacing-md);
-  color: var(--text-primary);
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.preview-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
-}
-
-.photo-preview-item {
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--bg-color);
-  transition: all var(--transition-fast);
-}
-
-.photo-preview-item:hover {
-  border-color: var(--primary-color);
-  box-shadow: var(--shadow-md);
-}
-
-.preview-image-container {
+/* ===========================
+   カルーセル
+   =========================== */
+.pu-carousel-wrap {
   position: relative;
-  height: 300px;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-color);
+  background: #000;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  height: 420px;
 }
 
-.preview-image-container img {
+.pu-main-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pu-main-img {
   max-width: 100%;
   max-height: 100%;
-  width: auto;
-  height: auto;
   object-fit: contain;
+  user-select: none;
 }
 
-.remove-photo-button {
+.pu-remove-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(239, 68, 68, 0.9);
+  top: 10px;
+  right: 10px;
+  background: rgba(239, 68, 68, 0.85);
   color: white;
   border: none;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   font-size: 1.1rem;
   font-weight: bold;
@@ -153,48 +126,203 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color var(--transition-fast);
+  transition: background var(--transition-fast);
+  z-index: 5;
+}
+.pu-remove-btn:hover { background: rgba(220, 38, 38, 1); }
+
+.pu-img-counter {
+  position: absolute;
+  bottom: 12px;
+  right: 14px;
+  background: rgba(0,0,0,0.55);
+  color: white;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 99px;
 }
 
-.remove-photo-button:hover {
-  background: var(--error-color);
+/* ナビゲーション */
+.pu-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(4px);
+  color: white;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background var(--transition-fast);
+}
+.pu-nav:hover { background: rgba(255,255,255,0.4); }
+.pu-nav.prev { left: 10px; }
+.pu-nav.next { right: 10px; }
+
+/* ドット */
+.pu-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: -4px;
 }
 
-.photo-details {
+.pu-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(99,102,241,0.3);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.pu-dot.active {
+  background: var(--primary-color);
+  transform: scale(1.3);
+}
+.pu-dot:hover { background: rgba(99,102,241,0.6); }
+
+/* ===========================
+   サムネイル並び替えエリア
+   =========================== */
+.pu-thumb-section {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  background: var(--bg-color);
+}
+
+.pu-thumb-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pu-thumb-count {
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+.pu-thumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pu-thumb {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: grab;
+  border: 2px solid var(--border-color);
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+.pu-thumb:active { cursor: grabbing; }
+.pu-thumb.selected { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(99,102,241,0.3); }
+.pu-thumb.drag-over {
+  border-color: var(--primary-color);
+  background: rgba(99,102,241,0.1);
+  transform: scale(1.05);
+}
+
+.pu-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.pu-thumb-num {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 99px;
+  line-height: 1.5;
+  pointer-events: none;
+}
+
+.pu-thumb-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(239,68,68,0.85);
+  color: white;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+.pu-thumb:hover .pu-thumb-remove { opacity: 1; }
+
+/* ===========================
+   メタ情報入力
+   =========================== */
+.pu-meta {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   padding: var(--spacing-md);
   background: var(--surface-color);
-  border-top: 1px solid var(--border-color);
-  min-height: 180px;
-  height: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.pu-meta-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
 }
 
 .photo-title-input,
 .photo-description-input,
 .photo-tags-input {
   width: 100%;
-  margin-bottom: var(--spacing-sm);
-  padding: 0.5rem 0.75rem;
+  box-sizing: border-box;
+  padding: 8px 12px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   font-size: 0.9rem;
-  transition: border-color var(--transition-fast);
   background: var(--bg-color);
   color: var(--text-primary);
+  transition: border-color var(--transition-fast);
 }
-
 .photo-title-input:focus,
 .photo-description-input:focus,
 .photo-tags-input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-  background: var(--surface-color);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
 }
 
 .photo-description-input {
-  height: 60px;
-  min-height: 60px;
-  max-height: 60px;
+  height: 64px;
   resize: none;
 }
 
@@ -203,10 +331,13 @@
   color: var(--text-secondary);
 }
 
+/* ===========================
+   アップロードボタン
+   =========================== */
 .upload-actions {
   display: flex;
   justify-content: center;
-  padding-top: var(--spacing-md);
+  padding-top: var(--spacing-sm);
   border-top: 2px solid var(--border-color);
 }
 
@@ -222,162 +353,33 @@
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-sm);
 }
-
 .submit-upload-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
   filter: brightness(1.1);
 }
-
 .submit-upload-button:disabled {
   background: var(--text-secondary);
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
   opacity: 0.7;
 }
 
-/* カルーセル用スタイル */
-.photo-carousel {
-  position: relative;
-  margin-bottom: var(--spacing-lg);
-}
-
-.carousel-main-photo {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: var(--spacing-lg);
-  width: 100%;
-  height: 400px;
-  box-sizing: border-box;
-  min-height: 400px;
-}
-
-.carousel-prev-photo,
-.carousel-next-photo {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 15%;
-  overflow: hidden;
-  border-radius: var(--radius-md);
-  z-index: 1;
-}
-
-.carousel-prev-photo {
-  left: -20%;
-}
-
-.carousel-next-photo {
-  right: -20%;
-}
-
-.carousel-edge-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.3;
-  filter: blur(1px);
-}
-
-.main-carousel-photo {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-}
-
-.carousel-indicators {
-  display: flex;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  margin: var(--spacing-md) 0;
-}
-
-.carousel-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(99, 102, 241, 0.3);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.carousel-indicator.active {
-  background: var(--primary-color);
-  transform: scale(1.2);
-}
-
-.carousel-indicator:hover {
-  background: rgba(99, 102, 241, 0.6);
-}
-
-.carousel-nav-button {
-  position: absolute;
-  top: 200px;
-  background: rgba(99, 102, 241, 0.6);
-  color: white;
-  border: none;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  font-size: 1.5rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition-fast);
-  z-index: 10;
-}
-
-.carousel-nav-button:hover {
-  background: rgba(99, 102, 241, 0.8);
-}
-
-.carousel-nav-button.prev {
-  left: var(--spacing-lg);
-}
-
-.carousel-nav-button.next {
-  right: var(--spacing-lg);
-}
-
-/* レスポンシブ対応 */
+/* ===========================
+   レスポンシブ
+   =========================== */
 @media (max-width: 768px) {
   .photo-upload-container {
     padding: var(--spacing-md);
     margin: var(--spacing-sm);
+    border-radius: var(--radius-md);
   }
 
-  .upload-methods {
-    flex-direction: column;
-  }
-
-  .carousel-main-photo {
+  .pu-carousel-wrap {
     height: 300px;
+    border-radius: var(--radius-md);
   }
 
-  .carousel-nav-button {
-    width: 40px;
-    height: 40px;
-    font-size: 1.2rem;
-    top: 150px;
-  }
+  .pu-thumb { width: 72px; height: 72px; }
 
-  .carousel-nav-button.prev {
-    left: var(--spacing-sm);
-  }
-
-  .carousel-nav-button.next {
-    right: var(--spacing-sm);
-  }
-
-  .photo-upload-header {
-    flex-direction: column;
-    gap: var(--spacing-md);
-    text-align: center;
-  }
+  .pu-add-hint { display: none; }
 }

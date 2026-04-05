@@ -3,7 +3,7 @@ import LikeButton from './LikeButton';
 import FollowButton from './FollowButton';
 import './PostList.css';
 
-function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
+function PostList({ onPostClick, onCreatePost, onUserClick, onMapView, savedScrollY, onScrollRestored }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -81,6 +81,20 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView }) {
       });
     }
   }, [posts]);
+
+  // データ読み込み完了後にスクロール位置を復元
+  useEffect(() => {
+    console.log('[PostList] scroll restore check:', { loading, savedScrollY });
+    if (!loading && savedScrollY != null && savedScrollY > 0) {
+      const timer = setTimeout(() => {
+        console.log('[PostList] scrolling to:', savedScrollY, '/ current scrollY:', window.scrollY, '/ body height:', document.body.scrollHeight);
+        window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+        console.log('[PostList] after scroll, scrollY:', window.scrollY);
+        if (onScrollRestored) onScrollRestored();
+      }, 80);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, savedScrollY]);
 
   // フォロー状態の変更を処理
   const handleFollowChange = (userId, isFollowing) => {

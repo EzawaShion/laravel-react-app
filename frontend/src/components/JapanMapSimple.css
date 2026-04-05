@@ -85,7 +85,7 @@
   font-size: 1rem;
 }
 
-.prefecture {
+.prefecture.clickable {
   cursor: pointer;
 }
 
@@ -95,7 +95,7 @@
   stroke: var(--border-color);
 }
 
-.prefecture-block:hover {
+.prefecture.clickable:hover .prefecture-block {
   opacity: 0.9;
   fill: var(--surface-hover);
 }

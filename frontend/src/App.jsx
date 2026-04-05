@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -45,6 +45,10 @@ function App() {
   const [user, setUser] = useState(null)
   const [isFromCreatePost, setIsFromCreatePost] = useState(false)
   const [draftPost, setDraftPost] = useState(null)
+  // スクロール位置の保存用
+  const scrollPositions = useRef({});
+  // PostList復帰時スクロール位置
+  const [savedScrollForPostList, setSavedScrollForPostList] = useState(null);
 
 
   // ユーザー認証状態と表示画面の復元
@@ -323,27 +327,32 @@ function App() {
   };
 
   const handlePostClick = (post) => {
+    // 現在のスクロール位置を保存
+    scrollPositions.current['beforePostDetail'] = window.scrollY;
+    console.log('[App] saving scrollY before postDetail:', window.scrollY);
     setPreviousScreen('postList');
     setSelectedPostId(post.id);
     window.history.pushState({ view: 'postDetail', postId: post.id }, '');
     setShowPostDetail(true);
     setShowPostList(false);
+    window.scrollTo(0, 0);
   };
 
   const handleBackToPostList = () => {
+    const savedScroll = scrollPositions.current['beforePostDetail'] || 0;
+    console.log('[App] restoring scrollY:', savedScroll, '/ previousScreen:', previousScreen);
     setShowPostDetail(false);
     setSelectedPostId(null);
 
-    // 前の画面に戻るロジック
     if (previousScreen === 'profile') {
       setShowProfile(true);
     } else if (previousScreen === 'userProfile') {
       setShowUserProfile(true);
     } else if (previousScreen === 'postList') {
+      setSavedScrollForPostList(savedScroll);
       setShowPostList(true);
     } else {
       // デフォルト（マップビュー）
-      // 何もしなくても他のフラグがfalseならマップが表示される
     }
     setPreviousScreen(null);
   };
@@ -537,12 +546,7 @@ function App() {
     console.log('Profile updated in App.jsx:', updatedUser);
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
-
-    // プロフィール画面を閉じる
-    setShowProfile(false);
-
-    // 成功メッセージを表示
-    alert('プロフィールが正常に更新されました！');
+    // プロフィール画面はそのまま表示（閉じない）
   };
 
   // ログイン済みユーザーの場合、Sidebarを表示し、各画面を制御
@@ -614,6 +618,8 @@ function App() {
               setShowUserProfile(true);
             }}
             onMapView={handleNavigateToHome}
+            savedScrollY={savedScrollForPostList}
+            onScrollRestored={() => setSavedScrollForPostList(null)}
           />
         )}
 
@@ -656,6 +662,7 @@ function App() {
               setShowUserProfile(true);
             }}
             onPostClick={(postId) => {
+              scrollPositions.current['beforePostDetail'] = window.scrollY;
               setPreviousScreen('profile');
               setSelectedPostId(postId);
               setShowPostDetail(true);
@@ -679,6 +686,7 @@ function App() {
               setShowUserProfile(true);
             }}
             onPostClick={(postId) => {
+              scrollPositions.current['beforePostDetail'] = window.scrollY;
               setPreviousScreen('userProfile');
               setSelectedPostId(postId);
               setShowPostDetail(true);

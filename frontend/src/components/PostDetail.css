@@ -1,37 +1,86 @@
 .post-detail-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: var(--spacing-lg);
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
   width: 100%;
   box-sizing: border-box;
 }
 
+/* ===== 3カラムヘッダー ===== */
 .post-detail-header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
   align-items: center;
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
   border-bottom: 1px solid var(--border-color);
-  width: 100%;
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  z-index: 100;
   box-sizing: border-box;
+}
+
+[data-theme='dark'] .post-detail-header {
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.post-detail-header-title {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .back-button {
-  background: var(--surface-color);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 1.2rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+  line-height: 1;
 }
 
 .back-button:hover {
   background: var(--surface-hover);
+}
+
+/* ハンバーガーメニュー（ヘッダー右端） */
+.post-header-menu {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.header-menu-trigger {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+}
+
+.header-menu-trigger:hover {
+  background: var(--surface-hover);
   color: var(--text-primary);
+}
+
+.header-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
 }
 
 .post-actions {
@@ -117,22 +166,39 @@
 .post-detail-meta {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
   background: var(--bg-color);
   border-radius: var(--radius-md);
   border-left: 4px solid var(--primary-color);
+  overflow: hidden;
+}
+
+/* 右側グループ: いいね・公開範囲・ロケーション */
+.post-meta-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* 公開範囲アイコンのみ */
+.post-visibility-icon {
+  font-size: 1rem;
+  line-height: 1;
+  cursor: default;
 }
 
 .post-author {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  flex-wrap: wrap;
-  margin-bottom: var(--spacing-xs);
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .post-date,
@@ -176,6 +242,7 @@
   color: var(--text-primary);
   font-size: 1rem;
   line-height: 1.8;
+  text-align: left;
 }
 
 .post-description p {
@@ -374,9 +441,9 @@
   margin-bottom: 0;
   width: 100%;
   height: auto;
-  min-height: 300px;
-  max-height: 600px;
   box-sizing: border-box;
+  /* overflow: hidden を外し、縦長画像も切れないようにする */
+  overflow: visible;
 }
 
 /* 前後の写真の端を表示 */
@@ -408,15 +475,17 @@
 }
 
 .main-carousel-photo {
+  /* 画像全体を表示する: 幅100%で拡縮、高さは自動 */
+  width: 100%;
+  height: auto;
   max-width: 100%;
   max-height: none;
-  width: auto;
-  height: auto;
+  object-fit: contain;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   z-index: 2;
   position: relative;
-  flex-shrink: 0;
+  display: block;
 }
 
 .carousel-photo-info {
@@ -519,32 +588,95 @@
 
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
-  .post-carousel {
+  .post-detail-container {
+    padding: 0 var(--spacing-sm) var(--spacing-md);
+  }
+
+  .post-detail-header {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .post-detail-header-title {
+    font-size: 0.95rem;
+  }
+
+  /* --- メタ情報を1行にコンパクト表示 --- */
+  .post-detail-meta {
+    padding: var(--spacing-sm) var(--spacing-md);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    flex-wrap: nowrap;
+  }
+
+  .post-author {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .author-avatar {
+    width: 26px;
+    height: 26px;
+  }
+
+  .author-username {
+    font-size: 0.8rem;
+  }
+
+  .post-date,
+  .post-likes,
+  .post-location,
+  .post-visibility {
+    font-size: 0.78rem;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .date-value,
+  .location-value,
+  .visibility-value {
+    font-size: 0.78rem;
+  }
+
+  /* タイトル */
+  .post-detail-title .detail-page-title {
+    font-size: 1.2rem;
+    margin-bottom: var(--spacing-md);
+  }
+
+  /* 投稿詳細カード全体のpadding削減 */
+  .post-detail-card {
     padding: var(--spacing-md);
+  }
+
+  .post-carousel {
+    /* カードのpaddingなし・幅100%でカードの端まで使う */
+    padding: 0;
     max-width: 100%;
     min-width: auto;
+    border-radius: var(--radius-md);
+    overflow: hidden;
   }
 
   .carousel-main-photo {
-    min-height: 200px;
-    max-height: 300px;
+    min-height: unset;
+    max-height: unset;
+    overflow: visible;
   }
 
   .main-carousel-photo {
-    max-height: 250px;
-    max-width: 90%;
+    /* モバイル: カード幅いっぱい、画像全体がはみ出さず表示 */
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .carousel-nav-button {
     display: none !important;
-  }
-
-  .carousel-nav-button.prev {
-    left: var(--spacing-sm);
-  }
-
-  .carousel-nav-button.next {
-    right: var(--spacing-sm);
   }
 
   .carousel-photo-title {
@@ -557,6 +689,7 @@
 
   .carousel-photo-info {
     padding: var(--spacing-sm);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
   }
 
   /* スマホでは前後の写真の端を非表示 */
@@ -572,34 +705,12 @@
   }
 
   .post-detail-card {
-    padding: var(--spacing-md);
-  }
-
-  .carousel-main-photo {
-    min-height: 150px;
-    max-height: 250px;
-  }
-
-  .main-carousel-photo {
-    max-height: 200px;
-    max-width: 95%;
+    padding: var(--spacing-sm);
   }
 
   /* スマホではナビゲーションボタンを非表示（スワイプで操作） */
   .carousel-nav-button {
     display: none;
-  }
-
-  /* スワイプヒントを表示 */
-  .carousel-main-photo::after {
-    content: '← スワイプで写真を切り替え →';
-    position: absolute;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    white-space: nowrap;
   }
 }
 
@@ -833,4 +944,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
+}
+
+text-overflow: ellipsis;
+line-height: 1.2;
 }

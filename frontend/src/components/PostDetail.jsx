@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import LikeButton from './LikeButton';
 import FollowButton from './FollowButton';
-import CommentSection from './CommentSection';
+// import CommentSection from './CommentSection'; // 一時非表示
 import PhotoCarousel from './PhotoCarousel';
 import './PostDetail.css';
 import './PostDetailMenu.css';
@@ -346,6 +346,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
 
   return (
     <div className="post-detail-container">
+      {/* ヘッダー: 左=戻る, 中=投稿, 右=ハンバーガー */}
       <div className="post-detail-header">
         <button
           onClick={onBackToList}
@@ -354,6 +355,49 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         >
           ←
         </button>
+        <span className="post-detail-header-title">
+          {post
+            ? (post.city
+                ? `📍 ${post.city.name}${post.city.prefecture ? ` (${post.city.prefecture.name})` : ''}`
+                : post.custom_location
+                  ? `📍 ${post.custom_location}`
+                  : '投稿')
+            : '投稿'}
+        </span>
+        <div className="post-header-menu" ref={menuRef}>
+          {isOwner ? (
+            <>
+              <button
+                className="header-menu-trigger"
+                onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+                aria-label="メニュー"
+              >
+                ☰
+              </button>
+              {showMenu && (
+                <div className="dropdown-menu header-dropdown">
+                  <div className="menu-info-item">
+                    📅 {post ? formatDate(post.created_at) : ''}
+                  </div>
+                  <button onClick={() => { onPhotoUpload(); setShowMenu(false); }}>
+                    📷 写真を追加
+                  </button>
+                  <button onClick={() => { onEditPost(post); setShowMenu(false); }}>
+                    ✏️ 編集
+                  </button>
+                  <button onClick={() => { setShowVisibilityModal(true); setShowMenu(false); }}>
+                    🌍 公開範囲を変更
+                  </button>
+                  <button onClick={() => { handleDelete(); setShowMenu(false); }} className="delete-item">
+                    🗑️ 削除
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ width: 36 }} />
+          )}
+        </div>
       </div>
 
       <div className="post-detail-card">
@@ -361,6 +405,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
 
 
         <div className="post-detail-meta">
+          {/* 左端: アバター + ユーザー名 */}
           <div className="post-author">
             <div
               className="author-info"
@@ -388,83 +433,31 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
             )}
           </div>
 
-          {!isOwner && (
-            <div className="post-date">
-              <span className="date-value">{formatDate(post.created_at)}</span>
+          {/* 右側グループ: 公開範囲アイコン → いいね */}
+          <div className="post-meta-right">
+            {/* 公開範囲: アイコンのみ */}
+            <div className="post-visibility-icon" title={
+              post.visibility === 'public' ? '全員に公開' :
+              post.visibility === 'followers' ? 'フォロワーのみ' : '自分のみ'
+            }>
+              {post.visibility === 'public' && '🌐'}
+              {post.visibility === 'followers' && '👥'}
+              {post.visibility === 'private' && '🔒'}
             </div>
-          )}
 
-          {isOwner && (
-            <div className="post-visibility">
-              <span className="visibility-value">
-                {post.visibility === 'public' && '🌐 全員に公開'}
-                {post.visibility === 'followers' && '👥 フォロワーのみ公開'}
-                {post.visibility === 'private' && '🔒 自分のみ公開'}
-              </span>
+            {/* いいね（右端） */}
+            <div className="post-likes">
+              <LikeButton
+                postId={post.id}
+                initialIsLiked={(() => {
+                  const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;
+                  return post.liked_user_ids?.includes(currentUserId) ?? false;
+                })()}
+                initialLikesCount={post.likes_count ?? 0}
+              />
             </div>
-          )}
-
-          <div className="post-likes">
-            <LikeButton
-              postId={post.id}
-              initialIsLiked={(() => {
-                const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;
-                return post.liked_user_ids?.includes(currentUserId) ?? false;
-              })()}
-              initialLikesCount={post.likes_count ?? 0}
-            />
           </div>
-          {(post.city || post.custom_location) && (
-            <div className="post-location">
-              {post.city && (
-                <span className="location-value">
-                  📍 {post.city.name}
-                  {post.city.prefecture && ` (${post.city.prefecture.name})`}
-                </span>
-              )}
-              {post.custom_location && (
-                <span className="location-value">
-                  📍 {post.custom_location}
-                </span>
-              )}
-            </div>
-          )}
 
-          {isOwner && (
-            <div className="post-actions" style={{ marginLeft: 'auto' }}>
-              <div className="menu-container" ref={menuRef}>
-                <button
-                  className="menu-trigger"
-                  onClick={(e) => {
-                    e.stopPropagation(); // 親要素へのバブルアップ防止
-                    setShowMenu(!showMenu);
-                  }}
-                  aria-label="メニュー"
-                >
-                  ⋮
-                </button>
-                {showMenu && (
-                  <div className="dropdown-menu">
-                    <div className="menu-info-item">
-                      📅 {formatDate(post.created_at)}
-                    </div>
-                    <button onClick={() => { onPhotoUpload(); setShowMenu(false); }}>
-                      📷 写真を追加
-                    </button>
-                    <button onClick={() => { onEditPost(post); setShowMenu(false); }}>
-                      ✏️ 編集
-                    </button>
-                    <button onClick={() => { setShowVisibilityModal(true); setShowMenu(false); }}>
-                      🌍 公開範囲を変更
-                    </button>
-                    <button onClick={() => { handleDelete(); setShowMenu(false); }} className="delete-item">
-                      🗑️ 削除
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="post-detail-title">
@@ -516,9 +509,27 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                     />
                   </div>
                 )}
+
+                {/* ナビゲーションボタン */}
+                {photos.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1)}
+                      className="carousel-nav-button prev"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      onClick={() => setCurrentIndex(prev => prev === photos.length - 1 ? 0 : prev + 1)}
+                      className="carousel-nav-button next"
+                    >
+                      ›
+                    </button>
+                  </>
+                )}
               </div>
 
-              {/* 写真枚数インジケーター（点のみ）- 写真と説明の間に配置 */}
+              {/* 写真枚数インジケーター */}
               {photos.length > 1 && (
                 <div className="carousel-indicators">
                   {photos.map((_, index) => (
@@ -531,7 +542,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 </div>
               )}
 
-              {/* 写真情報 */}
+              {/* 写真情報（画像の外・下に表示） */}
               {(photos[currentIndex]?.title || photos[currentIndex]?.description) && (
                 <div className="carousel-photo-info">
                   {photos[currentIndex]?.title && (
@@ -541,24 +552,6 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                     <p className="carousel-photo-description">{photos[currentIndex].description}</p>
                   )}
                 </div>
-              )}
-
-              {/* ナビゲーションボタン */}
-              {photos.length > 1 && (
-                <>
-                  <button
-                    onClick={() => setCurrentIndex(prev => prev === 0 ? photos.length - 1 : prev - 1)}
-                    className="carousel-nav-button prev"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    onClick={() => setCurrentIndex(prev => prev === photos.length - 1 ? 0 : prev + 1)}
-                    className="carousel-nav-button next"
-                  >
-                    ›
-                  </button>
-                </>
               )}
             </div>
 
@@ -598,12 +591,13 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
             />
           )
         }
-        {/* コメントセクション */}
+        {/* コメントセクション - 一時非表示
         <CommentSection
           postId={post.id}
           userId={JSON.parse(localStorage.getItem('user'))?.id}
           token={localStorage.getItem('token')}
         />
+        */}
       </div >
 
 

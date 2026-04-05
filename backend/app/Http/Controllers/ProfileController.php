@@ -37,6 +37,8 @@ class ProfileController extends Controller
                 'followers_count' => $user->followers()->count(),
                 'followings_count' => $user->followings()->count(),
                 'privacy_settings' => $user->privacy_settings,
+                'likes_visibility' => $user->likes_visibility ?? 'public',
+                'map_visibility' => $user->map_visibility ?? 'public',
                 'created_at' => $user->created_at,
             ]
         ]);
@@ -57,9 +59,11 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
             'bio' => 'nullable|string|max:1000',
-            'website' => 'nullable|string|max:255', // urlバリデーションを削除し、nullableに変更
+            'website' => 'nullable|string|max:255',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
-            'privacy_settings' => 'nullable|string'
+            'privacy_settings' => 'nullable|string',
+            'likes_visibility' => 'nullable|string|in:public,followers,private',
+            'map_visibility' => 'nullable|string|in:public,followers,private',
         ]);
 
         if ($validator->fails()) {
@@ -137,6 +141,8 @@ class ProfileController extends Controller
                 'followers_count' => $user->followers()->count(),
                 'followings_count' => $user->followings()->count(),
                 'privacy_settings' => $user->privacy_settings,
+                'likes_visibility' => $user->likes_visibility ?? 'public',
+                'map_visibility' => $user->map_visibility ?? 'public',
                 'created_at' => $user->created_at,
             ]
         ]);
@@ -197,6 +203,8 @@ class ProfileController extends Controller
                 'followers_count' => $user->followers()->count(),
                 'followings_count' => $user->followings()->count(),
                 'privacy_settings' => $user->privacy_settings,
+                'likes_visibility' => $user->likes_visibility ?? 'public',
+                'map_visibility' => $user->map_visibility ?? 'public',
                 'created_at' => $user->created_at,
             ]
         ]);

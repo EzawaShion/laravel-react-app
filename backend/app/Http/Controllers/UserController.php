@@ -89,6 +89,8 @@ class UserController extends Controller
                     'username' => $user->username,
                     'email' => $user->email,
                     'profile' => $user->bio,
+                    'bio' => $user->bio,
+                    'website' => $user->website,
                     'profile_image_url' => $avatarUrl,
                     'avatar_url' => $avatarUrl, // 後方互換性のため
                     'location' => $user->location,
@@ -96,6 +98,8 @@ class UserController extends Controller
                     'followings_count' => $user->followings_count,
                     'posts_count' => $user->posts_count,
                     'is_following' => auth('sanctum')->check() ? auth('sanctum')->user()->followings->contains($user->id) : false,
+                    'likes_visibility' => $user->likes_visibility ?? 'public',
+                    'map_visibility' => $user->map_visibility ?? 'public',
                 ]
             ]);
         } catch (\Exception $e) {

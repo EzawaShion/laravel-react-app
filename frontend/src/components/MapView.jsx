@@ -60,6 +60,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   const [geojsonData, setGeojsonData] = useState(null);
   const [prefectures, setPrefectures] = useState([]);
   const [cities, setCities] = useState([]);
+  const sidebarListRef = useRef(null); // サイドバースクロール担当
 
   // 日本以外を隠すためのマスクデータを生成（メモ化してパフォーマンスを確保）
   const maskData = useMemo(() => {
@@ -131,6 +132,22 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
       setSelectedLocationName('すべての投稿');
     }
   }, [posts, selectedLocationPosts.length]);
+
+  // マウント後、サイドバーの投稿が表示されたらスクロール位置を復元
+  useEffect(() => {
+    if (selectedLocationPosts.length > 0) {
+      const saved = sessionStorage.getItem('mapSidebarScrollTop');
+      if (saved && sidebarListRef.current) {
+        const target = parseInt(saved, 10);
+        setTimeout(() => {
+          if (sidebarListRef.current) {
+            sidebarListRef.current.scrollTop = target;
+          }
+          sessionStorage.removeItem('mapSidebarScrollTop');
+        }, 80);
+      }
+    }
+  }, [selectedLocationPosts]);
 
   // 都道府県一覧を取得
   useEffect(() => {
@@ -349,6 +366,10 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
 
   // 投稿をクリックした時の処理
   const handlePostClick = (postId) => {
+    // 現在のサイドバースクロール位置をsessionStorageに保存
+    if (sidebarListRef.current) {
+      sessionStorage.setItem('mapSidebarScrollTop', sidebarListRef.current.scrollTop);
+    }
     if (onPostClick) {
       onPostClick(postId);
     }
@@ -738,7 +759,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
         {/* サイドパネル - 常に表示 */}
         {showSidePanel && !isSidebarCollapsed && (
           <div className="map-sidebar">
-            <div className="sidebar-content">
+            <div className="sidebar-content" ref={sidebarListRef}>
               <div className="sidebar-header">
                 <div className="sidebar-header-left">
                   <button
