@@ -157,10 +157,11 @@
 
 .post-detail-title .detail-page-title {
   color: var(--text-primary);
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 1.5rem; /* 少しすっきりしたサイズに調整 */
+  font-weight: 700;  /* ヘッダーと同じ太さにする */
   margin: 0 0 var(--spacing-lg) 0;
   line-height: 1.3;
+  margin-bottom: 10px;
 }
 
 .post-detail-meta {
@@ -169,7 +170,7 @@
   flex-wrap: nowrap;
   align-items: center;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 10px;
   padding: var(--spacing-md) var(--spacing-lg);
   background: var(--bg-color);
   border-radius: var(--radius-md);
@@ -589,12 +590,16 @@
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
   .post-detail-container {
-    padding: 0 var(--spacing-sm) var(--spacing-md);
+    padding: 0;
+    /* ヘッダーを画面幅いっぱいに */
   }
 
   .post-detail-header {
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: 2px 8px;
+    /* 縦の幅を狭くする */
     margin-bottom: var(--spacing-sm);
+    min-height: 48px;
+    border-radius: 0;
   }
 
   .post-detail-header-title {
@@ -603,6 +608,7 @@
 
   /* --- メタ情報を1行にコンパクト表示 --- */
   .post-detail-meta {
+    margin: 0 var(--spacing-sm) var(--spacing-md);
     padding: var(--spacing-sm) var(--spacing-md);
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
@@ -701,11 +707,19 @@
 
 @media (max-width: 480px) {
   .post-detail-container {
-    padding: var(--spacing-sm);
+    padding: 0
   }
 
   .post-detail-card {
     padding: var(--spacing-sm);
+  }
+
+  .post-detail-header {
+    padding: 2px 8px;
+    /* 縦の幅を狭くする */
+    margin-bottom: var(--spacing-sm);
+    height: 48px;
+    border-radius: 0;
   }
 
   /* スマホではナビゲーションボタンを非表示（スワイプで操作） */
@@ -944,8 +958,4 @@
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
-}
-
-text-overflow: ellipsis;
-line-height: 1.2;
 }

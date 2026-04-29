@@ -316,8 +316,7 @@ function App() {
 
   const handlePostCreated = (post) => {
     setShowCreatePost(false);
-    setShowPostList(true);
-    // 投稿作成後の処理（例：投稿一覧に追加など）
+    // 投稿作成後はマップビュー（ホーム）に戻る
     console.log('投稿が作成されました:', post);
   };
 
@@ -435,9 +434,8 @@ function App() {
   // 投稿作成後の写真アップロード完了時の処理
   const handleCreatePostPhotoUploadSuccess = (photos) => {
     setShowPhotoUpload(false);
-    setShowPostList(true);
+    // 投稿完了後はマップビュー（ホーム）に戻る
     alert(`${photos.length}枚の写真がアップロードされました！`);
-    // 投稿一覧を再読み込み
     window.location.reload();
   };
 
@@ -801,61 +799,103 @@ function App() {
   }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React + Laravel API</h1>
-
-      {/* ユーザー認証状態の表示 */}
-      <div className="auth-section">
-        <div className="auth-buttons">
-          <button
-            onClick={() => setShowLogin(true)}
-            className="login-button"
-          >
-            ログイン
-          </button>
-          <button
-            onClick={() => setShowSignUp(true)}
-            className="signup-button"
-          >
-            アカウント作成
-          </button>
-        </div>
+    <div className="landing-page">
+      {/* 背景グラデーション＋地図モチーフ */}
+      <div className="landing-bg">
+        <div className="landing-bg-dots" />
       </div>
 
-      {/* APIデータの表示 */}
-      <div className="card">
-        <h2>Laravel API からのデータ</h2>
-        {loading && <p>読み込み中...</p>}
-        {error && <p style={{ color: 'red' }}>エラー: {error}</p>}
-        {apiData && (
-          <div>
-            <p><strong>メッセージ:</strong> {apiData.message}</p>
-            <p><strong>タイムスタンプ:</strong> {apiData.timestamp}</p>
-            <button onClick={fetchApiData}>再取得</button>
+      {/* ヘッダー */}
+      <header className="landing-header">
+        <span className="landing-brand">TravelMap</span>
+      </header>
+
+      {/* ヒーローセクション */}
+      <main className="landing-hero">
+        <div className="landing-hero-content">
+          <div className="landing-badge">📍 旅の記録をもっと豊かに</div>
+          <h1 className="landing-title">
+            あなたの旅を<br />
+            <span className="landing-title-accent">地図で残そう</span>
+          </h1>
+          <p className="landing-subtitle">
+            訪れた場所の写真・エピソードを地図と一緒に記録。<br className="landing-br" />
+            友達とシェアして、思い出をもっと鮮やかに。
+          </p>
+
+          <div className="landing-actions">
+            <button
+              onClick={() => setShowSignUp(true)}
+              className="landing-btn-primary"
+            >
+              サインアップ
+            </button>
+            <button
+              onClick={() => setShowLogin(true)}
+              className="landing-btn-secondary"
+            >
+              ログイン
+            </button>
           </div>
-        )}
-      </div>
+        </div>
 
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+        {/* マップカード装飾 */}
+        <div className="landing-map-card">
+          <div className="landing-map-pin pin-1">📍</div>
+          <div className="landing-map-pin pin-2">📍</div>
+          <div className="landing-map-pin pin-3">📍</div>
+          <div className="landing-map-pin pin-4">📍</div>
+          <div className="landing-map-pin pin-5">📍</div>
+          <div className="landing-map-pin pin-6">📍</div>
+          <div className="landing-map-pin pin-7">📍</div>
+          <div className="landing-map-pin pin-8">📍</div>
+          <div className="landing-map-pin pin-9">📍</div>
+          <div className="landing-map-pin pin-10">📍</div>
+        </div>
+      </main>
+
+      {/* フィーチャー */}
+      <section className="landing-features">
+        <div className="landing-feature-card feature-card--map">
+          <div className="feature-icon-wrap feature-icon-wrap--indigo">
+            {/* Map pin icon */}
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <h3>インタラクティブマップ</h3>
+          <p>日本全国の投稿をマップ上で一覧。どこに何があるかが一目でわかる。</p>
+        </div>
+        <div className="landing-feature-card feature-card--selfmap">
+          <div className="feature-icon-wrap feature-icon-wrap--violet">
+            {/* Japan / map icon */}
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+              <line x1="9" y1="3" x2="9" y2="18"/>
+              <line x1="15" y1="6" x2="15" y2="21"/>
+            </svg>
+          </div>
+          <h3>自分だけの日本地図</h3>
+          <p>訪れた都道府県に写真とエピソードを刻んで、あなただけのオリジナル日本地図を育てよう。</p>
+        </div>
+        <div className="landing-feature-card feature-card--social">
+          <div className="feature-icon-wrap feature-icon-wrap--rose">
+            {/* Heart icon */}
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e11d48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+            </svg>
+          </div>
+          <h3>フォロー＆いいね</h3>
+          <p>友達の旅をフォローして、いいねで応援しよう。旅仲間と繋がれる。</p>
+        </div>
+      </section>
+
+      {/* フッター */}
+      <footer className="landing-footer">
+        <p>© 2026 TravelMap</p>
+      </footer>
+    </div>
   )
 }
 

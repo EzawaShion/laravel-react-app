@@ -991,14 +991,42 @@
   background-color: rgba(0, 0, 0, 0.02);
 }
 
-/* Row 1: Title and Visibility */
+/* Row 1: Title and Visibility / Author Area */
 .posts-grid .grid-post-header-top {
   display: flex;
   position: relative;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   margin-bottom: var(--spacing-sm);
   width: 100%;
+}
+
+.grid-post-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-md);
+  transition: background-color 0.2s ease;
+  margin-right: auto; /* 左寄せを強制 */
+}
+
+.grid-post-user:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.grid-author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.grid-author-username {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 .grid-post-visibility {
@@ -1098,5 +1126,9 @@
 @media (max-width: 768px) {
   .posts-grid {
     grid-template-columns: 1fr !important;
+  }
+  
+  .profile-posts-section {
+    background-color: white;
   }
 }

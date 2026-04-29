@@ -176,47 +176,54 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
           </div>
         ) : users.length > 0 ? (
           <div className="user-list">
-            {users.map(user => (
-              <div
-                key={user.id}
-                className="us-user-card"
-                onClick={(e) => {
-                  console.log('Navigating to user:', user.id);
-                  if (onNavigateToUserProfile) {
-                    onNavigateToUserProfile(user.id);
-                  }
-                }}
-              >
+            {users.map(user => {
+              const currentUserId = JSON.parse(localStorage.getItem('user'))?.id;
+              const isSelf = currentUserId && parseInt(currentUserId) === parseInt(user.id);
+              
+              return (
                 <div
-                  className="us-user-info"
-                >
-                  <img
-                    src={user.avatar_url || 'http://localhost:8000/images/default-avatar.svg'}
-                    alt={user.name}
-                    className="us-user-avatar"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'http://localhost:8000/images/default-avatar.svg';
-                    }}
-                  />
-                  <div className="us-user-details">
-                    <div className="us-user-name-text">{user.name}</div>
-                    {user.username && (
-                      <p className="us-user-username-text">@{user.username}</p>
-                    )}
-                  </div>
-                </div>
-                <button
-                  className={`us-follow-button ${user.is_following ? 'following' : ''}`}
+                  key={user.id}
+                  className="us-user-card"
                   onClick={(e) => {
-                    e.stopPropagation();
-                    handleFollowToggle(user.id, user.is_following);
+                    console.log('Navigating to user:', user.id);
+                    if (onNavigateToUserProfile) {
+                      onNavigateToUserProfile(user.id);
+                    }
                   }}
                 >
-                  {user.is_following ? 'フォロー中' : 'フォロー'}
-                </button>
-              </div>
-            ))}
+                  <div
+                    className="us-user-info"
+                  >
+                    <img
+                      src={user.avatar_url || 'http://localhost:8000/images/default-avatar.svg'}
+                      alt={user.name}
+                      className="us-user-avatar"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'http://localhost:8000/images/default-avatar.svg';
+                      }}
+                    />
+                    <div className="us-user-details">
+                      <div className="us-user-name-text">{user.name}</div>
+                      {user.username && (
+                        <p className="us-user-username-text">@{user.username}</p>
+                      )}
+                    </div>
+                  </div>
+                  {!isSelf && (
+                    <button
+                      className={`us-follow-button ${user.is_following ? 'following' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFollowToggle(user.id, user.is_following);
+                      }}
+                    >
+                      {user.is_following ? 'フォロー中' : 'フォロー'}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ) : null}
       </div>

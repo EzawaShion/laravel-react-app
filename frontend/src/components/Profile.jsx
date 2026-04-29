@@ -666,8 +666,24 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
                 {likedPosts.map((post) => (
                   <div key={post.id} className="grid-post-card" onClick={() => handlePostClick(post.id)}>
                     <div className="grid-post-header-top">
-                      <div className="grid-post-title">{post.title}</div>
+                      <div
+                        className="grid-post-user"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onUserClick && post.user) {
+                            onUserClick(post.user.id);
+                          }
+                        }}
+                      >
+                        <img
+                          src={post.user?.profile_image_url || '/images/default-avatar.svg'}
+                          alt={post.user?.username}
+                          className="grid-author-avatar"
+                        />
+                        <span className="grid-author-username">@{post.user?.username}</span>
+                      </div>
                     </div>
+                    <div className="grid-post-title">{post.title}</div>
 
                     <div className="grid-post-image-container">
                       {post.first_photo_url ? (

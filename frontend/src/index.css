@@ -6,27 +6,27 @@
   font-weight: 400;
 
   /* Color Palette - Modern Travel App */
-  --primary-color: #1976d2;
-  /* MUI Blue 500 Equivalent */
-  --primary-hover: #1565c0;
-  /* MUI Blue 700 Equivalent */
+  --primary-color: #4f46e5;
+  /* Indigo 600 */
+  --primary-hover: #4338ca;
+  /* Indigo 700 */
   --secondary-color: #f43f5e;
   /* Rose 500 - 楽しさやアクセント */
   --accent-color: #8b5cf6;
   /* Violet 500 */
 
   /* Gradients */
-  --primary-gradient: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+  --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
   --secondary-gradient: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
   --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
   --glass-gradient: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75));
 
   /* Backgrounds & Surfaces */
-  --bg-color: #f0f9ff;
-  /* Sky 50 - ほんのり青みがかった白 */
+  --bg-color: #ffffff;
+  /* Pure white */
   --surface-color: #ffffff;
-  --surface-hover: #f8fafc;
-  --surface-active: #f1f5f9;
+  --surface-hover: #f5f5f7;
+  --surface-active: #ededf0;
 
   /* Text Colors */
   --text-primary: #0f172a;

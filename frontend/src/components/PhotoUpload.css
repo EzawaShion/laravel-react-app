@@ -370,6 +370,7 @@
 @media (max-width: 768px) {
   .photo-upload-container {
     padding: var(--spacing-md);
+    padding-bottom: 90px;
     margin: var(--spacing-sm);
     border-radius: var(--radius-md);
   }

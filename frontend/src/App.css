@@ -6,47 +6,476 @@
   text-align: center;
 }
 
-/* Landing Page Styles */
-.landing-container {
-  max-width: 1280px;
+/* ===== ランディングページ ===== */
+.landing-page {
+  min-height: 100vh;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: 'Roboto', 'Noto Sans JP', 'Inter', sans-serif;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+/* 背景装飾 */
+.landing-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.landing-bg-dots {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 10% 10%, rgba(79, 70, 229, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 45%);
+}
+
+/* ヘッダー */
+.landing-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 32px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.landing-logo-mark {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.landing-brand {
+  font-size: 1.4rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #1976d2, #42a5f5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+
+/* ヒーロー */
+.landing-hero {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 72px 32px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: var(--spacing-xl);
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+.landing-hero-content {
+  flex: 1;
+  max-width: 560px;
 }
 
-.logo:hover {
-  filter: drop-shadow(0 0 2em rgba(99, 102, 241, 0.5));
+.landing-badge {
+  display: inline-block;
+  background: rgba(79, 70, 229, 0.1);
+  border: 1px solid rgba(79, 70, 229, 0.25);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  color: #3730a3;
+  margin-bottom: 20px;
+  font-weight: 600;
 }
 
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em rgba(97, 218, 251, 0.5));
+.landing-title {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.2;
+  margin: 0 0 20px 0;
+  color: #0f172a;
+  letter-spacing: -1px;
 }
 
-@keyframes logo-spin {
+.landing-title-accent {
+  background: linear-gradient(90deg, #4f46e5, #6366f1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.landing-subtitle {
+  font-size: 1.05rem;
+  color: #64748b;
+  line-height: 1.8;
+  margin: 0 0 36px 0;
+}
+
+/* ボタン */
+.landing-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.landing-btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
+  letter-spacing: 0.3px;
+}
+
+.landing-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
+  filter: brightness(1.05);
+}
+
+.landing-btn-secondary {
+  background: white;
+  color: #4f46e5;
+  border: 2px solid #4f46e5;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.landing-btn-secondary:hover {
+  background: #eef2ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+}
+
+/* マップカード装飾 */
+.landing-map-card {
+  position: relative;
+  width: 500px;
+  height: 300px;
+  flex-shrink: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.07), 0 4px 12px rgba(79, 70, 229, 0.08);
+}
+
+.landing-map-pin {
+  position: absolute;
+  font-size: 1.8rem;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.15));
+  /* 初期状態: 非表示・上にオフセット */
+  opacity: 0;
+  transform: translateY(-40px) scale(1.3);
+  animation: pinDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+    pinFloat 2.4s ease-in-out infinite;
+}
+
+/* ─── ピン位置 & タイミング（drop delay, float delay）───
+   1-2: ゆっくり 0.5s間隔
+   3-8: 速く    0.2s間隔
+   9-10: ゆっくり 0.45s間隔
+   合計約3秒で完了
+─────────────────────────────────────────────────── */
+.pin-1 {
+  top: 18px;
+  left: 28px;
+  animation-delay: 0.0s, 0.5s;
+}
+
+.pin-2 {
+  top: 55px;
+  right: 48px;
+  animation-delay: 0.5s, 1.0s;
+}
+
+.pin-3 {
+  top: 25px;
+  left: 145px;
+  animation-delay: 1.0s, 1.5s;
+}
+
+.pin-4 {
+  top: 95px;
+  left: 52px;
+  animation-delay: 1.2s, 1.7s;
+}
+
+.pin-5 {
+  top: 120px;
+  right: 65px;
+  animation-delay: 1.4s, 1.9s;
+}
+
+.pin-6 {
+  top: 75px;
+  left: 205px;
+  animation-delay: 1.6s, 2.1s;
+}
+
+.pin-7 {
+  top: 160px;
+  left: 88px;
+  animation-delay: 1.8s, 2.3s;
+}
+
+.pin-8 {
+  top: 145px;
+  right: 32px;
+  animation-delay: 2.0s, 2.5s;
+}
+
+.pin-9 {
+  bottom: 55px;
+  left: 155px;
+  animation-delay: 2.45s, 2.95s;
+}
+
+.pin-10 {
+  bottom: 38px;
+  right: 52px;
+  animation-delay: 2.9s, 3.4s;
+}
+
+/* ページ読み込み時に上から刺さる */
+@keyframes pinDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) scale(1.3);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateY(4px) scale(0.95);
+  }
+
+  80% {
+    transform: translateY(-4px) scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 着地後のふわふわ浮遊 */
+@keyframes pinFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.landing-map-line {
+  position: absolute;
+  top: 55px;
+  left: 80px;
+  right: 100px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(79, 70, 229, 0.5), rgba(99, 102, 241, 0.5));
+  border-radius: 2px;
+  /* 左から伸びるアニメーション */
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: drawLine 0.6s ease-out 0.6s forwards;
+}
+
+@keyframes drawLine {
   from {
-    transform: rotate(0deg);
+    transform: scaleX(0);
+    opacity: 0;
   }
 
   to {
-    transform: rotate(360deg);
+    transform: scaleX(1);
+    opacity: 1;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+
+
+/* フィーチャーセクション */
+.landing-features {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  gap: 18px;
+  padding: 0 32px 80px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.landing-feature-card {
+  flex: 1;
+  background: white;
+  border: 1px solid #e9e9f0;
+  border-radius: 20px;
+  padding: 28px 24px 28px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.28s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* カード上部のアクセントライン */
+.landing-feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 20px 20px 0 0;
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+
+.feature-card--map::before {
+  background: linear-gradient(90deg, #4f46e5, #6366f1);
+}
+
+.feature-card--selfmap::before {
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+}
+
+.feature-card--social::before {
+  background: linear-gradient(90deg, #e11d48, #f43f5e);
+}
+
+.landing-feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+  border-color: transparent;
+}
+
+.landing-feature-card:hover::before {
+  opacity: 1;
+}
+
+/* アイコンラッパー（色付き丸背景） */
+.feature-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.feature-icon-wrap--indigo {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+}
+
+.feature-icon-wrap--violet {
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+}
+
+.feature-icon-wrap--rose {
+  background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+}
+
+.landing-feature-card h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.3px;
+}
+
+.landing-feature-card p {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* フッター */
+.landing-footer {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 20px;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  border-top: 1px solid #e2e8f0;
+  background: white;
+}
+
+@media (max-width: 1018px) {
+  .landing-map-card {
+    width: 340px;
+    height: 200px;
   }
 }
 
-.read-the-docs {
-  color: var(--text-secondary);
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .landing-hero {
+    flex-direction: column;
+    padding: 40px 20px;
+    gap: 32px;
+  }
+
+  .landing-map-card {
+    width: 80%;
+    height: 200px;
+  }
+
+  .landing-features {
+    flex-direction: column;
+    padding: 0 20px 56px;
+  }
+
+  .landing-header {
+    padding: 16px 20px;
+  }
+
+  .landing-br {
+    display: none;
+  }
 }
+
+@media (max-width: 480px) {
+  .landing-map-card {
+    width: 100%;
+    height: 200px;
+  }
+
+  .landing-hero {
+    flex-direction: column;
+    padding: 20px 20px;
+    gap: 32px;
+  }
+}
+
 
 /* 認証関連のスタイル */
 .auth-section {

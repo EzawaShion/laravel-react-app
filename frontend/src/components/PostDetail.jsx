@@ -395,7 +395,48 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
               )}
             </>
           ) : (
-            <div style={{ width: 36 }} />
+            <>
+              <button
+                className="header-menu-trigger"
+                onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+                aria-label="メニュー"
+              >
+                ☰
+              </button>
+              {showMenu && (
+                <div className="dropdown-menu header-dropdown">
+                  <div className="menu-info-item">
+                    📅 {post ? formatDate(post.created_at) : ''}
+                  </div>
+                  <div className="menu-info-item">
+                    {post.visibility === 'public' && '🌐 全員に公開'}
+                    {post.visibility === 'followers' && '👥 フォロワーのみ'}
+                    {post.visibility === 'private' && '🔒 自分のみ'}
+                  </div>
+                  {/* フォローボタン */}
+                  {post.user && post.user.id !== JSON.parse(localStorage.getItem('user'))?.id && (
+                    <div className="menu-follow-item" onClick={(e) => e.stopPropagation()}>
+                      <FollowButton
+                        userId={post.user.id}
+                        initialIsFollowing={isFollowing}
+                        onFollowChange={handleFollowChange}
+                      />
+                    </div>
+                  )}
+                  {/* いいねボタン */}
+                  <div className="menu-like-item" onClick={(e) => e.stopPropagation()}>
+                    <LikeButton
+                      postId={post.id}
+                      initialIsLiked={(() => {
+                        const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;
+                        return post.liked_user_ids?.includes(currentUserId) ?? false;
+                      })()}
+                      initialLikesCount={post.likes_count ?? 0}
+                    />
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -424,39 +465,34 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 <span className="author-username">@{post.user?.username}</span>
               </div>
             </div>
-            {post.user && post.user.id !== JSON.parse(localStorage.getItem('user'))?.id && (
-              <FollowButton
-                userId={post.user.id}
-                initialIsFollowing={isFollowing}
-                onFollowChange={handleFollowChange}
-              />
-            )}
           </div>
 
-          {/* 右側グループ: 公開範囲アイコン → いいね */}
-          <div className="post-meta-right">
-            {/* 公開範囲: アイコンのみ */}
-            <div className="post-visibility-icon" title={
-              post.visibility === 'public' ? '全員に公開' :
-              post.visibility === 'followers' ? 'フォロワーのみ' : '自分のみ'
-            }>
-              {post.visibility === 'public' && '🌐'}
-              {post.visibility === 'followers' && '👥'}
-              {post.visibility === 'private' && '🔒'}
-            </div>
+          {/* 右側グループ: 自分の投稿の場合のみ公開範囲・いいねを表示 */}
+          {isOwner && (
+            <div className="post-meta-right">
+              {/* 公開範囲: アイコンのみ */}
+              <div className="post-visibility-icon" title={
+                post.visibility === 'public' ? '全員に公開' :
+                post.visibility === 'followers' ? 'フォロワーのみ' : '自分のみ'
+              }>
+                {post.visibility === 'public' && '🌐'}
+                {post.visibility === 'followers' && '👥'}
+                {post.visibility === 'private' && '🔒'}
+              </div>
 
-            {/* いいね（右端） */}
-            <div className="post-likes">
-              <LikeButton
-                postId={post.id}
-                initialIsLiked={(() => {
-                  const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;
-                  return post.liked_user_ids?.includes(currentUserId) ?? false;
-                })()}
-                initialLikesCount={post.likes_count ?? 0}
-              />
+              {/* いいね（右端） */}
+              <div className="post-likes">
+                <LikeButton
+                  postId={post.id}
+                  initialIsLiked={(() => {
+                    const currentUserId = post.current_user_id || JSON.parse(localStorage.getItem('user'))?.id;
+                    return post.liked_user_ids?.includes(currentUserId) ?? false;
+                  })()}
+                  initialLikesCount={post.likes_count ?? 0}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
         </div>
 

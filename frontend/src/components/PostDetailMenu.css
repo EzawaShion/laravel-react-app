@@ -82,6 +82,20 @@
   background-color: var(--error-bg);
 }
 
+/* 他ユーザーの投稿メニュー: フォロー・いいね */
+.menu-follow-item,
+.menu-like-item {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
+  margin-top: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+}
+
+.menu-like-item {
+  border-top: none;
+}
+
 /* モーダル */
 .modal-overlay {
   position: fixed;

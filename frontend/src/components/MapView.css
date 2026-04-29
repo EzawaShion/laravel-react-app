@@ -1049,4 +1049,9 @@
   .show-icon::before {
     content: "∧" !important;
   }
+
+  /* 画面下部のナビゲーションバーと被らないように余白を追加 */
+  .location-posts-list {
+    padding-bottom: 80px;
+  }
 }

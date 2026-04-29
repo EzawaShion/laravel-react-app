@@ -813,3 +813,10 @@
   color: #333;
   font-weight: 600;
 }
+
+/* モバイル表示時の下部ナビゲーション対応 */
+@media (max-width: 768px) {
+  .create-post-container {
+    padding-bottom: 90px; /* ナビバーの高さ + 余白 */
+  }
+}
