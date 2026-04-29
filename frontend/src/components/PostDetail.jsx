@@ -3,6 +3,7 @@ import LikeButton from './LikeButton';
 import FollowButton from './FollowButton';
 // import CommentSection from './CommentSection'; // 一時非表示
 import PhotoCarousel from './PhotoCarousel';
+import MenuIcon from '@mui/icons-material/Menu';
 import './PostDetail.css';
 import './PostDetailMenu.css';
 
@@ -358,9 +359,25 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
         <span className="post-detail-header-title">
           {post
             ? (post.city
-                ? `📍 ${post.city.name}${post.city.prefecture ? ` (${post.city.prefecture.name})` : ''}`
+                ? (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px', verticalAlign: 'middle', flexShrink: 0 }}>
+                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z" />
+                      <circle cx="12" cy="10" r="3" fill="#fff" stroke="none" />
+                    </svg>
+                    {`${post.city.name}${post.city.prefecture ? ` (${post.city.prefecture.name})` : ''}`}
+                  </>
+                )
                 : post.custom_location
-                  ? `📍 ${post.custom_location}`
+                  ? (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px', verticalAlign: 'middle', flexShrink: 0 }}>
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" fill="#fff" stroke="none" />
+                      </svg>
+                      {post.custom_location}
+                    </>
+                  )
                   : '投稿')
             : '投稿'}
         </span>
@@ -372,24 +389,50 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
                 aria-label="メニュー"
               >
-                ☰
+                <MenuIcon />
               </button>
               {showMenu && (
                 <div className="dropdown-menu header-dropdown">
                   <div className="menu-info-item">
-                    📅 {post ? formatDate(post.created_at) : ''}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle', flexShrink: 0 }}>
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    {post ? formatDate(post.created_at) : ''}
                   </div>
                   <button onClick={() => { onPhotoUpload(); setShowMenu(false); }}>
-                    📷 写真を追加
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle', flexShrink: 0 }}>
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                      <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                    写真を追加
                   </button>
                   <button onClick={() => { onEditPost(post); setShowMenu(false); }}>
-                    ✏️ 編集
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle', flexShrink: 0 }}>
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    編集
                   </button>
                   <button onClick={() => { setShowVisibilityModal(true); setShowMenu(false); }}>
-                    🌍 公開範囲を変更
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle', flexShrink: 0 }}>
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="2" y1="12" x2="22" y2="12"/>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                    公開範囲を変更
                   </button>
                   <button onClick={() => { handleDelete(); setShowMenu(false); }} className="delete-item">
-                    🗑️ 削除
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle', flexShrink: 0 }}>
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                      <path d="M10 11v6"/>
+                      <path d="M14 11v6"/>
+                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
+                    削除
                   </button>
                 </div>
               )}
@@ -401,17 +444,29 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
                 aria-label="メニュー"
               >
-                ☰
+                <MenuIcon />
               </button>
               {showMenu && (
                 <div className="dropdown-menu header-dropdown">
                   <div className="menu-info-item">
-                    📅 {post ? formatDate(post.created_at) : ''}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle', flexShrink: 0 }}>
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    {post ? formatDate(post.created_at) : ''}
                   </div>
                   <div className="menu-info-item">
-                    {post.visibility === 'public' && '🌐 全員に公開'}
-                    {post.visibility === 'followers' && '👥 フォロワーのみ'}
-                    {post.visibility === 'private' && '🔒 自分のみ'}
+                    {post.visibility === 'public' && (
+                      <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle' }}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>全員に公開</>
+                    )}
+                    {post.visibility === 'followers' && (
+                      <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle' }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>フォロワーのみ</>
+                    )}
+                    {post.visibility === 'private' && (
+                      <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle' }}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>自分のみ</>
+                    )}
                   </div>
                   {/* フォローボタン */}
                   {post.user && post.user.id !== JSON.parse(localStorage.getItem('user'))?.id && (
@@ -475,9 +530,27 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                 post.visibility === 'public' ? '全員に公開' :
                 post.visibility === 'followers' ? 'フォロワーのみ' : '自分のみ'
               }>
-                {post.visibility === 'public' && '🌐'}
-                {post.visibility === 'followers' && '👥'}
-                {post.visibility === 'private' && '🔒'}
+                {post.visibility === 'public' && (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                )}
+                {post.visibility === 'followers' && (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                )}
+                {post.visibility === 'private' && (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                )}
               </div>
 
               {/* いいね（右端） */}
@@ -648,19 +721,34 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
                   className={`visibility-option ${post.visibility === 'public' ? 'active' : ''}`}
                   onClick={() => handleUpdateVisibility('public')}
                 >
-                  🌐 全員に公開
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle' }}>
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                  全員に公開
                 </button>
                 <button
                   className={`visibility-option ${post.visibility === 'followers' ? 'active' : ''}`}
                   onClick={() => handleUpdateVisibility('followers')}
                 >
-                  👥 フォロワーのみ公開
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle' }}>
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                  フォロワーのみ公開
                 </button>
                 <button
                   className={`visibility-option ${post.visibility === 'private' ? 'active' : ''}`}
                   onClick={() => handleUpdateVisibility('private')}
                 >
-                  🔒 自分のみ公開
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle' }}>
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  自分のみ公開
                 </button>
               </div>
               <button onClick={() => setShowVisibilityModal(false)} className="cancel-button">

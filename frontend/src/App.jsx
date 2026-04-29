@@ -18,6 +18,12 @@ import EditPost from './components/EditPost'
 import UserProfile from './components/UserProfile'
 import UserSearch from './components/UserSearch'
 import Sidebar from './components/Sidebar'
+const ModernPin = ({ width = 24, height = 24, color = "#ef4444" }) => (
+  <svg width={width} height={height} viewBox="0 0 24 24" fill={color} stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.25))' }}>
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z" />
+    <circle cx="12" cy="10" r="3" fill="#ffffff" stroke="none" />
+  </svg>
+);
 
 function App() {
   const [count, setCount] = useState(0)
@@ -807,13 +813,19 @@ function App() {
 
       {/* ヘッダー */}
       <header className="landing-header">
+        <div style={{ width: '36px', height: '36px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src="/favicon.png" alt="TravelMap Logo" style={{ width: '170%', height: '170%', objectFit: 'contain', mixBlendMode: 'multiply' }} />
+        </div>
         <span className="landing-brand">TravelMap</span>
       </header>
 
       {/* ヒーローセクション */}
       <main className="landing-hero">
         <div className="landing-hero-content">
-          <div className="landing-badge">📍 旅の記録をもっと豊かに</div>
+          <div className="landing-badge">
+            <ModernPin width={16} height={16} color="#4f46e5" />
+            <span style={{ marginLeft: '6px' }}>旅の記録をもっと豊かに</span>
+          </div>
           <h1 className="landing-title">
             あなたの旅を<br />
             <span className="landing-title-accent">地図で残そう</span>
@@ -841,16 +853,16 @@ function App() {
 
         {/* マップカード装飾 */}
         <div className="landing-map-card">
-          <div className="landing-map-pin pin-1">📍</div>
-          <div className="landing-map-pin pin-2">📍</div>
-          <div className="landing-map-pin pin-3">📍</div>
-          <div className="landing-map-pin pin-4">📍</div>
-          <div className="landing-map-pin pin-5">📍</div>
-          <div className="landing-map-pin pin-6">📍</div>
-          <div className="landing-map-pin pin-7">📍</div>
-          <div className="landing-map-pin pin-8">📍</div>
-          <div className="landing-map-pin pin-9">📍</div>
-          <div className="landing-map-pin pin-10">📍</div>
+          <div className="landing-map-pin pin-1"><ModernPin /></div>
+          <div className="landing-map-pin pin-2"><ModernPin /></div>
+          <div className="landing-map-pin pin-3"><ModernPin /></div>
+          <div className="landing-map-pin pin-4"><ModernPin /></div>
+          <div className="landing-map-pin pin-5"><ModernPin /></div>
+          <div className="landing-map-pin pin-6"><ModernPin /></div>
+          <div className="landing-map-pin pin-7"><ModernPin /></div>
+          <div className="landing-map-pin pin-8"><ModernPin /></div>
+          <div className="landing-map-pin pin-9"><ModernPin /></div>
+          <div className="landing-map-pin pin-10"><ModernPin /></div>
         </div>
       </main>
 
@@ -860,8 +872,8 @@ function App() {
           <div className="feature-icon-wrap feature-icon-wrap--indigo">
             {/* Map pin icon */}
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/>
-              <circle cx="12" cy="10" r="3"/>
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
             </svg>
           </div>
           <h3>インタラクティブマップ</h3>
@@ -871,9 +883,9 @@ function App() {
           <div className="feature-icon-wrap feature-icon-wrap--violet">
             {/* Japan / map icon */}
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
-              <line x1="9" y1="3" x2="9" y2="18"/>
-              <line x1="15" y1="6" x2="15" y2="21"/>
+              <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+              <line x1="9" y1="3" x2="9" y2="18" />
+              <line x1="15" y1="6" x2="15" y2="21" />
             </svg>
           </div>
           <h3>自分だけの日本地図</h3>
@@ -883,7 +895,7 @@ function App() {
           <div className="feature-icon-wrap feature-icon-wrap--rose">
             {/* Heart icon */}
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e11d48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
             </svg>
           </div>
           <h3>フォロー＆いいね</h3>

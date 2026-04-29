@@ -83,7 +83,6 @@ function SignUp({ onSignUpSuccess, onSwitchToLogin, onSwitchToEmailVerificationR
     <div className="signup-container">
       <div className="signup-card">
         <div className="page-title">アカウント作成</div>
-        <p className="subtitle">旅行プランナーに参加しましょう！</p>
 
         {errors.general && (
           <div className="error-message">

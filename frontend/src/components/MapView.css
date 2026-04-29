@@ -261,8 +261,8 @@
 
 /* クラスタースタイルのカスタマイズ */
 .marker-cluster-small {
-  background-color: rgba(59, 130, 246, 0.6);
-  border: 2px solid rgba(59, 130, 246, 0.8);
+  background-color: rgba(255, 108, 108, 0.6);
+  border: 2px solid rgba(255, 108, 108, 0.6);
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -272,7 +272,7 @@
 }
 
 .marker-cluster-small div {
-  background-color: rgba(59, 130, 246, 0.8);
+  background-color: rgba(255, 108, 108, 0.6);
   color: white;
   font-weight: bold;
   font-size: 12px;

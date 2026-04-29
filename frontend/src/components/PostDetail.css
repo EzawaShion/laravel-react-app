@@ -62,7 +62,7 @@
   border: none;
   font-size: 1.1rem;
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   width: 36px;
   height: 36px;
   border-radius: 50%;

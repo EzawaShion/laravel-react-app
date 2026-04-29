@@ -24,12 +24,18 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-// Leafletのデフォルトアイコンを修正
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+// カスタムSVGピンアイコン
+const customPinIcon = L.divIcon({
+  html: `
+    <svg width="28" height="36" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));">
+      <path d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 16 9 16s9-9.25 9-16c0-4.97-4.03-9-9-9z" fill="#ef4444"/>
+      <circle cx="12" cy="9" r="3.5" fill="#ffffff"/>
+    </svg>
+  `,
+  className: '',
+  iconSize: [28, 36],
+  iconAnchor: [14, 36],
+  popupAnchor: [0, -36],
 });
 
 function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreatePost, onNavigateToProfile, onUserClick }) {
@@ -612,7 +618,13 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
             </button>
           </div>
         </div>
-        <div className="map-title">📍 投稿マップ</div>
+        <div className="map-title">
+          <svg width="16" height="16" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '4px', verticalAlign: 'middle', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))' }}>
+            <path d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 16 9 16s9-9.25 9-16c0-4.97-4.03-9-9-9z" fill="#ef4444"/>
+            <circle cx="12" cy="9" r="3.5" fill="#ffffff"/>
+          </svg>
+          投稿マップ
+        </div>
         <div className="post-count-badge">
           {posts.length}件の投稿
         </div>
@@ -744,6 +756,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                 <Marker
                   key={post.id}
                   position={[parseFloat(post.latitude), parseFloat(post.longitude)]}
+                  icon={customPinIcon}
                   eventHandlers={{
                     click: () => {
                       handleLocationClick(parseFloat(post.latitude), parseFloat(post.longitude));
@@ -818,10 +831,17 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
                         </div>
                         <div className="sidebar-post-info-wrapper">
                           <div className="sidebar-post-location">
-                            📍 {post.location_name}
+                            <svg width="12" height="12" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '3px', verticalAlign: 'middle', flexShrink: 0, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' }}>
+                              <path d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 16 9 16s9-9.25 9-16c0-4.97-4.03-9-9-9z" fill="#ef4444"/>
+                              <circle cx="12" cy="9" r="3.5" fill="#ffffff"/>
+                            </svg>
+                            {post.location_name}
                           </div>
                           <div className="sidebar-post-likes">
-                            ❤️ {post.likes_count}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="#ef4444" style={{ marginRight: '3px', verticalAlign: 'middle', flexShrink: 0 }}>
+                              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                            {post.likes_count}
                           </div>
                         </div>
                       </div>

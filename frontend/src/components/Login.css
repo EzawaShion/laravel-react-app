@@ -233,6 +233,11 @@
 
 /* レスポンシブ対応 */
 @media (max-width: 480px) {
+  .login-container {
+    align-items: flex-start;
+    padding-top: 5vh;
+  }
+
   .login-card {
     padding: var(--spacing-lg);
     box-shadow: var(--shadow-md);

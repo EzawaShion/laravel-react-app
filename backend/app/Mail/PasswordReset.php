@@ -31,7 +31,7 @@ class PasswordReset extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'パスワードリセット - 旅行プランナー',
+            subject: 'パスワードリセット - TravelMap',
         );
     }
 

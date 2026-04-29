@@ -3,6 +3,11 @@ import FollowList from './FollowList';
 import JapanMapSimple from './JapanMapSimple';
 import LikeButton from './LikeButton';
 import ProfileEditModal from './ui/ProfileEditModal';
+import MenuIcon from '@mui/icons-material/Menu';
+import EditIcon from '@mui/icons-material/Edit';
+import LogoutIcon from '@mui/icons-material/Logout';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import './Profile.css';
 
 function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout, onNavigateToUserSearch }) {
@@ -413,11 +418,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
 
           <div className="profile-menu-container">
             <button className="hamburger-button" onClick={toggleMenu} aria-label="メニュー">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-              </svg>
+              <MenuIcon />
             </button>
 
             {showMenu && (
@@ -442,7 +443,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
                     });
                   }}
                 >
-                  <span className="menu-icon">✏️</span>
+                  <span className="menu-icon"><EditIcon fontSize="small" /></span>
                   プロフィール編集
                 </button>
 
@@ -456,7 +457,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
                       }
                     }}
                   >
-                    <span className="menu-icon">🚪</span>
+                    <span className="menu-icon"><LogoutIcon fontSize="small" /></span>
                     ログアウト
                   </button>
                 )}
@@ -502,7 +503,12 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
           <div className="profile-meta-row">
             {user.website && user.website !== 'null' && user.website.trim() !== '' && (
               <div className="meta-item">
-                <span className="meta-icon">🔗</span>
+                <span className="meta-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                  </svg>
+                </span>
                 <a href={user.website} target="_blank" rel="noopener noreferrer">
                   {user.website}
                 </a>
@@ -551,7 +557,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
             onClick={() => setActiveTab('likes')}
             className={`tab-button ${activeTab === 'likes' ? 'active' : ''}`}
           >
-            ❤️ いいね
+            <FavoriteIcon sx={{ fontSize: 14, verticalAlign: 'middle', marginRight: '4px', color: '#ef4444' }} />いいね
           </button>
           <button
             onClick={() => setActiveTab('map')}
@@ -585,9 +591,24 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
                             post.visibility === 'followers' ? 'フォロワーのみ公開' :
                               '自分のみ公開'
                         }>
-                          {post.visibility === 'public' && '🌐'}
-                          {post.visibility === 'followers' && '👥'}
-                          {post.visibility === 'private' && '🔒'}
+                          {post.visibility === 'public' && (
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+                              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            </svg>
+                          )}
+                          {post.visibility === 'followers' && (
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                          )}
+                          {post.visibility === 'private' && (
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                          )}
                         </span>
                       </div>
                     </div>
@@ -615,14 +636,18 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
 
                     <div className="grid-post-footer-row">
                       <div className="grid-post-location">
-                        {post.city ? `📍 ${post.city.prefecture?.name} ${post.city.name}` :
-                          post.custom_location ? `📍 ${post.custom_location}` : ''}
+                        {post.city ? (
+                          <><svg width="13" height="13" viewBox="0 0 24 24" fill="#ef4444" stroke="none" style={{ marginRight: '3px', verticalAlign: 'middle', flexShrink: 0 }}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3" fill="#fff"/></svg>{post.city.prefecture?.name} {post.city.name}</>
+                        ) : post.custom_location ? (
+                          <><svg width="13" height="13" viewBox="0 0 24 24" fill="#ef4444" stroke="none" style={{ marginRight: '3px', verticalAlign: 'middle', flexShrink: 0 }}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3" fill="#fff"/></svg>{post.custom_location}</>
+                        ) : ''}
                       </div>
 
                       <div className="grid-post-actions-right">
                         {(post.photos_count > 0 || post.photos?.length > 0 || post.total_photos > 0 || post.first_photo_url) && (
                           <span className="grid-photo-count">
-                            📷 {post.photos_count || post.photos?.length || post.total_photos || 1}
+                            <PhotoCameraIcon sx={{ fontSize: 13, verticalAlign: 'middle', marginRight: '2px' }} />
+                            {post.photos_count || post.photos?.length || post.total_photos || 1}
                           </span>
                         )}
 
@@ -651,7 +676,9 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
 
         {activeTab === 'likes' && (
           <>
-            <div className="posts-section-title">❤️ いいねした投稿</div>
+            <div className="posts-section-title">
+              <FavoriteIcon sx={{ fontSize: 16, verticalAlign: 'middle', marginRight: '4px', color: '#ef4444' }} />いいねした投稿
+            </div>
 
             {likedPostsLoading ? (
               <div className="posts-loading">
@@ -708,8 +735,11 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
 
                     <div className="grid-post-footer-row">
                       <div className="grid-post-location">
-                        {post.city ? `📍 ${post.city.prefecture?.name} ${post.city.name}` :
-                          post.custom_location ? `📍 ${post.custom_location}` : ''}
+                        {post.city ? (
+                          <><svg width="13" height="13" viewBox="0 0 24 24" fill="#ef4444" stroke="none" style={{ marginRight: '3px', verticalAlign: 'middle', flexShrink: 0 }}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3" fill="#fff"/></svg>{post.city.prefecture?.name} {post.city.name}</>
+                        ) : post.custom_location ? (
+                          <><svg width="13" height="13" viewBox="0 0 24 24" fill="#ef4444" stroke="none" style={{ marginRight: '3px', verticalAlign: 'middle', flexShrink: 0 }}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3" fill="#fff"/></svg>{post.custom_location}</>
+                        ) : ''}
                       </div>
                       <div className="grid-post-actions-right">
                         <div onClick={(e) => e.stopPropagation()}>

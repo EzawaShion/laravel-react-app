@@ -1,5 +1,5 @@
 # Project Context
-- App Name: 旅行プランナーアプリ (Travel Planner App)
+- App Name: TravelMapアプリ (Travel Planner App)
 - Description: 旅行の計画、記録、共有ができるプラットフォーム。
 - Key Features: 投稿（旅行記）、検索（地図・フィルター）、プロフィール、お気に入り。
 - Reference: 詳細は `画面遷移図.md` を常に参照すること。

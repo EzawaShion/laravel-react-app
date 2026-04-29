@@ -129,7 +129,11 @@ function MapPostGrid({
 
                 <div className="grid-post-footer-row">
                   <div className="grid-post-location">
-                    📍 {post.location_name}
+                    <svg width="12" height="12" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '3px', verticalAlign: 'middle', flexShrink: 0, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' }}>
+                      <path d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 16 9 16s9-9.25 9-16c0-4.97-4.03-9-9-9z" fill="#ef4444"/>
+                      <circle cx="12" cy="9" r="3.5" fill="#ffffff"/>
+                    </svg>
+                    {post.location_name}
                   </div>
 
                   <div className="grid-post-actions-right">
@@ -137,7 +141,11 @@ function MapPostGrid({
                     {/* <span className="comment-count">💬 0</span> */}
                     {(post.photos_count > 0 || post.photos?.length > 0 || post.first_photo_url) && (
                       <span className="grid-photo-count">
-                        📷 {post.photos_count || post.photos?.length || 1}
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '3px', verticalAlign: 'middle', flexShrink: 0 }}>
+                          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                          <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                        {post.photos_count || post.photos?.length || 1}
                       </span>
                     )}
 

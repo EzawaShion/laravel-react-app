@@ -31,7 +31,7 @@ class EmailVerification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'メールアドレスの確認 - 旅行プランナー',
+            subject: 'メールアドレスの確認 - TravelMap',
         );
     }
 

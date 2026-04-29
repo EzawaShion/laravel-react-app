@@ -53,7 +53,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>旅行プランナー</h1>
+        <h1>TravelMap</h1>
         <p>パスワードリセット</p>
     </div>
     
@@ -88,7 +88,7 @@
     </div>
     
     <div class="footer">
-        <p>このメールは旅行プランナーから送信されました。</p>
+        <p>このメールはTravelMapから送信されました。</p>
         <p>このメールに心当たりがない場合は、無視していただいて構いません。</p>
     </div>
 </body>

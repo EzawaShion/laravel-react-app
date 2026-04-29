@@ -240,13 +240,20 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView, savedScro
                 <div className="post-location">
                   {post.city && (
                     <span className="location-text">
-                      📍 {post.city.name}
-                      {post.city.prefecture && ` (${post.city.prefecture.name})`}
+                      <svg width="12" height="12" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '3px', verticalAlign: 'middle', flexShrink: 0, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' }}>
+                        <path d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 16 9 16s9-9.25 9-16c0-4.97-4.03-9-9-9z" fill="#ef4444"/>
+                        <circle cx="12" cy="9" r="3.5" fill="#ffffff"/>
+                      </svg>
+                      {post.city.name}{post.city.prefecture && ` (${post.city.prefecture.name})`}
                     </span>
                   )}
                   {post.custom_location && (
                     <span className="custom-location">
-                      📍 {post.custom_location}
+                      <svg width="12" height="12" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '3px', verticalAlign: 'middle', flexShrink: 0, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' }}>
+                        <path d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 16 9 16s9-9.25 9-16c0-4.97-4.03-9-9-9z" fill="#ef4444"/>
+                        <circle cx="12" cy="9" r="3.5" fill="#ffffff"/>
+                      </svg>
+                      {post.custom_location}
                     </span>
                   )}
                 </div>
