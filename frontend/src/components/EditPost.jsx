@@ -38,7 +38,7 @@ function EditPost({ post, onBack, onUpdateSuccess }) {
   // 都道府県データを取得
   const fetchPrefectures = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/prefectures');
+      const response = await fetch('/api/prefectures');
       const data = await response.json();
       if (response.ok) {
         setPrefectures(data.prefectures);
@@ -51,7 +51,7 @@ function EditPost({ post, onBack, onUpdateSuccess }) {
   // 市区町村データを取得
   const fetchCities = async (prefectureId) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/cities/${prefectureId}`);
+      const response = await fetch(`/api/cities/${prefectureId}`);
       const data = await response.json();
       if (response.ok) {
         setCities(data.cities);
@@ -82,7 +82,7 @@ function EditPost({ post, onBack, onUpdateSuccess }) {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/posts/${post.id}`, {
+      const response = await fetch(`/api/posts/${post.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

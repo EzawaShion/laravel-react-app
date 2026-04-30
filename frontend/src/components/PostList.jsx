@@ -23,7 +23,7 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView, savedScro
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('http://localhost:8000/api/posts', {
+      const response = await fetch('/api/posts', {
         headers
       });
 
@@ -47,7 +47,7 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView, savedScro
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch(`http://localhost:8000/api/follow/status/${userId}`, {
+      const response = await fetch(`/api/follow/status/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

@@ -39,7 +39,7 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/users/search', {
+      const response = await fetch('/api/users/search', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -92,7 +92,7 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
         return;
       }
 
-      const response = await fetch(`http://localhost:8000/api/users/${userId}/follow`, {
+      const response = await fetch(`/api/users/${userId}/follow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -195,12 +195,12 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
                     className="us-user-info"
                   >
                     <img
-                      src={user.avatar_url || 'http://localhost:8000/images/default-avatar.svg'}
+                      src={user.avatar_url || '/images/default-avatar.svg'}
                       alt={user.name}
                       className="us-user-avatar"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'http://localhost:8000/images/default-avatar.svg';
+                        e.target.src = '/images/default-avatar.svg';
                       }}
                     />
                     <div className="us-user-details">

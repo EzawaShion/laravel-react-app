@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { toPng } from 'html-to-image';
 import './JapanMapSimple.css';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = '';
 
 
 

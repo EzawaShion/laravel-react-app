@@ -21,7 +21,7 @@ function FollowButton({ userId, initialIsFollowing = false, onFollowChange }) {
       const token = localStorage.getItem('token');
       const endpoint = isFollowing ? '/unfollow' : '/follow';
       
-      const response = await fetch(`http://localhost:8000/api${endpoint}`, {
+      const response = await fetch(`/api${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

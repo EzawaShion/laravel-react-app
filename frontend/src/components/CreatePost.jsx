@@ -51,7 +51,7 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload, initialData }) {
   // 都道府県一覧を取得
   const fetchPrefectures = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/prefectures');
+      const response = await fetch('/api/prefectures');
       const data = await response.json();
 
       if (data.success) {
@@ -66,7 +66,7 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload, initialData }) {
   const fetchCities = async (prefectureId) => {
     setLoadingLocations(true);
     try {
-      const response = await fetch(`http://localhost:8000/api/cities/${prefectureId}`);
+      const response = await fetch(`/api/cities/${prefectureId}`);
       const data = await response.json();
 
       if (data.success) {

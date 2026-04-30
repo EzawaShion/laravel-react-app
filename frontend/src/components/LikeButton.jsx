@@ -20,7 +20,7 @@ function LikeButton({ postId, initialIsLiked = false, initialLikesCount = 0 }) {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:8000/api/like`, {
+      const response = await fetch(`/api/like`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

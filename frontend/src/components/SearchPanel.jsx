@@ -62,7 +62,7 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
         }
       });
 
-      const url = `http://localhost:8000/api/posts/search?${queryParams.toString()}`;
+      const url = `/api/posts/search?${queryParams.toString()}`;
       console.log('リアルタイム検索URL:', url);
 
       const token = localStorage.getItem('token');
@@ -106,7 +106,7 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
 
   const fetchPrefectures = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/prefectures');
+      const response = await fetch('/api/prefectures');
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -120,7 +120,7 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
 
   const fetchCities = async (prefectureId) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/cities/${prefectureId}`);
+      const response = await fetch(`/api/cities/${prefectureId}`);
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -166,7 +166,7 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
         }
       });
 
-      const url = `http://localhost:8000/api/posts/search?${queryParams.toString()}`;
+      const url = `/api/posts/search?${queryParams.toString()}`;
       console.log('検索URL:', url);
       console.log('検索パラメータ:', searchParams);
 

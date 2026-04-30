@@ -34,7 +34,7 @@ function SignUp({ onSignUpSuccess, onSwitchToLogin, onSwitchToEmailVerificationR
 
     try {
       // バックエンドのAPIエンドポイントにPOSTリクエストを送信
-      const response = await fetch('http://localhost:8000/api/register', {
+      const response = await fetch('/api/register', {
         // POSTリクエストを送信
         method: 'POST',
         // ヘッダーを設定
@@ -76,7 +76,7 @@ function SignUp({ onSignUpSuccess, onSwitchToLogin, onSwitchToEmailVerificationR
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:8000/auth/google';
+    window.location.href = '/auth/google';
   };
 
   return (

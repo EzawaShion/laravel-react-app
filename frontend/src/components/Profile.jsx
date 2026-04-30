@@ -110,7 +110,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/profile', {
+      const response = await fetch('/api/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -121,7 +121,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
 
         // 画像URLを絶対URLに変換
         if (data.user.profile_image_url && !data.user.profile_image_url.startsWith('http')) {
-          data.user.profile_image_url = 'http://localhost:8000' + data.user.profile_image_url;
+          data.user.profile_image_url = '' + data.user.profile_image_url;
         }
 
         setUser(data.user);
@@ -150,7 +150,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
   const fetchFollowStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/profile', {
+      const response = await fetch('/api/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -179,7 +179,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
       }
 
       // 自分の投稿を取得する専用エンドポイントを使用
-      const response = await fetch('http://localhost:8000/api/posts/my', {
+      const response = await fetch('/api/posts/my', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -209,7 +209,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
     try {
       setLikedPostsLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/like/my', {
+      const response = await fetch('/api/like/my', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -326,7 +326,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
       }
       console.log('editForm state:', editForm);
 
-      const response = await fetch('http://localhost:8000/api/profile', {
+      const response = await fetch('/api/profile', {
         method: 'POST', // PUTからPOSTに変更
         headers: {
           'Authorization': `Bearer ${token}`,

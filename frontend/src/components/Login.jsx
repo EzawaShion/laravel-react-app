@@ -31,7 +31,7 @@ function Login({ onLoginSuccess, onSwitchToSignUp, onSwitchToForgotPassword }) {
     setErrors({});
 
     try {
-      const response = await fetch('http://localhost:8000/api/login', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ function Login({ onLoginSuccess, onSwitchToSignUp, onSwitchToForgotPassword }) {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:8000/auth/google';
+    window.location.href = '/auth/google';
   };
 
   return (

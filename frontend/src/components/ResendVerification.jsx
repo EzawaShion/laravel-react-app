@@ -14,7 +14,7 @@ function ResendVerification({ onBackToLogin }) {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/email/verification-notification', {
+      const response = await fetch('/api/email/verification-notification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

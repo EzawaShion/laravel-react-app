@@ -110,7 +110,7 @@ function PhotoCarousel({ photos, onClose, initialIndex = 0 }) {
 
           <div className="main-photo-container">
             <img
-              src={`http://localhost:8000/storage/${currentPhoto.file_path}`}
+              src={`/storage/${currentPhoto.file_path}`}
               alt={currentPhoto.title || `写真 ${currentIndex + 1}`}
               className="main-photo"
             />
@@ -136,7 +136,7 @@ function PhotoCarousel({ photos, onClose, initialIndex = 0 }) {
                 onClick={() => handleThumbnailClick(index)}
               >
                 <img
-                  src={`http://localhost:8000/storage/${photo.file_path}`}
+                  src={`/storage/${photo.file_path}`}
                   alt={`サムネイル ${index + 1}`}
                   className="thumbnail-image"
                 />

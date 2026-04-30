@@ -41,7 +41,7 @@ function ResetPassword({ onResetSuccess }) {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/password/reset', {
+      const response = await fetch('/api/password/reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

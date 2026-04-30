@@ -179,7 +179,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   // 都道府県一覧を取得
   const fetchPrefectures = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/prefectures');
+      const response = await fetch('/api/prefectures');
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -194,7 +194,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   // 市町村一覧を取得
   const fetchCities = async (prefectureId) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/cities/${prefectureId}`);
+      const response = await fetch(`/api/cities/${prefectureId}`);
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -224,7 +224,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
         return;
       }
 
-      const url = `http://localhost:8000/api/posts/search?${queryParams.toString()}`;
+      const url = `/api/posts/search?${queryParams.toString()}`;
       console.log('リアルタイム検索URL:', url);
 
       const token = localStorage.getItem('token');
@@ -319,7 +319,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/posts', {
+      const response = await fetch('/api/posts', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

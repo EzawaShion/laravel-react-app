@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './CommentSection.css';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = '';
 
 const CommentSection = ({ postId, userId, token }) => {
   const [comments, setComments] = useState([]);

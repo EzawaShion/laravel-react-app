@@ -21,8 +21,8 @@ function FollowList({ userId, type, onClose, onUserClick }) {
 
       const token = localStorage.getItem('token');
       const endpoint = type === 'followers'
-        ? `http://localhost:8000/api/follow/followers/${userId}?page=${page}`
-        : `http://localhost:8000/api/follow/followings/${userId}?page=${page}`;
+        ? `/api/follow/followers/${userId}?page=${page}`
+        : `/api/follow/followings/${userId}?page=${page}`;
 
       const response = await fetch(endpoint, {
         headers: {
@@ -109,12 +109,12 @@ function FollowList({ userId, type, onClose, onUserClick }) {
                 <div key={user.id} className="follow-user-card">
                   <div className="follow-user-info" onClick={() => handleUserClick(user.id)}>
                     <img
-                      src={user.profile_image_url || 'http://localhost:8000/images/default-avatar.svg'}
+                      src={user.profile_image_url || '/images/default-avatar.svg'}
                       alt={user.name}
                       className="follow-user-avatar"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'http://localhost:8000/images/default-avatar.svg';
+                        e.target.src = '/images/default-avatar.svg';
                       }}
                     />
                     <div className="follow-user-details">

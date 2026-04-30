@@ -106,7 +106,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
       setError('');
 
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/users/${userId}`, {
+      const response = await fetch(`/api/users/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -117,7 +117,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
 
         // 画像URLを絶対URLに変換
         if (data.user.profile_image_url && !data.user.profile_image_url.startsWith('http')) {
-          data.user.profile_image_url = 'http://localhost:8000' + data.user.profile_image_url;
+          data.user.profile_image_url = '' + data.user.profile_image_url;
         }
 
         setUser(data.user);
@@ -138,7 +138,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
   const fetchFollowStatus = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/follow/status/${userId}`, {
+      const response = await fetch(`/api/follow/status/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -179,7 +179,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
       setPostsLoading(true);
 
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/posts', {
+      const response = await fetch('/api/posts', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -207,7 +207,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
       setLikedPostsLoading(true);
       const token = localStorage.getItem('token');
       // 全投稿を取得してこのユーザーがいいねしたものをフィルタリング
-      const response = await fetch('http://localhost:8000/api/posts', {
+      const response = await fetch('/api/posts', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

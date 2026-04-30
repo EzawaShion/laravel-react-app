@@ -19,7 +19,7 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel, isFromCreatePost, draf
     const fetchCount = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:8000/api/photos/post/${postId}`, {
+        const res = await fetch(`/api/photos/post/${postId}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const data = await res.json();
@@ -159,7 +159,7 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel, isFromCreatePost, draf
       let currentPostId = postId;
 
       if (!currentPostId && draftPost) {
-        const res = await fetch('http://localhost:8000/api/posts', {
+        const res = await fetch('/api/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify(draftPost),
@@ -181,7 +181,7 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel, isFromCreatePost, draf
       const controller = new AbortController();
       const tid = setTimeout(() => controller.abort(), 5 * 60 * 1000);
 
-      const res = await fetch('http://localhost:8000/api/photos/upload', {
+      const res = await fetch('/api/photos/upload', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData,

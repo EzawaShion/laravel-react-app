@@ -14,7 +14,7 @@ function ForgotPassword({ onBackToLogin, onSwitchToResendVerification }) {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/password/email', {
+      const response = await fetch('/api/password/email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

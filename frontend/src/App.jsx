@@ -220,7 +220,7 @@ function App() {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch('http://localhost:8000/api/hello')
+      const response = await fetch('/api/hello')
       if (!response.ok) {
         throw new Error('APIリクエストに失敗しました')
       }
@@ -461,7 +461,7 @@ function App() {
   const handleSwitchToProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/profile', {
+      const response = await fetch('/api/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
