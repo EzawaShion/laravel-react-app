@@ -14,6 +14,8 @@ class MasterDataSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        
         $this->command->info('Inserting Prefectures...');
         
         $prefecturesJson = file_get_contents(__DIR__ . '/prefectures.json');
@@ -40,6 +42,8 @@ class MasterDataSeeder extends Seeder
         }
         
         $this->command->info('Inserted ' . count($cities) . ' Cities.');
+        
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         
         $this->command->info('Master Data Seeding Completed Successfully!');
     }
