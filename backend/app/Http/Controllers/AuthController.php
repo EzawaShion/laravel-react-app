@@ -165,8 +165,7 @@ class AuthController extends Controller
             $token = $user->createToken('auth_token')->plainTextToken;
             
             // フロントエンドにリダイレクト
-            return redirect()->away(
-                'http://localhost:5173/auth/callback?' . 
+            return redirect()->to('/?' . 
                 http_build_query([
                     'token' => $token,
                     'user' => json_encode($user)
@@ -174,7 +173,7 @@ class AuthController extends Controller
             );
             
         } catch (\Exception $e) {
-            return redirect()->away('http://localhost:5173/auth/error');
+            return redirect()->to('/?error=google_auth_failed');
         }
     }
 
@@ -186,16 +185,16 @@ class AuthController extends Controller
         $user = User::findOrFail($id);
 
         if (!hash_equals(sha1($user->email), $hash)) {
-            return redirect()->away('http://localhost:5173/auth/error?message=invalid_verification');
+            return redirect()->to('/?message=invalid_verification');
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->away('http://localhost:5173/auth/error?message=already_verified');
+            return redirect()->to('/?message=already_verified');
         }
 
         $user->markEmailAsVerified();
 
-        return redirect()->away('http://localhost:5173/auth/success?message=email_verified');
+        return redirect()->to('/?message=email_verified');
     }
 
     /**
