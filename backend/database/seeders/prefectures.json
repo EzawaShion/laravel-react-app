@@ -1,0 +1,472 @@
+[
+    {
+        "id": 1,
+        "name": "北海道",
+        "code": "10006",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "43.06432500",
+        "longitude": "141.34687800",
+        "capital_city_id": 1
+    },
+    {
+        "id": 2,
+        "name": "青森県",
+        "code": "20001",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "40.82444000",
+        "longitude": "140.74000500",
+        "capital_city_id": null
+    },
+    {
+        "id": 3,
+        "name": "岩手県",
+        "code": "30007",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "39.70357000",
+        "longitude": "141.15265200",
+        "capital_city_id": null
+    },
+    {
+        "id": 4,
+        "name": "宮城県",
+        "code": "40002",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "38.26893000",
+        "longitude": "140.87214700",
+        "capital_city_id": null
+    },
+    {
+        "id": 5,
+        "name": "秋田県",
+        "code": "50008",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "39.71862600",
+        "longitude": "140.10238100",
+        "capital_city_id": null
+    },
+    {
+        "id": 6,
+        "name": "山形県",
+        "code": "60003",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "38.24055000",
+        "longitude": "140.36335800",
+        "capital_city_id": null
+    },
+    {
+        "id": 7,
+        "name": "福島県",
+        "code": "70009",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "37.75001900",
+        "longitude": "140.46773700",
+        "capital_city_id": null
+    },
+    {
+        "id": 8,
+        "name": "茨城県",
+        "code": "80004",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "36.34173700",
+        "longitude": "140.44682400",
+        "capital_city_id": null
+    },
+    {
+        "id": 9,
+        "name": "栃木県",
+        "code": "90000",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "36.56583200",
+        "longitude": "139.88362000",
+        "capital_city_id": null
+    },
+    {
+        "id": 10,
+        "name": "群馬県",
+        "code": "100005",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "36.39119400",
+        "longitude": "139.06088300",
+        "capital_city_id": null
+    },
+    {
+        "id": 11,
+        "name": "埼玉県",
+        "code": "110001",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "35.85703300",
+        "longitude": "139.64901200",
+        "capital_city_id": null
+    },
+    {
+        "id": 12,
+        "name": "千葉県",
+        "code": "120006",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "35.60456000",
+        "longitude": "140.12315400",
+        "capital_city_id": null
+    },
+    {
+        "id": 13,
+        "name": "東京都",
+        "code": "130001",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "35.68944400",
+        "longitude": "139.69167000",
+        "capital_city_id": null
+    },
+    {
+        "id": 14,
+        "name": "神奈川県",
+        "code": "140007",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "35.44777800",
+        "longitude": "139.64250200",
+        "capital_city_id": null
+    },
+    {
+        "id": 15,
+        "name": "新潟県",
+        "code": "150002",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "37.90245100",
+        "longitude": "139.02324500",
+        "capital_city_id": null
+    },
+    {
+        "id": 16,
+        "name": "富山県",
+        "code": "160008",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "36.69527100",
+        "longitude": "137.21133300",
+        "capital_city_id": null
+    },
+    {
+        "id": 17,
+        "name": "石川県",
+        "code": "170003",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "36.59460600",
+        "longitude": "136.62566900",
+        "capital_city_id": null
+    },
+    {
+        "id": 18,
+        "name": "福井県",
+        "code": "180009",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "36.06523300",
+        "longitude": "136.22177500",
+        "capital_city_id": null
+    },
+    {
+        "id": 19,
+        "name": "山梨県",
+        "code": "190004",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "35.66388900",
+        "longitude": "138.56833500",
+        "capital_city_id": null
+    },
+    {
+        "id": 20,
+        "name": "長野県",
+        "code": "200000",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "36.65130600",
+        "longitude": "138.18090400",
+        "capital_city_id": null
+    },
+    {
+        "id": 21,
+        "name": "岐阜県",
+        "code": "210005",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "35.39117400",
+        "longitude": "136.72365700",
+        "capital_city_id": null
+    },
+    {
+        "id": 22,
+        "name": "静岡県",
+        "code": "220001",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "34.97694400",
+        "longitude": "138.38305600",
+        "capital_city_id": null
+    },
+    {
+        "id": 23,
+        "name": "愛知県",
+        "code": "230006",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "35.18027800",
+        "longitude": "136.90666700",
+        "capital_city_id": null
+    },
+    {
+        "id": 24,
+        "name": "三重県",
+        "code": "240001",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "34.73027800",
+        "longitude": "136.50861100",
+        "capital_city_id": null
+    },
+    {
+        "id": 25,
+        "name": "滋賀県",
+        "code": "250007",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "35.00444400",
+        "longitude": "135.86833300",
+        "capital_city_id": null
+    },
+    {
+        "id": 26,
+        "name": "京都府",
+        "code": "260002",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "35.02124200",
+        "longitude": "135.75561300",
+        "capital_city_id": null
+    },
+    {
+        "id": 27,
+        "name": "大阪府",
+        "code": "270008",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "34.68638900",
+        "longitude": "135.52000000",
+        "capital_city_id": null
+    },
+    {
+        "id": 28,
+        "name": "兵庫県",
+        "code": "280003",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "34.69125700",
+        "longitude": "135.18307800",
+        "capital_city_id": null
+    },
+    {
+        "id": 29,
+        "name": "奈良県",
+        "code": "290009",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "34.68527800",
+        "longitude": "135.83277800",
+        "capital_city_id": null
+    },
+    {
+        "id": 30,
+        "name": "和歌山県",
+        "code": "300004",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "34.22611100",
+        "longitude": "135.16750000",
+        "capital_city_id": null
+    },
+    {
+        "id": 31,
+        "name": "鳥取県",
+        "code": "310000",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "35.50344900",
+        "longitude": "134.23826100",
+        "capital_city_id": null
+    },
+    {
+        "id": 32,
+        "name": "島根県",
+        "code": "320005",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "35.47229300",
+        "longitude": "133.05052000",
+        "capital_city_id": null
+    },
+    {
+        "id": 33,
+        "name": "岡山県",
+        "code": "330001",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "34.66173900",
+        "longitude": "133.93503200",
+        "capital_city_id": null
+    },
+    {
+        "id": 34,
+        "name": "広島県",
+        "code": "340006",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "34.39655800",
+        "longitude": "132.45964600",
+        "capital_city_id": null
+    },
+    {
+        "id": 35,
+        "name": "山口県",
+        "code": "350001",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "34.18583300",
+        "longitude": "131.47138900",
+        "capital_city_id": null
+    },
+    {
+        "id": 36,
+        "name": "徳島県",
+        "code": "360007",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "34.06571000",
+        "longitude": "134.55941900",
+        "capital_city_id": null
+    },
+    {
+        "id": 37,
+        "name": "香川県",
+        "code": "370002",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "34.34008800",
+        "longitude": "134.04322400",
+        "capital_city_id": null
+    },
+    {
+        "id": 38,
+        "name": "愛媛県",
+        "code": "380008",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "33.84166700",
+        "longitude": "132.76611100",
+        "capital_city_id": null
+    },
+    {
+        "id": 39,
+        "name": "高知県",
+        "code": "390003",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "33.55972200",
+        "longitude": "133.53111100",
+        "capital_city_id": null
+    },
+    {
+        "id": 40,
+        "name": "福岡県",
+        "code": "400009",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "33.60638900",
+        "longitude": "130.41805600",
+        "capital_city_id": null
+    },
+    {
+        "id": 41,
+        "name": "佐賀県",
+        "code": "410004",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "33.24932200",
+        "longitude": "130.29879900",
+        "capital_city_id": null
+    },
+    {
+        "id": 42,
+        "name": "長崎県",
+        "code": "420000",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "32.75004000",
+        "longitude": "129.86725100",
+        "capital_city_id": null
+    },
+    {
+        "id": 43,
+        "name": "熊本県",
+        "code": "430005",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "32.78972200",
+        "longitude": "130.74166700",
+        "capital_city_id": null
+    },
+    {
+        "id": 44,
+        "name": "大分県",
+        "code": "440001",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "33.23805600",
+        "longitude": "131.61250000",
+        "capital_city_id": null
+    },
+    {
+        "id": 45,
+        "name": "宮崎県",
+        "code": "450006",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "31.91111100",
+        "longitude": "131.42388900",
+        "capital_city_id": null
+    },
+    {
+        "id": 46,
+        "name": "鹿児島県",
+        "code": "460001",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "31.56027800",
+        "longitude": "130.55805600",
+        "capital_city_id": null
+    },
+    {
+        "id": 47,
+        "name": "沖縄県",
+        "code": "470007",
+        "created_at": null,
+        "updated_at": "2025-09-21 03:23:32",
+        "latitude": "26.21244500",
+        "longitude": "127.68092200",
+        "capital_city_id": null
+    }
+]
