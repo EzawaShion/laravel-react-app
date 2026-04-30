@@ -165,7 +165,7 @@ class AuthController extends Controller
             $token = $user->createToken('auth_token')->plainTextToken;
             
             // フロントエンドにリダイレクト
-            return redirect()->to('/?' . 
+            return redirect()->to(config('app.frontend_url') . '/?' . 
                 http_build_query([
                     'token' => $token,
                     'user' => json_encode($user)
@@ -173,7 +173,7 @@ class AuthController extends Controller
             );
             
         } catch (\Exception $e) {
-            return redirect()->to('/?error=google_auth_failed');
+            return redirect()->to(config('app.frontend_url') . '/?error=google_auth_failed');
         }
     }
 
@@ -185,16 +185,16 @@ class AuthController extends Controller
         $user = User::findOrFail($id);
 
         if (!hash_equals(sha1($user->email), $hash)) {
-            return redirect()->to('/?message=invalid_verification');
+            return redirect()->to(config('app.frontend_url') . '/?message=invalid_verification');
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->to('/?message=already_verified');
+            return redirect()->to(config('app.frontend_url') . '/?message=already_verified');
         }
 
         $user->markEmailAsVerified();
 
-        return redirect()->to('/?message=email_verified');
+        return redirect()->to(config('app.frontend_url') . '/?message=email_verified');
     }
 
     /**
