@@ -739,6 +739,13 @@ function App() {
           onNavigateToCreatePost={handleNavigateToCreatePost}
           onNavigateToProfile={handleNavigateToProfile}
           onNavigateToUserSearch={handleNavigateToUserSearch}
+          currentPage={
+            showUserSearch ? 'userSearch'
+            : showProfile ? 'profile'
+            : showCreatePost ? 'createPost'
+            : (!showPostList && !showPostDetail && !showEditPost && !showPhotoUpload && !showUserProfile) ? 'home'
+            : null
+          }
         />
       </div>
     );

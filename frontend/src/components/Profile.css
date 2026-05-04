@@ -763,7 +763,6 @@
 @media (max-width: 768px) {
   .profile-container {
     padding: var(--spacing-md);
-    padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }
 
   .profile-header {
@@ -1009,7 +1008,8 @@
   padding: 4px;
   border-radius: var(--radius-md);
   transition: background-color 0.2s ease;
-  margin-right: auto; /* 左寄せを強制 */
+  margin-right: auto;
+  /* 左寄せを強制 */
 }
 
 .grid-post-user:hover {
@@ -1127,7 +1127,7 @@
   .posts-grid {
     grid-template-columns: 1fr !important;
   }
-  
+
   .profile-posts-section {
     background-color: white;
   }

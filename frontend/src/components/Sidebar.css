@@ -1,8 +1,8 @@
-.global-sidebar {
+/* ===== デスクトップ用サイドバー（769px以上） ===== */
+.global-sidebar.desktop-only {
   position: fixed;
   left: 10px;
   top: 170px;
-  /* Below Leaflet zoom controls and header */
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -11,6 +11,12 @@
   background: transparent;
   width: auto;
   box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .global-sidebar.desktop-only {
+    display: none;
+  }
 }
 
 .sidebar-action-button {
@@ -28,7 +34,6 @@
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: visible;
-  /* Changed to visible for tooltip */
 }
 
 .sidebar-action-button:hover {
@@ -37,6 +42,18 @@
   border-color: var(--primary-color);
   box-shadow: var(--shadow-lg);
 }
+
+/* アクティブ（現在のページ）状態 */
+.sidebar-action-button.is-active {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.sidebar-action-button.is-active svg {
+  color: var(--primary-color);
+}
+
 
 .sidebar-icon {
   font-size: 1.4rem;
@@ -91,77 +108,138 @@
   border-color: transparent var(--text-primary) transparent transparent;
 }
 
+/* ===== モバイル用FABメニュー（768px以下） ===== */
+.mobile-fab-container {
+  display: none;
+}
+
 @media (max-width: 768px) {
-  .global-sidebar {
-    top: auto;
-    bottom: 0px !important;
-    /* Force to bottom of viewport */
-    left: 0;
+  .mobile-fab-container {
+    display: block;
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    z-index: 1000;
+  }
+
+  /* 背景オーバーレイ */
+  .mobile-fab-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(2px);
+    z-index: -1;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* 展開メニュー全体 */
+  .mobile-fab-menu {
+    position: absolute;
+    bottom: 68px;
     right: 0;
-    flex-direction: row;
-    gap: 0;
-    background: var(--surface-color);
-    padding: 6px 0;
-    padding-bottom: env(safe-area-inset-bottom, 12px);
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
-    border-top: 1px solid var(--border-color);
-    width: 100%;
-    margin: 0;
-    justify-content: center;
-    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    pointer-events: none;
   }
 
-  .sidebar-action-button {
-    flex: 1;
-    min-width: 0;
-    height: 52px;
-    border-radius: 0;
-    background: transparent;
+  /* メニューアイテム（ラベル + アイコン） */
+  .mobile-fab-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
     border: none;
-    box-shadow: none;
-    flex-direction: column;
-    gap: 2px;
-    overflow: hidden;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0;
+    transform: translateY(16px) scale(0.9);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+  }
+
+  .mobile-fab-menu.open .mobile-fab-menu-item {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .mobile-fab-menu-label {
+    background: rgba(30, 30, 40, 0.88);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+
+  .mobile-fab-menu-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--primary-color, #4f46e5);
+    flex-shrink: 0;
+    transition: background 0.2s ease, transform 0.2s ease;
   }
 
-  .sidebar-fab-wrapper {
-    flex: 1;
+  /* アクティブ（現在のページ）のアイコン強調 */
+  .mobile-fab-menu-icon.active {
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
+  }
+
+  .mobile-fab-menu-item.is-active .mobile-fab-menu-label {
+    background: rgba(79, 70, 229, 0.85);
+  }
+
+
+  .mobile-fab-menu-item:active .mobile-fab-menu-icon {
+    transform: scale(0.92);
+    background: var(--surface-hover, #f1f5f9);
+  }
+
+  /* メインFABボタン */
+  .mobile-fab-trigger {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
   }
 
-  .sidebar-fab-wrapper .MuiFab-root {
-    width: 36px;
-    height: 36px;
-    min-height: 36px;
+  .mobile-fab-trigger:active {
+    transform: scale(0.92);
   }
 
-  .sidebar-action-button:hover,
-  .sidebar-action-button:active {
-    transform: none;
-    background: var(--surface-hover);
+  .mobile-fab-trigger.open {
+    transform: rotate(90deg);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
   }
 
-  .sidebar-icon {
-    font-size: 1.2rem;
-  }
-
-  .sidebar-text {
-    display: none;
-  }
-
-  .sidebar-text::before {
-    display: none;
-  }
-
-  .sidebar-action-button:hover .sidebar-text,
-  .sidebar-action-button:active .sidebar-text {
-    color: var(--primary-color);
+  .mobile-fab-trigger svg {
+    font-size: 1.6rem;
+    transition: transform 0.3s ease;
   }
 }

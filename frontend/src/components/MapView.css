@@ -340,7 +340,6 @@
 @media (max-width: 768px) {
   .map-view-container {
     height: 100dvh;
-    padding-bottom: 70px;
     /* ボトムナビ用スペース */
   }
 
@@ -1048,10 +1047,5 @@
 
   .show-icon::before {
     content: "∧" !important;
-  }
-
-  /* 画面下部のナビゲーションバーと被らないように余白を追加 */
-  .location-posts-list {
-    padding-bottom: 80px;
   }
 }

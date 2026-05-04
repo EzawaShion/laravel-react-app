@@ -516,7 +516,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
           onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
         >
           <span className="material-icons">
-            {isMobileSearchOpen ? 'close' : 'menu'}
+            {isMobileSearchOpen ? 'close' : 'search'}
           </span>
         </button>
 

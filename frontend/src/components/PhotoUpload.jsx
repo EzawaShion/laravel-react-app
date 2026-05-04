@@ -10,6 +10,12 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel, isFromCreatePost, draf
   const [dragOverId, setDragOverId] = useState(null);
   const dragItemId = useRef(null);
   const fileInputRef = useRef(null);
+  const thumbListRef = useRef(null);
+  // タッチドラッグ用
+  const touchDragId = useRef(null);
+  const touchClone = useRef(null);
+  const touchOffsetX = useRef(0);
+  const touchOffsetY = useRef(0);
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
@@ -118,7 +124,27 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel, isFromCreatePost, draf
     } : it));
   };
 
-  // ドラッグ&ドロップ並び替え
+  // 共通：並び替えロジック
+  const reorderItems = (srcId, targetId) => {
+    if (!srcId || srcId === targetId) return;
+    setItems(prev => {
+      const arr = [...prev];
+      const fromIdx = arr.findIndex(it => it.id === srcId);
+      const toIdx = arr.findIndex(it => it.id === targetId);
+      if (fromIdx < 0 || toIdx < 0) return prev;
+      const [removed] = arr.splice(fromIdx, 1);
+      arr.splice(toIdx, 0, removed);
+      setCurrentIndex(ci => {
+        if (ci === fromIdx) return toIdx;
+        if (fromIdx < toIdx && ci > fromIdx && ci <= toIdx) return ci - 1;
+        if (fromIdx > toIdx && ci >= toIdx && ci < fromIdx) return ci + 1;
+        return ci;
+      });
+      return arr;
+    });
+  };
+
+  // マウス ドラッグ&ドロップ
   const onDragStart = (e, id) => {
     dragItemId.current = id;
     e.dataTransfer.effectAllowed = 'move';
@@ -129,24 +155,86 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel, isFromCreatePost, draf
   };
   const onDrop = (e, targetId) => {
     e.preventDefault();
-    const srcId = dragItemId.current;
-    if (!srcId || srcId === targetId) { setDragOverId(null); return; }
-    setItems(prev => {
-      const arr = [...prev];
-      const fromIdx = arr.findIndex(it => it.id === srcId);
-      const toIdx = arr.findIndex(it => it.id === targetId);
-      const [removed] = arr.splice(fromIdx, 1);
-      arr.splice(toIdx, 0, removed);
-      // currentIndex を追従
-      if (currentIndex === fromIdx) setCurrentIndex(toIdx);
-      else if (fromIdx < toIdx && currentIndex > fromIdx && currentIndex <= toIdx) setCurrentIndex(ci => ci - 1);
-      else if (fromIdx > toIdx && currentIndex >= toIdx && currentIndex < fromIdx) setCurrentIndex(ci => ci + 1);
-      return arr;
-    });
+    reorderItems(dragItemId.current, targetId);
     dragItemId.current = null;
     setDragOverId(null);
   };
   const onDragEnd = () => { dragItemId.current = null; setDragOverId(null); };
+
+  // タッチ ドラッグ&ドロップ
+  const onTouchStart = (e, id) => {
+    const touch = e.touches[0];
+    const el = e.currentTarget;
+    const rect = el.getBoundingClientRect();
+    touchDragId.current = id;
+    touchOffsetX.current = touch.clientX - rect.left;
+    touchOffsetY.current = touch.clientY - rect.top;
+
+    // ゴースト要素を作成
+    const clone = el.cloneNode(true);
+    clone.style.cssText = `
+      position: fixed;
+      top: ${rect.top}px;
+      left: ${rect.left}px;
+      width: ${rect.width}px;
+      height: ${rect.height}px;
+      opacity: 0.75;
+      pointer-events: none;
+      z-index: 99999;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      transition: none;
+    `;
+    document.body.appendChild(clone);
+    touchClone.current = clone;
+    el.style.opacity = '0.3';
+
+    setDragOverId(id);
+  };
+
+  const onTouchMove = (e, id) => {
+    e.preventDefault(); // スクロール抑制
+    const touch = e.touches[0];
+
+    // ゴーストを指に追従させる
+    if (touchClone.current) {
+      touchClone.current.style.top = `${touch.clientY - touchOffsetY.current}px`;
+      touchClone.current.style.left = `${touch.clientX - touchOffsetX.current}px`;
+    }
+
+    // 指の下にある要素を特定
+    if (touchClone.current) touchClone.current.style.display = 'none';
+    const elBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (touchClone.current) touchClone.current.style.display = '';
+
+    // pu-thumb 要素を探す
+    const thumbEl = elBelow?.closest('[data-thumb-id]');
+    const overId = thumbEl?.dataset.thumbId || null;
+    setDragOverId(overId);
+  };
+
+  const onTouchEnd = (e, id) => {
+    const touch = e.changedTouches[0];
+
+    // クローン削除・元要素を戻す
+    if (touchClone.current) {
+      document.body.removeChild(touchClone.current);
+      touchClone.current = null;
+    }
+    e.currentTarget.style.opacity = '';
+
+    // ドロップ先を特定
+    const elBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+    const thumbEl = elBelow?.closest('[data-thumb-id]');
+    const targetId = thumbEl?.dataset.thumbId;
+
+    if (targetId && targetId !== touchDragId.current) {
+      reorderItems(touchDragId.current, targetId);
+    }
+
+    touchDragId.current = null;
+    setDragOverId(null);
+  };
 
   // アップロード
   const handleUpload = async () => {
@@ -293,12 +381,16 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel, isFromCreatePost, draf
               {items.map((it, i) => (
                 <div
                   key={it.id}
+                  data-thumb-id={it.id}
                   className={`pu-thumb ${it.id === dragOverId ? 'drag-over' : ''} ${i === currentIndex ? 'selected' : ''}`}
                   draggable
                   onDragStart={(e) => onDragStart(e, it.id)}
                   onDragOver={(e) => onDragOver(e, it.id)}
                   onDrop={(e) => onDrop(e, it.id)}
                   onDragEnd={onDragEnd}
+                  onTouchStart={(e) => onTouchStart(e, it.id)}
+                  onTouchMove={(e) => onTouchMove(e, it.id)}
+                  onTouchEnd={(e) => onTouchEnd(e, it.id)}
                   onClick={() => setCurrentIndex(i)}
                 >
                   <span className="pu-thumb-num">{i + 1}</span>
