@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiFetch } from '../api';
 import './ResetPassword.css';
 
 function ResetPassword({ onResetSuccess }) {
@@ -41,7 +42,7 @@ function ResetPassword({ onResetSuccess }) {
     setError('');
 
     try {
-      const response = await fetch('/api/password/reset', {
+      const response = await apiFetch('/password/reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

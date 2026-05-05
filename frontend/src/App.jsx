@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import { apiFetch } from './api'
 import './App.css'
 import SignUp from './components/SignUp'
 import Login from './components/Login'
@@ -220,7 +221,7 @@ function App() {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch('/api/hello')
+      const response = await apiFetch('/hello')
       if (!response.ok) {
         throw new Error('APIリクエストに失敗しました')
       }
@@ -460,12 +461,7 @@ function App() {
   // プロフィール画面に切り替え
   const handleSwitchToProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await apiFetch('/profile');
 
       if (response.ok) {
         const data = await response.json();

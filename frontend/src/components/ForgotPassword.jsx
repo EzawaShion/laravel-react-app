@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiFetch } from '../api';
 import './ForgotPassword.css';
 
 function ForgotPassword({ onBackToLogin, onSwitchToResendVerification }) {
@@ -14,7 +15,7 @@ function ForgotPassword({ onBackToLogin, onSwitchToResendVerification }) {
     setError('');
 
     try {
-      const response = await fetch('/api/password/email', {
+      const response = await apiFetch('/password/email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

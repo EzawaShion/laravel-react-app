@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { apiFetch } from '../api';
 import FollowList from './FollowList';
 import JapanMapSimple from './JapanMapSimple';
 import LikeButton from './LikeButton';
@@ -114,12 +115,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await apiFetch('/profile');
 
       if (response.ok) {
         const data = await response.json();
@@ -154,12 +150,7 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
 
   const fetchFollowStats = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await apiFetch('/profile');
 
       if (response.ok) {
         const data = await response.json();
@@ -176,19 +167,17 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
   const fetchMyPosts = async () => {
     try {
       setPostsLoading(true);
-      const token = localStorage.getItem('token');
 
-      if (!token) {
+      if (!localStorage.getItem('token')) {
         setPostsLoading(false);
         return;
       }
 
       // 自分の投稿を取得する専用エンドポイントを使用
-      const response = await fetch('/api/posts/my', {
+      const response = await apiFetch('/posts/my', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -213,12 +202,10 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
   const fetchLikedPosts = async () => {
     try {
       setLikedPostsLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/like/my', {
+      const response = await apiFetch('/like/my', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
       });
       if (response.ok) {
@@ -302,7 +289,6 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
         return;
       }
 
-      const token = localStorage.getItem('token');
       const formData = new FormData();
 
       // テキストフィールド - 空文字列も含めて全て送信
@@ -331,13 +317,10 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
       }
       console.log('editForm state:', editForm);
 
-      const response = await fetch('/api/profile', {
+      const response = await apiFetch('/profile', {
         method: 'POST', // PUTからPOSTに変更
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          // multipart/form-dataの場合はContent-Typeを設定しない
-          // ブラウザが自動的に適切なContent-Typeとboundaryを設定する
-        },
+        // multipart/form-dataの場合はContent-Typeを設定しない
+        // ブラウザが自動的に適切なContent-Typeとboundaryを設定する
         body: formData,
       });
 

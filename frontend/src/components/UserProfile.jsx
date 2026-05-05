@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiFetch } from '../api';
 import FollowButton from './FollowButton';
 import FollowList from './FollowList';
 import LikeButton from './LikeButton';
@@ -105,12 +106,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
       setLoading(true);
       setError('');
 
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/users/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiFetch(`/users/${userId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -137,12 +133,7 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
 
   const fetchFollowStatus = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/follow/status/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiFetch(`/follow/status/${userId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -178,12 +169,10 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
     try {
       setPostsLoading(true);
 
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/posts', {
+      const response = await apiFetch('/posts', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
       });
 
@@ -205,13 +194,11 @@ function UserProfile({ userId, onBack, onSwitchToProfile, onUserClick, onPostCli
   const fetchUserLikedPosts = async () => {
     try {
       setLikedPostsLoading(true);
-      const token = localStorage.getItem('token');
       // 全投稿を取得してこのユーザーがいいねしたものをフィルタリング
-      const response = await fetch('/api/posts', {
+      const response = await apiFetch('/posts', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
       });
       if (response.ok) {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api';
 import './CommentSection.css';
-
-const API_BASE_URL = '';
 
 const CommentSection = ({ postId, userId, token }) => {
   const [comments, setComments] = useState([]);
@@ -10,11 +9,8 @@ const CommentSection = ({ postId, userId, token }) => {
 
   const fetchComments = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/comments`, {
-        headers: {
-          'Accept': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+      const response = await apiFetch(`/posts/${postId}/comments`, {
+        headers: { 'Accept': 'application/json' },
       });
       if (response.ok) {
         const data = await response.json();
@@ -23,7 +19,7 @@ const CommentSection = ({ postId, userId, token }) => {
     } catch (err) {
       console.error('Failed to fetch comments', err);
     }
-  }, [postId, token]);
+  }, [postId]);
 
   useEffect(() => {
     if (postId) {
@@ -37,13 +33,9 @@ const CommentSection = ({ postId, userId, token }) => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/comments`, {
+      const response = await apiFetch(`/posts/${postId}/comments`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ content: newComment }),
       });
 
@@ -65,12 +57,9 @@ const CommentSection = ({ postId, userId, token }) => {
     if (!confirm('コメントを削除しますか？')) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/comments/${commentId}`, {
+      const response = await apiFetch(`/comments/${commentId}`, {
         method: 'DELETE',
-        headers: {
-          'Accept': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: { 'Accept': 'application/json' },
       });
 
       if (response.ok) {

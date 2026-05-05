@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { apiFetch } from '../api';
 import LikeButton from './LikeButton';
 import FollowButton from './FollowButton';
 // import CommentSection from './CommentSection'; // 一時非表示
@@ -113,16 +114,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
-      const headers = {};
-
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(`/api/posts/${postId}`, {
-        headers
-      });
+      const response = await apiFetch(`/posts/${postId}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -151,12 +143,7 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
   // 写真を取得
   const fetchPhotos = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/photos/post/${postId}`, {
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
+      const response = await apiFetch(`/photos/post/${postId}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -170,14 +157,9 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
   // フォロー状態を取得
   const fetchFollowStatus = async (userId) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!localStorage.getItem('token')) return;
 
-      const response = await fetch(`/api/follow/status/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiFetch(`/follow/status/${userId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -200,12 +182,8 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
     }
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/posts/${postId}`, {
+      const response = await apiFetch(`/posts/${postId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
       });
 
       const data = await response.json();
@@ -224,13 +202,11 @@ function PostDetail({ postId, onBackToList, onEditPost, onDeletePost, onPhotoUpl
   // 公開範囲を更新
   const handleUpdateVisibility = async (newVisibility) => {
     try {
-      const token = localStorage.getItem('token');
       // 既存の値を保持しながらvisibilityのみ更新
-      const response = await fetch(`/api/posts/${postId}`, {
+      const response = await apiFetch(`/posts/${postId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           title: post.title,

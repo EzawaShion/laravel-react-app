@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiFetch } from '../api';
 import './UserSearch.css';
 
 // デバウンス用カスタムフック
@@ -38,12 +39,10 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
   const fetchAllUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/users/search', {
+      const response = await apiFetch('/users/search', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         }
       });
 
@@ -92,11 +91,10 @@ function UserSearch({ onNavigateToProfile, onNavigateToUserProfile, onClose }) {
         return;
       }
 
-      const response = await fetch(`/api/users/${userId}/follow`, {
+      const response = await apiFetch(`/users/${userId}/follow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         }
       });
 

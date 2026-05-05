@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { toPng } from 'html-to-image';
+import { apiFetch } from '../api';
 import './JapanMapSimple.css';
-
-const API_BASE_URL = '';
 
 
 
@@ -393,11 +392,9 @@ function JapanMapSimple({ userId }) {
       setError('');
 
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/api/users/${userId}/map`, {
+        const response = await apiFetch(`/users/${userId}/map`, {
           headers: {
             'Accept': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
         });
 
@@ -512,13 +509,11 @@ function JapanMapSimple({ userId }) {
 
     try {
       setSaving(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/users/${userId}/favorite-photo`, {
+      const response = await apiFetch(`/users/${userId}/favorite-photo`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           prefecture_id: selectedBlock.prefectureId,
@@ -567,12 +562,10 @@ function JapanMapSimple({ userId }) {
 
     try {
       setSaving(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/users/${userId}/favorite-photo/${prefectureId}`, {
+      const response = await apiFetch(`/users/${userId}/favorite-photo/${prefectureId}`, {
         method: 'DELETE',
         headers: {
           'Accept': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
 

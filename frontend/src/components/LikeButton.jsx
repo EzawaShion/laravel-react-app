@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiFetch } from '../api';
 import './LikeButton.css';
 
 function LikeButton({ postId, initialIsLiked = false, initialLikesCount = 0 }) {
@@ -18,14 +19,9 @@ function LikeButton({ postId, initialIsLiked = false, initialLikesCount = 0 }) {
     setIsLoading(true);
     
     try {
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`/api/like`, {
+      const response = await apiFetch('/like', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ post_id: postId })
       });
 

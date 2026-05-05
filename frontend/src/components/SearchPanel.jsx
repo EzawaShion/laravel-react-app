@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api';
 import './SearchPanel.css';
 
 // debounce用のカスタムhook
@@ -62,15 +63,13 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
         }
       });
 
-      const url = `/api/posts/search?${queryParams.toString()}`;
-      console.log('リアルタイム検索URL:', url);
+      const path = `/posts/search?${queryParams.toString()}`;
+      console.log('リアルタイム検索URL:', `/api${path}`);
 
-      const token = localStorage.getItem('token');
-      const response = await fetch(url, {
+      const response = await apiFetch(path, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
 
@@ -106,7 +105,7 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
 
   const fetchPrefectures = async () => {
     try {
-      const response = await fetch('/api/prefectures');
+      const response = await apiFetch('/prefectures');
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -120,7 +119,7 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
 
   const fetchCities = async (prefectureId) => {
     try {
-      const response = await fetch(`/api/cities/${prefectureId}`);
+      const response = await apiFetch(`/cities/${prefectureId}`);
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -166,16 +165,14 @@ const SearchPanel = ({ onSearch, onClose, isVisible }) => {
         }
       });
 
-      const url = `/api/posts/search?${queryParams.toString()}`;
-      console.log('検索URL:', url);
+      const path = `/posts/search?${queryParams.toString()}`;
+      console.log('検索URL:', `/api${path}`);
       console.log('検索パラメータ:', searchParams);
 
-      const token = localStorage.getItem('token');
-      const response = await fetch(url, {
+      const response = await apiFetch(path, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
       console.log('レスポンスステータス:', response.status);

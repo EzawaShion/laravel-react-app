@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { apiFetch } from '../api';
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON, Pane } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import 'leaflet/dist/leaflet.css';
@@ -179,7 +180,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   // 都道府県一覧を取得
   const fetchPrefectures = async () => {
     try {
-      const response = await fetch('/api/prefectures');
+      const response = await apiFetch('/prefectures');
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -194,7 +195,7 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   // 市町村一覧を取得
   const fetchCities = async (prefectureId) => {
     try {
-      const response = await fetch(`/api/cities/${prefectureId}`);
+      const response = await apiFetch(`/cities/${prefectureId}`);
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -224,15 +225,13 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
         return;
       }
 
-      const url = `/api/posts/search?${queryParams.toString()}`;
-      console.log('リアルタイム検索URL:', url);
+      const searchPath = `/posts/search?${queryParams.toString()}`;
+      console.log('リアルタイム検索URL:', `/api${searchPath}`);
 
-      const token = localStorage.getItem('token');
-      const response = await fetch(url, {
+      const response = await apiFetch(searchPath, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
 
@@ -318,12 +317,10 @@ function MapView({ onBack, onPostClick, onNavigateToPostList, onNavigateToCreate
   const fetchPostsWithCoordinates = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/posts', {
+      const response = await apiFetch('/posts', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
 

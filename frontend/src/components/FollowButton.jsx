@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiFetch } from '../api';
 import './FollowButton.css';
 
 function FollowButton({ userId, initialIsFollowing = false, onFollowChange }) {
@@ -18,15 +19,11 @@ function FollowButton({ userId, initialIsFollowing = false, onFollowChange }) {
     setError(null);
     
     try {
-      const token = localStorage.getItem('token');
       const endpoint = isFollowing ? '/unfollow' : '/follow';
-      
-      const response = await fetch(`/api${endpoint}`, {
+
+      const response = await apiFetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId })
       });
 

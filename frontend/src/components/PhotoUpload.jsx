@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api';
 import './PhotoUpload.css';
 
 function PhotoUpload({ postId, onUploadSuccess, onCancel, isFromCreatePost, draftPost }) {
@@ -24,10 +25,7 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel, isFromCreatePost, draf
     if (!postId) return;
     const fetchCount = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`/api/photos/post/${postId}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const res = await apiFetch(`/photos/post/${postId}`);
         const data = await res.json();
         if (res.ok) setExistingPhotoCount(data.photos?.length || 0);
       } catch (e) { console.error(e); }
@@ -243,13 +241,12 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel, isFromCreatePost, draf
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
       let currentPostId = postId;
 
       if (!currentPostId && draftPost) {
-        const res = await fetch('/api/posts', {
+        const res = await apiFetch('/posts', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(draftPost),
         });
         if (!res.ok) throw new Error((await res.json()).message || '投稿の作成に失敗しました');
@@ -269,9 +266,8 @@ function PhotoUpload({ postId, onUploadSuccess, onCancel, isFromCreatePost, draf
       const controller = new AbortController();
       const tid = setTimeout(() => controller.abort(), 5 * 60 * 1000);
 
-      const res = await fetch('/api/photos/upload', {
+      const res = await apiFetch('/photos/upload', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
         signal: controller.signal,
       });

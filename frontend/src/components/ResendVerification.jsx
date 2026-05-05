@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { apiFetch } from '../api';
 import './ResendVerification.css';
 
 function ResendVerification({ onBackToLogin }) {
@@ -14,7 +15,7 @@ function ResendVerification({ onBackToLogin }) {
     setError('');
 
     try {
-      const response = await fetch('/api/email/verification-notification', {
+      const response = await apiFetch('/email/verification-notification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

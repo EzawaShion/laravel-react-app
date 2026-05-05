@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiFetch } from '../api';
 import LikeButton from './LikeButton';
 import FollowButton from './FollowButton';
 import './PostList.css';
@@ -16,16 +17,7 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView, savedScro
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
-      const headers = {};
-
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch('/api/posts', {
-        headers
-      });
+      const response = await apiFetch('/posts');
 
       const data = await response.json();
 
@@ -44,14 +36,9 @@ function PostList({ onPostClick, onCreatePost, onUserClick, onMapView, savedScro
   // フォロー状態を取得
   const fetchFollowStatus = async (userId) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!localStorage.getItem('token')) return;
 
-      const response = await fetch(`/api/follow/status/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiFetch(`/follow/status/${userId}`);
 
       if (response.ok) {
         const data = await response.json();

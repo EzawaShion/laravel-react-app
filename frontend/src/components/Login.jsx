@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiFetch } from '../api';
 import './Login.css';
 
 function Login({ onLoginSuccess, onSwitchToSignUp, onSwitchToForgotPassword }) {
@@ -31,7 +32,7 @@ function Login({ onLoginSuccess, onSwitchToSignUp, onSwitchToForgotPassword }) {
     setErrors({});
 
     try {
-      const response = await fetch('/api/login', {
+      const response = await apiFetch('/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { apiFetch } from '../api';
 import TextField from '@mui/material/TextField';
 import './CreatePost.css';
 import Select from './ui/Select';
@@ -21,23 +22,14 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload, initialData }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
 
-    // 都道府県が変更された場合、市町村をリセット
     if (name === 'prefecture_id') {
-      setFormData(prev => ({
-        ...prev,
-        city_id: ''
-      }));
+      // 都道府県変更時は city_id も同時にリセット（1回の更新にまとめる）
+      setFormData(prev => ({ ...prev, prefecture_id: value, city_id: '' }));
       setCities([]);
-
-      // 都道府県が選択された場合、市町村を取得
-      if (value) {
-        fetchCities(value);
-      }
+      if (value) fetchCities(value);
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
@@ -51,7 +43,7 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload, initialData }) {
   // 都道府県一覧を取得
   const fetchPrefectures = async () => {
     try {
-      const response = await fetch('/api/prefectures');
+      const response = await apiFetch('/prefectures');
       const data = await response.json();
 
       if (data.success) {
@@ -66,7 +58,7 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload, initialData }) {
   const fetchCities = async (prefectureId) => {
     setLoadingLocations(true);
     try {
-      const response = await fetch(`/api/cities/${prefectureId}`);
+      const response = await apiFetch(`/cities/${prefectureId}`);
       const data = await response.json();
 
       if (data.success) {
@@ -100,8 +92,12 @@ function CreatePost({ onPostCreated, onCancel, onPhotoUpload, initialData }) {
       return;
     }
 
-    // 投稿データ（ドラフト）を親コンポーネントに渡して画面遷移
-    onPhotoUpload(formData);
+    // 空文字は null に変換してから渡す（バックエンドの nullable バリデーションに合わせる）
+    onPhotoUpload({
+      ...formData,
+      city_id: formData.city_id || null,
+      prefecture_id: formData.prefecture_id || null,
+    });
   };
 
   return (

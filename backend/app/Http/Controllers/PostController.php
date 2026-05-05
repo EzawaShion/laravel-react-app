@@ -17,7 +17,9 @@ class PostController extends Controller
     public function search(Request $request)
     {
         $query = Post::with(['user', 'city.prefecture.capitalCity', 'photos' => function($query) {
-            $query->orderBy('order_num')->limit(1); // 最初の写真のみを取得
+            $query->orderBy('order_num')->limit(1);
+        }, 'likes' => function($query) {
+            $query->select('post_id', 'user_id');
         }])->withCount('photos');
 
         // 公開範囲のフィルタリング
@@ -72,36 +74,31 @@ class PostController extends Controller
                       ->orderBy('likes_count', 'desc')
                       ->orderBy('created_at', 'desc')
                       ->get();
-        
+
         // 各投稿にいいね状態とカウントを追加
         $posts->each(function ($post) {
-            $post->likes_count = $post->likes()->count();
-            
             // いいねしたユーザーIDのリストを取得
-            $post->liked_user_ids = $post->likes()->pluck('user_id')->toArray();
-            
+            $post->liked_user_ids = $post->likes->pluck('user_id')->toArray();
+
             // ユーザーのプロフィール画像URLを明示的に設定
             if ($post->user) {
                 $post->user->profile_image_url = $post->user->profile_image_url;
             }
-            
+
             // 最初の写真のURLを設定
             $post->first_photo_url = $post->photos->first() ? $post->photos->first()->image_url : null;
-            
+
             // 座標情報を設定（city > prefecture capital の優先順位）
             if ($post->city && $post->city->latitude && $post->city->longitude) {
-                // 市区町村の座標を使用
                 $post->latitude = $post->city->latitude;
                 $post->longitude = $post->city->longitude;
                 $post->location_name = $post->city->prefecture->name . ' ' . $post->city->name;
-            } elseif ($post->city && $post->city->prefecture && $post->city->prefecture->capitalCity && 
+            } elseif ($post->city && $post->city->prefecture && $post->city->prefecture->capitalCity &&
                      $post->city->prefecture->capitalCity->latitude && $post->city->prefecture->capitalCity->longitude) {
-                // 県庁所在地の座標を使用
                 $post->latitude = $post->city->prefecture->capitalCity->latitude;
                 $post->longitude = $post->city->prefecture->capitalCity->longitude;
                 $post->location_name = $post->city->prefecture->name . ' (県庁所在地: ' . $post->city->prefecture->capitalCity->name . ')';
             } elseif ($post->city && $post->city->prefecture && $post->city->prefecture->latitude && $post->city->prefecture->longitude) {
-                // 都道府県の座標を使用（フォールバック）
                 $post->latitude = $post->city->prefecture->latitude;
                 $post->longitude = $post->city->prefecture->longitude;
                 $post->location_name = $post->city->prefecture->name;
@@ -120,7 +117,7 @@ class PostController extends Controller
     public function getPrefectures()
     {
         $prefectures = Prefecture::orderBy('id')->get(['id', 'name']);
-        
+
         return response()->json([
             'prefectures' => $prefectures
         ]);
@@ -132,7 +129,7 @@ class PostController extends Controller
     public function getCities(Request $request)
     {
         $prefectureId = $request->query('prefecture_id');
-        
+
         if (!$prefectureId) {
             return response()->json([
                 'cities' => []
@@ -142,7 +139,7 @@ class PostController extends Controller
         $cities = City::where('prefecture_id', $prefectureId)
                      ->orderBy('id')
                      ->get(['id', 'name', 'prefecture_id']);
-        
+
         return response()->json([
             'cities' => $cities
         ]);
@@ -154,8 +151,10 @@ class PostController extends Controller
     public function index()
     {
         $query = Post::with(['user', 'city.prefecture.capitalCity', 'photos' => function($query) {
-            $query->orderBy('order_num')->limit(1); // 最初の写真のみを取得
-        }])->withCount('photos');
+            $query->orderBy('order_num')->limit(1);
+        }, 'likes' => function($query) {
+            $query->select('post_id', 'user_id');
+        }])->withCount(['photos', 'likes']);
 
         // 公開範囲のフィルタリング
         $query->where(function($q) {
@@ -177,36 +176,31 @@ class PostController extends Controller
         });
 
         $posts = $query->latest()->get();
-        
+
         // 各投稿にいいね状態とカウントを追加
         $posts->each(function ($post) {
-            $post->likes_count = $post->likes()->count();
-            
             // いいねしたユーザーIDのリストを取得
-            $post->liked_user_ids = $post->likes()->pluck('user_id')->toArray();
-            
+            $post->liked_user_ids = $post->likes->pluck('user_id')->toArray();
+
             // ユーザーのプロフィール画像URLを明示的に設定
             if ($post->user) {
                 $post->user->profile_image_url = $post->user->profile_image_url;
             }
-            
+
             // 最初の写真のURLを設定
             $post->first_photo_url = $post->photos->first() ? $post->photos->first()->image_url : null;
-            
+
             // 座標情報を設定（city > prefecture capital の優先順位）
             if ($post->city && $post->city->latitude && $post->city->longitude) {
-                // 市区町村の座標を使用
                 $post->latitude = $post->city->latitude;
                 $post->longitude = $post->city->longitude;
                 $post->location_name = $post->city->prefecture->name . ' ' . $post->city->name;
-            } elseif ($post->city && $post->city->prefecture && $post->city->prefecture->capitalCity && 
+            } elseif ($post->city && $post->city->prefecture && $post->city->prefecture->capitalCity &&
                      $post->city->prefecture->capitalCity->latitude && $post->city->prefecture->capitalCity->longitude) {
-                // 県庁所在地の座標を使用
                 $post->latitude = $post->city->prefecture->capitalCity->latitude;
                 $post->longitude = $post->city->prefecture->capitalCity->longitude;
                 $post->location_name = $post->city->prefecture->name . ' (県庁所在地: ' . $post->city->prefecture->capitalCity->name . ')';
             } elseif ($post->city && $post->city->prefecture && $post->city->prefecture->latitude && $post->city->prefecture->longitude) {
-                // 都道府県の座標を使用（フォールバック）
                 $post->latitude = $post->city->prefecture->latitude;
                 $post->longitude = $post->city->prefecture->longitude;
                 $post->location_name = $post->city->prefecture->name . ' (県庁所在地)';
@@ -215,17 +209,17 @@ class PostController extends Controller
                 $post->longitude = null;
                 $post->location_name = $post->custom_location;
             }
-            
+
             // ログインユーザーがいる場合、いいね状態を確認
             if (auth()->check()) {
-                $post->is_liked = $post->isLikedBy(auth()->user());
+                $post->is_liked = $post->likes->contains('user_id', auth()->id());
                 $post->current_user_id = auth()->id();
             } else {
                 $post->is_liked = false;
                 $post->current_user_id = null;
             }
         });
-        
+
         return response()->json([
             'success' => true,
             'posts' => $posts
@@ -241,47 +235,48 @@ class PostController extends Controller
         try {
             // 認証されたユーザーのIDを取得
             $userId = auth()->id();
-            
+
             if (!$userId) {
                 return response()->json([
                     'success' => false,
                     'message' => '認証が必要です'
                 ], 401);
             }
-            
+
             // ユーザーの投稿を取得（city.prefectureリレーションを含める）
             $posts = Post::with(['user', 'city.prefecture', 'photos' => function($query) {
                 $query->orderBy('order_num')->limit(1);
+            }, 'likes' => function($query) {
+                $query->select('post_id', 'user_id');
             }])
+                ->withCount('likes')
                 ->where('user_id', $userId)
                 ->latest()
                 ->get();
-            
+
             // 各投稿にいいね状態とカウントを追加
             $posts->each(function ($post) {
-                $post->likes_count = $post->likes()->count();
-                
                 // いいねしたユーザーIDのリストを取得
-                $post->liked_user_ids = $post->likes()->pluck('user_id')->toArray();
-                
+                $post->liked_user_ids = $post->likes->pluck('user_id')->toArray();
+
                 // ユーザーのプロフィール画像URLを明示的に設定
                 if ($post->user) {
                     $post->user->profile_image_url = $post->user->profile_image_url;
                 }
-                
+
                 // 最初の写真のURLを設定
                 $post->first_photo_url = $post->photos->first() ? $post->photos->first()->image_url : null;
-                
+
                 // ログインユーザーのいいね状態を確認
-                $post->is_liked = $post->isLikedBy(auth()->user());
+                $post->is_liked = $post->likes->contains('user_id', auth()->id());
                 $post->current_user_id = auth()->id();
             });
-            
+
             return response()->json([
                 'success' => true,
                 'posts' => $posts
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -324,17 +319,17 @@ class PostController extends Controller
             ], 422);
         }
 
-        // city_idの決定ロジック
-        $cityId = $request->city_id;
-        
-        // 県のみ選択された場合は県庁所在地を設定
+        // city_idの決定ロジック（空文字はnullとして扱う）
+        $cityId = $request->city_id ?: null;
+
+        // 市区町村未選択で都道府県のみの場合は県庁所在地を設定
         if (!$cityId && $request->prefecture_id) {
             $prefecture = \App\Models\Prefecture::find($request->prefecture_id);
             if ($prefecture && $prefecture->capital_city_id) {
                 $cityId = $prefecture->capital_city_id;
             }
         }
-        
+
         // 投稿を作成
         $post = Post::create([
             'user_id' => $request->user()->id,
@@ -359,8 +354,10 @@ class PostController extends Controller
     public function show($id)
     {
         try {
-            $post = Post::with(['user', 'city.prefecture'])->find($id);
-            
+            $post = Post::with(['user', 'city.prefecture', 'likes' => function($query) {
+                $query->select('post_id', 'user_id');
+            }])->withCount('likes')->find($id);
+
             if (!$post) {
                 return response()->json([
                     'success' => false,
@@ -394,20 +391,17 @@ class PostController extends Controller
                 ], 403);
             }
 
-            // いいね状態とカウントを追加
-            $post->likes_count = $post->likes()->count();
-            
             // いいねしたユーザーIDのリストを取得
-            $post->liked_user_ids = $post->likes()->pluck('user_id')->toArray();
-            
+            $post->liked_user_ids = $post->likes->pluck('user_id')->toArray();
+
             // ユーザーのプロフィール画像URLを明示的に設定
             if ($post->user) {
                 $post->user->profile_image_url = $post->user->profile_image_url;
             }
-            
+
             // ログインユーザーがいる場合、いいね状態を確認
             if (auth()->check()) {
-                $post->is_liked = $post->isLikedBy(auth()->user());
+                $post->is_liked = $post->likes->contains('user_id', auth()->id());
                 $post->current_user_id = auth()->id();
             } else {
                 $post->is_liked = false;
@@ -432,7 +426,7 @@ class PostController extends Controller
     public function edit($id)
     {
         $post = Post::find($id);
-        
+
         if (!$post) {
             return response()->json([
                 'success' => false,
@@ -460,7 +454,7 @@ class PostController extends Controller
     public function update(Request $request, $id)
     {
         $post = Post::find($id);
-        
+
         if (!$post) {
             return response()->json([
                 'success' => false,
@@ -493,10 +487,10 @@ class PostController extends Controller
             ], 422);
         }
 
-        // city_idの決定ロジック
-        $cityId = $request->city_id;
-        
-        // 県のみ選択された場合は県庁所在地を設定
+        // city_idの決定ロジック（空文字はnullとして扱う）
+        $cityId = $request->city_id ?: null;
+
+        // 市区町村未選択で都道府県のみの場合は県庁所在地を設定
         if (!$cityId && $request->prefecture_id) {
             $prefecture = \App\Models\Prefecture::find($request->prefecture_id);
             if ($prefecture && $prefecture->capital_city_id) {
@@ -527,7 +521,7 @@ class PostController extends Controller
     {
         try {
             $post = Post::with(['photos'])->find($id);
-            
+
             if (!$post) {
                 return response()->json([
                     'success' => false,

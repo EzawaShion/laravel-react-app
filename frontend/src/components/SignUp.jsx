@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiFetch } from '../api';
 import './SignUp.css';
 
 function SignUp({ onSignUpSuccess, onSwitchToLogin, onSwitchToEmailVerificationRequest }) {
@@ -34,7 +35,7 @@ function SignUp({ onSignUpSuccess, onSwitchToLogin, onSwitchToEmailVerificationR
 
     try {
       // バックエンドのAPIエンドポイントにPOSTリクエストを送信
-      const response = await fetch('/api/register', {
+      const response = await apiFetch('/register', {
         // POSTリクエストを送信
         method: 'POST',
         // ヘッダーを設定

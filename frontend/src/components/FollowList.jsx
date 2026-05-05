@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiFetch } from '../api';
 import FollowButton from './FollowButton';
 import './FollowList.css';
 
@@ -19,16 +20,11 @@ function FollowList({ userId, type, onClose, onUserClick }) {
       setLoading(true);
       setError('');
 
-      const token = localStorage.getItem('token');
       const endpoint = type === 'followers'
-        ? `/api/follow/followers/${userId}?page=${page}`
-        : `/api/follow/followings/${userId}?page=${page}`;
+        ? `/follow/followers/${userId}?page=${page}`
+        : `/follow/followings/${userId}?page=${page}`;
 
-      const response = await fetch(endpoint, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiFetch(endpoint);
 
       if (response.ok) {
         const data = await response.json();
