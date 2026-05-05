@@ -1040,7 +1040,7 @@
   /* 既存の調整: 再表示ボタンは左下 */
   .show-sidebar-btn {
     top: auto;
-    bottom: 90px;
+    bottom: 24px;
     left: 16px;
     right: auto;
   }

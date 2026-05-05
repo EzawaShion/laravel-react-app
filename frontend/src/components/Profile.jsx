@@ -8,6 +8,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import { useModalOpen } from '../hooks/useModalOpen';
 import './Profile.css';
 
 function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout, onNavigateToUserSearch }) {
@@ -41,6 +42,10 @@ function Profile({ onBack, onProfileUpdated, onUserClick, onPostClick, onLogout,
   const [likedPostsLoading, setLikedPostsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('posts');
   const [showMenu, setShowMenu] = useState(false);
+
+  // モーダルが開いているとき body に data-modal-open を付与（FAB非表示制御）
+  useModalOpen(isEditing);
+  useModalOpen(showFollowList);
 
   useEffect(() => {
     fetchProfile();
