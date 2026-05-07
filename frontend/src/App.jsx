@@ -906,6 +906,59 @@ function App() {
         </div>
       </section>
 
+      {/* スクリーンショットショーケース */}
+      <section className="landing-showcase">
+        <div className="showcase-bg-glow showcase-bg-glow--1" />
+        <div className="showcase-bg-glow showcase-bg-glow--2" />
+        <div className="showcase-bg-glow showcase-bg-glow--3" />
+
+        <div className="landing-showcase-inner">
+          <div className="landing-showcase-header">
+            <span className="showcase-eyebrow">FEATURES</span>
+            <h2 className="landing-showcase-title">旅の記録が、<br />もっと楽しくなる</h2>
+          </div>
+
+          <div className="showcase-row">
+            <div className="showcase-text">
+              <div className="showcase-num">01</div>
+              <div className="showcase-label">MAP VIEW</div>
+              <h3>日本地図から旅を探す</h3>
+              <p>全国の投稿が地図上にピン表示。気になるエリアをクリックするだけで、その場所の旅行記録がすぐに見つかる。</p>
+            </div>
+            <div className="showcase-image-wrap">
+              <div className="showcase-image-glow" />
+              <img src="/screenshots/map-view.png" alt="マップビュー" className="showcase-image" />
+            </div>
+          </div>
+
+          <div className="showcase-row showcase-row--reverse">
+            <div className="showcase-text">
+              <div className="showcase-num">02</div>
+              <div className="showcase-label">MY JAPAN MAP</div>
+              <h3>自分だけの<br />訪問マップを育てる</h3>
+              <p>投稿した都道府県が自動でハイライト。47都道府県のうち何か所訪れたか、一目でわかるオリジナル日本地図。</p>
+            </div>
+            <div className="showcase-image-wrap">
+              <div className="showcase-image-glow showcase-image-glow--violet" />
+              <img src="/screenshots/profile-map.png" alt="プロフィールマップ" className="showcase-image" />
+            </div>
+          </div>
+
+          <div className="showcase-row">
+            <div className="showcase-text">
+              <div className="showcase-num">03</div>
+              <div className="showcase-label">PHOTO ALBUM</div>
+              <h3>写真を並べて<br />記録する</h3>
+              <p>複数枚の写真をまとめてアップロード。ドラッグで順番を並び替え、1枚ごとにコメントを残せる。</p>
+            </div>
+            <div className="showcase-image-wrap">
+              <div className="showcase-image-glow showcase-image-glow--rose" />
+              <img src="/screenshots/post-detail.png" alt="投稿詳細" className="showcase-image" />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* フッター */}
       <footer className="landing-footer">
         <p>© 2026 TravelMap</p>
